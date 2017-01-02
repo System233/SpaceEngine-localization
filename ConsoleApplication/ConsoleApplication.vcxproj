@@ -232,7 +232,9 @@
     <ResourceCompile Include="ConsoleApplication3.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Debug\Config.ini" />
+    <Resource Include="..\Debug\Config.ini">
+      <FileType>Document</FileType>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon1.ico" />
