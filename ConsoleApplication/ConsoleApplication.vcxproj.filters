@@ -14,12 +14,12 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
+    <Text Include="gui.txt" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Config.ini" />
-    <None Include="..\..\ConsoleApplication3\Debug\Config.ini" />
   </ItemGroup>
 </Project>

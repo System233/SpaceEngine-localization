@@ -50,6 +50,8 @@
     </None>
     <None Include="chs-gui.cfg" />
     <None Include="CN-font.cfg" />
+    <None Include="..\eng-menu.psd" />
+    <None Include="..\win1252-font.psd" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Font1.png">
