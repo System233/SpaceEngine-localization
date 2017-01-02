@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 		SetConsoleTextAttribute(hHandle, 0xC);
 		printf("\n 输入文件必须使用Unicode字符集,现在存在FontConfig\\FontTexture字符的行会被忽略.\n");
 		SetConsoleTextAttribute(hHandle, 0x7);
-		printf("\n 程序目录下需要Config.ini字符配置文件 若不存在则自动创建\n 翻译一行一个\n 输出的内容最好用UE的[用户剪切板(ctrl+数字)]去复制,系统剪切板会破坏内容\n 即便如此，有时一些内容仍然会被破坏,请自行检查.重点检查换行是否正常(一般是被插入0A)\n 错误的字节用16进制编辑删除.\n \n示例");
+		printf("\n 程序目录下需要Config.ini字符配置文件 若不存在则自动创建\n 翻译一行一个\n 要复制的话最好用UE的[用户剪切板(ctrl+数字)]去复制,系统剪切板会破坏内容\n 即便如此，有时一些内容仍然会被破坏,请自行检查.重点检查换行是否正常(一般是被插入0A)\n 错误的字节用16进制编辑删除.\n \n示例");
 		SetConsoleTextAttribute(hHandle, 0xB);
 		printf("\n 命令:		%s gui.txt chs-gui.cfg\n ", argv[0]);
 		SetConsoleTextAttribute(hHandle, 0xE);
