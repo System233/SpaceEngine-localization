@@ -188,6 +188,56 @@ public:
 	unsigned int Y;
 };
 */
+/*int write_png(char *file_name, PNGDATA DATA)
+{
+	FILE *fp;
+	png_structp png_ptr;
+	png_infop info_ptr;
+	//	png_colorp palette;
+	long width = DATA.W;
+	long height = DATA.H;
+	long bit_depth = DATA.B;
+	fopen_s(&fp, file_name, "wb");
+	if (fp == NULL)
+		return (ERROR);
+	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+	if (png_ptr == NULL)
+	{
+		fclose(fp);
+		return (ERROR);
+	}
+	info_ptr = png_create_info_struct(png_ptr);
+	if (info_ptr == NULL)
+	{
+		fclose(fp);
+		png_destroy_write_struct(&png_ptr, NULL);
+		return (ERROR);
+	}
+	if (setjmp(png_jmpbuf(png_ptr)))
+	{
+		fclose(fp);
+		png_destroy_write_struct(&png_ptr, &info_ptr);
+		return (ERROR);
+	}
+	png_init_io(png_ptr, fp);
+	png_set_IHDR(png_ptr, info_ptr, width, height, bit_depth, PNG_COLOR_TYPE_RGBA,
+		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+	png_write_info(png_ptr, info_ptr);
+	BYTE* image = DATA.DATA;//new BYTE[height*width*4];
+
+	png_bytep* row_pointers = new png_bytep[height];
+
+	if (height > PNG_UINT_32_MAX / (sizeof(png_bytep)))
+		png_error(png_ptr, "Image is too tall to process in memory");
+	for (long k = 0; k < height; k++)
+		row_pointers[k] = image + k*width * 4;
+	png_write_image(png_ptr, row_pointers);
+	png_write_end(png_ptr, info_ptr);
+	png_destroy_write_struct(&png_ptr, &info_ptr);
+	fclose(fp);
+	return 1;
+}*/
 int LoadPNG(const char *filepath, PNGDATA *IMAGE)
 {
 	FILE *fp;
@@ -299,7 +349,7 @@ DrawTexture();
 }*/
 int TIMES = 0;bool TMSO = true;
 bool ReTex = false;
-BYTE* CharAnalysis(BYTE* str) {
+/*BYTE* CharAnalysis(BYTE* str) {
 
 	if (ReTex) {
 		if (TMSO) {
@@ -316,6 +366,52 @@ BYTE* CharAnalysis(BYTE* str) {
 
 	}
 
+	Charvec.clear();
+	int i = 0, s = 0;
+
+	while (str[i] != '\0') {
+
+		if (CharADD.Page[STR[s] = str[i]].use)Charvec.push_back(str[++i]);
+		s++;i++;
+	}
+	STR[s] = 0;
+	return STR;
+
+}*//*
+void SAVE(int width, int height) {
+	char Name[256];
+	PNGDATA IMAGE;
+	IMAGE.B = 8;
+	IMAGE.W = width;
+	IMAGE.H = height;//1024 1536
+	IMAGE.DATA = new BYTE[width* height * 4];
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, IMAGE.DATA);
+	//	Dlog(3, "LastError:%d *p:0x%8p", GetLastError(), pixels);
+	//IMAGE.DATA = FontTexture;
+	GetLocalTime(&sys_time);
+	snprintf(Name, 1000, "%02d-%02d-%02d-%02d-%02d-%02d-%02d.png", sys_time.wYear, sys_time.wMonth, sys_time.wDay, sys_time.wHour, sys_time.wMinute, sys_time.wSecond, sys_time.wMilliseconds);
+	write_png(Name, IMAGE);
+	delete[] IMAGE.DATA;
+
+}*/
+BYTE* CharAnalysis(BYTE* str) {
+
+	if (ReTex) {
+		if (TMSO) {
+			TMSO = false;
+			TIMES = *start;
+		}
+		if ((*start - TIMES)>2) {
+			CharADD.MainInit();
+			DrawTexture();
+			WCharAdd.Start();
+			ReTex = false;
+			TMSO = true;
+			//SAVE(0x800, 0x400);
+		}
+
+	}
+	
 	Charvec.clear();
 	int i = 0, s = 0;
 
@@ -595,7 +691,7 @@ void DEFASM GetCharXYOW974() {
 		jmp RE0
 	}
 }
-
+/*
 void DEFASM glTex2D() {
 	__asm{
 		cmp dword ptr [esp+0x10], 0x800
@@ -613,6 +709,21 @@ void DEFASM glTex2D() {
 
 	}
 
+}*/
+/*
+void TInit() {
+	CharADD.MainInit();
+	DrawTexture();
+	WCharAdd.Start();
+	SAVE(0x800, 0x400);
+}*/
+void DEFASM TexInit() {
+			
+	__asm {
+		mov ReTex, 1
+		jmp TexEnd
+	
+	}
 }
 float Offset2 = 0;
 int ostr = 0, swi = 0;//lpage = 0;

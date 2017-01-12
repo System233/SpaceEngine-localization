@@ -72,8 +72,9 @@ int main(int argc, char *argv[])
 	DWORD Err = 0;
 	if (!A.empty()) {
 		SetConsoleTextAttribute(hHandle, 0xE);
-		printf(" 未找到以下字符配置 输出格式 [字符:频度]\n");
+		printf("以下字符未配置 ");
 		SetConsoleTextAttribute(hHandle, 0x7);
+		printf("输出格式 [字符:频度]\n");
 		for (unsigned int i = 0;i < A.size();i++) {
 			printf("%s:%d ", A[i].str, WCharAdd.Wstr[A[i].ID[0]].Size);
 		}
@@ -82,14 +83,15 @@ int main(int argc, char *argv[])
 		char MsgBuf[256];
 		FormatMessageA( FORMAT_MESSAGE_FROM_SYSTEM , NULL, Err, 0,MsgBuf,256, NULL);
 		SetConsoleTextAttribute(hHandle, 0xC);
-		printf(" 错误:%d 描述:%s\n", Err, MsgBuf);
+		printf("错误:%d", Err);
 		SetConsoleTextAttribute(hHandle, 0x7);
+		printf(" 描述:%s\n",  MsgBuf);
 	
 	}
 	
 	else { 
 		SetConsoleTextAttribute(hHandle, 0xA);
-		printf("\n 此过程中没有任何错误");
+		printf("\n完成");
 		SetConsoleTextAttribute(hHandle, 0x7);
 	};
 
@@ -136,5 +138,4 @@ void TEST(char* In, char*Out) {
 	}
 	fclose(fp);
 	fclose(fp2);
-
 }

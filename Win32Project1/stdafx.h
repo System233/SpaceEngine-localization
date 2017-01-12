@@ -17,10 +17,11 @@
 #include <vector>
 #include <sstream> 
 #include <fstream>
+void TexInit();
 extern DWORD glTexAdd,*glTex2DAdd, Base;
 extern HANDLE mProc;
 extern bool ReTex;
-void glTex2D();
+extern char SYSTEMPATH[MAX_PATH];
 void msgmgr(int type, char* msg, ...);
 BOOL WriteAdd(DWORD OffSet, BYTE *Code, size_t Size);
 BOOL ReadAdd(DWORD OffSet, BYTE *Code, size_t Size);
@@ -38,7 +39,7 @@ typedef struct {
 int LoadPNG(const char *filepath, PNGDATA *IMAGE);
 
 //extern DWORD *ReAdd;
-extern void *RV, *RV2 ;
+extern void *RV, *RV2 , *TexEnd;
 struct Version {
 	int HM = 0;
 	int LM = 0;
@@ -132,31 +133,34 @@ class SEL {
 	WCHAR *wstr = 0;
 
 	BOOL GetInfo(Addchar *AC) {
-		wchar_t *str = AC->wstr, Add[16];
+		wchar_t *str = AC->wstr, Add[16],P;
 		int size = AC->size;
 		BYTE *CON = AC->str;
 		int s = 0;
 		if (CON == NULL)return 0;
 		int i = 0, T = 0, j = 0;
-		while (i<size&&str[i] != ';') {
+		while (i<size&&(P=str[i]) != ';') {
 
-			if (str[i] == '"') {
+			if (P == '"') {
 				j++,i++;
 				continue;
 			}
-			if (j == 1 && s<16)Add[s++] = str[i];
+			if (j == 1 && s<16)Add[s++] = P;
 			if (j == 3) {
-				CON[T] = BYTE(str[i]);
-				if (Wstr[str[i]].str[1] == 0) {
+				CON[T] = BYTE(P);
+				if (Wstr[P].str[1] == 0) {
 					CON[T] = '#';
+					char *P2 = WcharToChar(&P);
+					if(nullstr.find(P2)== std::string::npos)nullstr+=P2;
+					
 				}
 				else
-					if (Wstr[str[i]].str[0] == 0) {
-						CON[T] = Wstr[str[i]].str[1];
+					if (Wstr[P].str[0] == 0) {
+						CON[T] = Wstr[P].str[1];
 					}
 					else {
-						CON[T++] = Wstr[str[i]].str[0];
-						CON[T] = Wstr[str[i]].str[1];
+						CON[T++] = Wstr[P].str[0];
+						CON[T] = Wstr[P].str[1];
 						//Wstr[str[i]].UseSize++;
 					}
 					T++;
@@ -175,6 +179,18 @@ class SEL {
 
 		AC->size = T;
 		return TRUE;
+	}
+	//std::wstring nullstr;
+	std::string nullstr;
+	char *m_char;
+	char* WcharToChar(const wchar_t *wc)
+	{
+		if (m_char){delete[] m_char;m_char = NULL;}
+		int len = WideCharToMultiByte(CP_ACP, 0, wc, 1, NULL, 0, NULL, NULL);
+		m_char = new char[len + 1];
+		WideCharToMultiByte(CP_ACP, 0, wc, 1, m_char, len, NULL, NULL);
+		m_char[len] = '\0';
+		return m_char;
 	}
 public:
 
@@ -239,7 +255,7 @@ public:
 
 
 	BOOL Start() {
-		WCHAR *str = 0,TMP[1024], Versum[20];
+		WCHAR *str = 0,*TMP=new WCHAR[1024], Versum[20];
 		size_t len=0, i = 0, j = 0;
 		Version Ver;
 		GetFileVersion(&Ver, &hModule2);
@@ -249,21 +265,23 @@ public:
 		//strend= wcsstr(wstr, Versum);
 		if ((len = (wcsstr(wstr, Versum) - str)) == 0)return FALSE;
 		while (i <len) {
-			TMP[j] = str[i];;
+			TMP[j] = str[i];
 			if (str[i] == '\r' || str[i] == '\n'||  i >= len) {
 				if(j!=0){
 				Addchar AC;
-				AC.str = new BYTE[j * 2];
+				AC.str = new BYTE[j*2];
 				AC.wstr = TMP;
 				AC.size = j;
-				
 				GetInfo(&AC);
 				if (AC.Add != 0) {
 					
 					BYTE *P = (BYTE*)(Base + AC.Add);
+					memcpy(P, AC.str, AC.size);
+					P[AC.size] = 0;
+					/*
 					int k = 0;
 					for (k = 0;AC.str[k] != 0 && k < 15;k++)  P[k] = AC.str[k];
-					P[k] = 0;
+					P[k] = 0;*/
 				}
 				delete[] AC.str;
 				j = 0, i++;
@@ -272,22 +290,76 @@ public:
 			}
 			i++, j++;
 		}
-		
-		delete[] wstr;
+		msgmgr(2, "以下字符未配置:%s", nullstr.c_str());
+		nullstr.clear();
+		delete[] wstr, TMP;
 		return TRUE;
 
 	}
 };
+void GetError(int d);
 extern SEL WCharAdd;
+extern WCHAR *Type[2];
+extern char *ResPath[7], ConfigFilePath[256] ;
+extern int ResId[7];//IDR_CONFIG
+class CharD {
+public:
+	std::string Name, Value;
+	CharD(std::string N, std::string V) {
+		Name = N;
+		Value = V;
+
+	}
+	void claer() {
+		Name.clear();
+		Value.clear();
+	}
+
+
+};
+class CharDef {
+private:
+	
+
+	std::vector<CharD*> str;
+public:
+	CharDef(){}
+	~CharDef() {
+		while (!str.empty()) {
+			CharD* P;
+			P = str.front();
+			P->claer();
+			delete P;
+			str.erase(str.begin());
+			
+		
+		};
+
+	}
+	bool Add(std::string N, std::string V) {
+		if (!Find(N)) {
+			str.push_back(new CharD(N, V));
+			return true;
+		}
+		msgmgr(2, "重定义:%s->%s", N.c_str(), V.c_str());
+		return false;
+	}
+	CharD* Find(std::string A) {//operator =
+		for (std::vector<CharD*>::const_iterator i = str.begin();i != str.end();i++)
+			if ((*i)->Name.compare(A.c_str()))return *i;
+		return false;
+	}
+
+
+};
 class CharAdd {
 private:
-	WCHAR *Type[2] = { L"Config",L"PNG" };
-	char *ResPath[7] = { "chs-font1.png","chs-font2.png","chs-font3.png","chs-menu.png","CN-font.png","chs-gui.cfg","CN-font.cfg" };
-	int ResId[7] = { IDB_PNG1,IDB_PNG2,IDB_PNG3,IDB_PNG4,IDB_PNG5,IDR_CONFIG1,IDR_CONFIG2 };//IDR_CONFIG
-	char ConfigFilePath[256] = "System/Config.ini";
+	void Err(int ID,int err) {
+		msgmgr(1, "读取块:Page%s->%X %d 时出现异常", Pstr[ID], err / 2, err);
+
+	}
 
 	void InitChar(int ID, char* str) {
-		try {
 			if (ID == 0) {
 				SetPage(str);return;
 			}
@@ -301,28 +373,16 @@ private:
 					str_list2.push_back(buf);
 			}
 			unsigned int i = 0, k = 0;
-			if (str_list2.size() != 512)  throw int(str_list2.size() / 2);
+			if (str_list2.size() != 512)  Err(ID,str_list2.size() / 2);
 			while (str_list2.size() > i) {
 
-				if (str_list2.size() < i + 1)  throw int(i);
+				if (str_list2.size() < i + 1)  Err(ID,i);
 				TMP[k].Off = float(atof(str_list2[i++].c_str()));
 
 				TMP[k].Width = float(atof(str_list2[i++].c_str()));
 				k++;
 
 			};
-		}
-		catch (int err) {
-			msgmgr(1, "读取块:Page%s->%X %d 时出现异常", Pstr[ID], err / 2, err);
-			/*CHAR TMP[1024];
-			GetLocalTime(&sys_time);
-			snprintf(TMP, 1024, "%02d:%02d:%02d.%03d	读取块:Page%s->%X %d 时出现异常", sys_time.wHour, sys_time.wMinute, sys_time.wSecond, sys_time.wMilliseconds, Pstr[ID], err / 2, err);
-			std::ofstream Dlllog("DllError.log", std::ios::app);
-			Dlllog << TMP << std::endl;
-			Dlllog.close();*/
-			//Dlog(2, "读取块:Page%s->%X %d 时出现异常\n", Pstr[ID], err / 2, err);
-			return;
-		}
 
 	};
 	void SetPage(char *str) {
@@ -356,7 +416,7 @@ private:
 		int TMP = 0;
 		while (A < str_list.size()) {
 
-			if (A + 2 > str_list.size())throw (int)A;
+			if (A + 2 > str_list.size())Err(0,A);
 			PID1 = BYTE(strtol(str_list[A++].c_str(), NULL, 16));
 			if (TMP < 3) {
 				Page[PID1].OffSetX = 16 + 16 * TMP;
@@ -379,9 +439,10 @@ private:
 		}
 
 	}
+	char Tstr[256];
 	BOOL WriteRes(int ID, int t, const char *str1, const char *str2) {
-		char str[256];
-		snprintf(str, 256, "%s%s", str1 == 0 ? "" : str1, str2);
+		
+		snprintf(Tstr, 256, "%s/%s%s", SYSTEMPATH, str1 == 0 ? "" : str1, str2);
 
 		HRSRC hRsrc = FindResource(DLL, MAKEINTRESOURCE(ID), Type[t]);
 		if (hRsrc != NULL) {
@@ -390,14 +451,19 @@ private:
 				LPVOID pBuffer = LockResource(hGlobal);
 				DWORD dwSize = SizeofResource(DLL, hRsrc);
 				FILE *fp;
-				fopen_s(&fp, str, "wb+");
+				fopen_s(&fp, Tstr, "wb+");
+				
 				if (fp != 0) {
 					fwrite(pBuffer, sizeof(BYTE), dwSize, fp);
 					fclose(fp);
+					//delete[] str;
 					return TRUE;
 				}
+				
 			}
 		}
+		
+		//delete[] str;
 		return FALSE;
 	}
 	char* GetConfig(int ID, char* str) {
@@ -412,14 +478,21 @@ public:
 		//AD=std::ofstream("A.txt", std::ios::app);
 		fopen_s(&fp, ConfigFilePath, "rb+");
 		if (fp == NULL) {
-			WriteRes(IDR_CONFIG, 0, 0, ConfigFilePath);
+			if(!WriteRes(IDR_CONFIG, 0, 0, ConfigFilePath)) {
+				GetError(15);
+				return FALSE;
+			};//错误标记15;
 			//	fclose(fp);
 			InitFile();
 			fopen_s(&fp, ConfigFilePath, "rb+");
 		}
-		fseek(fp, 0, SEEK_END);
+		if (fp == NULL) {
+			GetError(14);
+				return FALSE;
+		};//错误标记14
+		fseek(fp, 0L, SEEK_END);
 		DWORD FileSize = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
+		fseek(fp, 0L, SEEK_SET);
 		char *Config = new char[FileSize];
 		if (Config == 0)return FALSE;
 		fread(Config, sizeof(char), FileSize, fp);
@@ -445,9 +518,10 @@ public:
 			NeedInit = 2;
 		}
 		if (NeedInit) {
-			char str[256];
-			size_t Size = snprintf(str, 256, NeedInit>1 ? "\n%s: %s\n" : "%s: %s\n", Verstr, Versum);
-			fwrite(str, sizeof(char), Size, fp);
+		//	char *str=new char[256];
+			size_t Size = snprintf(Tstr, 256, NeedInit>1 ? "\n%s: %s\n" : "%s: %s\n", Verstr, Versum);
+			fwrite(Tstr, sizeof(char), Size, fp);
+			//delete[] str;
 			InitFile();
 		}
 		fclose(fp);
