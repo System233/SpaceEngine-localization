@@ -57,6 +57,7 @@ DWORD *ReAdd,
 	0x5C2A0//974未测试<<<<<<<<<<<<<<<<<<<<<=============
 };
 char SYSTEMPATH[MAX_PATH];
+std::string LOGPATH;
 //bool Is980 = false;
 DWORD glTexAdd = 0, *glTex2DAdd = 0, sBackWidth = 0;
 int *start = 0;// = (int*)((DWORD)hModule2 + 0X407E64);//974 0x3E10B8 
@@ -78,11 +79,13 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:{
+
 		hModule2 = GetModuleHandle(NULL);
 		GetModuleFileNameA(hModule2, SYSTEMPATH, MAX_PATH);
 		//msgmgr(0, "SYSTEMPATH A:%s", SYSTEMPATH);
 		*strrchr(SYSTEMPATH, '\\')=0;
 		*strrchr(SYSTEMPATH, '\\') = 0;
+
 		int A = 0;
 		//char *P;
 		while (SYSTEMPATH[A] != 0&&A<MAX_PATH) {
@@ -90,8 +93,14 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 			A++;
 		}
 		//msgmgr(0, "SYSTEMPATH A:%s", SYSTEMPATH);
+		LOGPATH = SYSTEMPATH;
+		LOGPATH += "/SE-Localization.log";
+		/*std::ofstream AA("AAA.log");
+		AA << LOGPATH;
+		AA.close();*/
+	//	msgmgr(0, "AAAAAAA");
 		DLL = hModule;
-		CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Start, NULL, NULL, &ThreadId);
+		Start();
 
 	}break;
 	case DLL_THREAD_ATTACH:break;
@@ -120,14 +129,34 @@ void msgmgr(int type, char* msg, ...) {
 	va_end(vlArgs);
 	GetLocalTime(&sys_time);
 	
-	std::ofstream A("SE-Localization.log", std::ios::app);
+	std::ofstream A,B;
+	
+	DWORD L = 0;
 	if (isone) {
-		snprintf(str2, 3072, "[TIME] %04d-%02d-%02d %02d:%02d:%02d\n------------------------------------", sys_time.wYear, sys_time.wMonth, sys_time.wDay, sys_time.wHour, sys_time.wMinute, sys_time.wSecond);
+		FILE *fp;
+		fopen_s(&fp, LOGPATH.c_str(), "rb");
+		if(fp!=NULL){
+		fseek(fp, 0, SEEK_END);
+		if ((L= ftell(fp)) > 512 * 1024) {
+			fclose(fp);
+			fopen_s(&fp, LOGPATH.c_str(), "wb+");
+			if(fp!=0)fclose(fp);
+		}
+		
+		}
+		
+		A.open(LOGPATH.c_str(), std::ios::app);
+		snprintf(str2, 3072, "\nTIME %04d-%02d-%02d %02d:%02d:%02d\n --------------------------\n", sys_time.wYear, sys_time.wMonth, sys_time.wDay, sys_time.wHour, sys_time.wMinute, sys_time.wSecond);
 		A << str2;
 		isone = FALSE;
 	}
-	snprintf(str2, 3072, "%02d:%02d:%02d [%s] %s\n", sys_time.wHour, sys_time.wMinute, sys_time.wSecond, Msg[type], str);
-
+	else {
+		A.open(LOGPATH, std::ios::app);
+	}
+	
+	snprintf(str2, 3072, "%02d:%02d:%02d.%03d [%s] %s\n",sys_time.wHour, sys_time.wMinute, sys_time.wSecond, sys_time.wMilliseconds,Msg[type>3?4: type], str);
+	B << str2;
+	B.close();
 	A << str2;
 	delete[] str2;
 	A.close();
@@ -166,7 +195,7 @@ void Start() {
 			sBackWidth = BackWidth[0];
 			sStartAdd = StartAdd[0];
 			//sglAdd = glAdd[0];
-			localePath = "data/locale/";
+			localePath = "data/locale";
 			//				DEBUG << "执行980";
 		}
 		if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 4) {
@@ -186,14 +215,30 @@ void Start() {
 			sTexAdd = TexInitAdd[1];
 			sStartAdd = StartAdd[1];
 			//sglAdd = glAdd[1];
-			localePath = "locale/";
+			localePath = "locale";
 
 			//			DEBUG << "执行974";
 		}
 	}
+	else {
+		msgmgr(1, "读取主程序异常");
+	}
 	
 	if (CanRun){
-		if (!CharADD.MainInit())return;
+		
+		char PH[260];
+		snprintf(PH, 260, "%s/%s/%s", SYSTEMPATH, localePath, ResPath[5]);
+		std::ifstream IF(PH);
+		if (!IF) {
+			IF.close();
+			std::ofstream OF(PH);
+			OF.close();
+		}
+		IF.close();
+	/*	if (!CharADD.MainInit()) {
+			msgmgr(1, "读取配置文件异常");
+			GetError(17);//错误标记17
+			return; }*/
 		RE0 = (void*)(Base + ReAdd[0]);
 		RE1 = (void*)(Base + ReAdd[1]);
 		RE2 = (void*)(Base + ReAdd[2]);
@@ -328,3 +373,4 @@ BOOL GetFileVersion(Version *Ver,HMODULE *hModle)
 
 
 
+	

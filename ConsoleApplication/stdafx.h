@@ -334,3 +334,70 @@ public:
 	std::vector<STA> No;
 
 };
+#include<TlHelp32.h>  
+class ReadAdd {
+	DWORD Base=0;
+	DWORD GetBase(DWORD Pid)
+	{
+		
+		HANDLE phSnapshot;
+		hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, Pid);
+		MODULEENTRY32 me32;
+		phSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, Pid);
+		if (phSnapshot == INVALID_HANDLE_VALUE)return false;
+		me32.dwSize = sizeof(MODULEENTRY32);
+		if (!Module32First(phSnapshot, &me32))return false;
+		
+		do
+		{
+			if (me32.th32ProcessID == Pid)
+			{
+				Base = (DWORD)me32.modBaseAddr;
+				break;
+			}
+		} while (Module32Next(phSnapshot, &me32));
+
+		CloseHandle(phSnapshot);
+		if (Base != 0)return Base;
+		return false;
+	}
+	size_t ReadMem(DWORD OF,char *p) {
+		size_t l = 0;
+		char *p2 = p;
+		if(p!=0){
+		DWORD LP = Base + OF;
+		while(l<256&&ReadProcessMemory(hProc, (LPVOID)LP++, p2, 1, 0)&&*(p2++)!=0)l++;
+		p[l] = 0;
+		}
+		return l;
+	}
+	HANDLE hProc = 0;
+public:
+	~ReadAdd() {
+		CloseHandle(hProc);
+	}
+	ReadAdd(char *Path, char*Out, char *F,DWORD PID) {
+		std::ifstream IF(Path);
+		char str[256],str2[256],str3[512];
+		GetBase(PID);
+		if (hProc == NULL) return;
+		std::ofstream OF(Out);
+		while(IF.getline(str,256)){
+			size_t L = 0;
+			DWORD LP=strtol(str, 0, 16);
+			if (L = ReadMem(LP, str2)) {
+				snprintf(str3, 512, F, LP, str2);
+				printf("%s\n", str3);
+				OF << str3 << std::endl;
+
+			}
+			
+			//ReadProcessMemory(hProc, (LPVOID)(Base+strtol(str,0,16)), PVOID pvBufferLocal, DWORD dwSize, PDWORD pdwNumBytesRead);
+		
+		}
+		IF.close();
+		OF.close();
+	}
+
+
+};

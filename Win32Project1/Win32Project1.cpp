@@ -403,8 +403,9 @@ BYTE* CharAnalysis(BYTE* str) {
 		}
 		if ((*start - TIMES)>2) {
 			CharADD.MainInit();
+		//	WCharAdd.Start();
 			DrawTexture();
-			WCharAdd.Start();
+		//	msgmgr(3, "加载纹理");
 			ReTex = false;
 			TMSO = true;
 			//SAVE(0x800, 0x400);
@@ -441,13 +442,16 @@ int GetChar(wchar_t ch) {
 */
 void DrawTexture() {
 	for (int i = 0;i<7;i++) {
+		
 		BYTE PID = CharADD.PageId[i];
+		if (!CharADD.Page[PID].use)continue;
 		int x = CharADD.Page[PID].PX;
 		int y = CharADD.Page[PID].PY;
 		PNGDATA IMAGE;
 		
-		const char *File1 = CharADD.Page[PID].File.c_str();
-		const char *TMP=0;
+		const char *File = CharADD.Page[PID].File.c_str();
+		
+		/*const char *TMP=0;
 		int j = 0;
 		while (File1[j] != '\0') {
 			if (File1[j] != ' ') {
@@ -455,14 +459,15 @@ void DrawTexture() {
 				break;
 			}
 			j++;
-		}
-		char File[256];
-		snprintf(File, 256, "%s/%s",localePath, TMP);
-		int ERR = LoadPNG(File, &IMAGE);
+		}*/
+		char Path[256];
+		snprintf(Path, 256, "%s/%s/%s",SYSTEMPATH,localePath, File);
+		int ERR = LoadPNG(Path, &IMAGE);
 
 		if (ERR != 0 || IMAGE.W != IMAGE.H || IMAGE.W != 256) {
 			CharADD.Page[PID].use = false;	
-			continue;
+			msgmgr(2, "纹理加载失败[%d]:%d*%d*%d X:%d Y:%d Path:%s", ERR, IMAGE.W, IMAGE.H, IMAGE.B, x,y, Path);
+			//continue;
 		}
 		glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, IMAGE.W, IMAGE.H, GL_RGBA, GL_UNSIGNED_BYTE, IMAGE.DATA);
 		delete[] IMAGE.DATA;

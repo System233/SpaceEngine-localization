@@ -4,27 +4,27 @@
 //
 
 #pragma once
-#define  PNG_BYTES_TO_CHECK 4
+
 #include "targetver.h"
-#define DEFASM __declspec(naked) 
-#define WIN32_LEAN_AND_MEAN             // 从 Windows 头中排除极少使用的资料
-// Windows 头文件: 
+
+#include <stdio.h>
+#include <tchar.h>
+
+
+
+// TODO:  在此处引用程序需要的其他头文件
 #include <windows.h>
-#include <png.h>
-#include "resource.h"
 //#include <tchar.h>
 //#include <iostream>
 #include <vector>
 #include <sstream> 
 #include <fstream>
 void TexInit();
-extern DWORD glTexAdd,*glTex2DAdd, Base;
+extern DWORD glTexAdd, *glTex2DAdd, Base;
 extern HANDLE mProc;
 extern bool ReTex;
-extern char SYSTEMPATH[MAX_PATH];
+extern char *SYSTEMPATH;
 void msgmgr(int type, char* msg, ...);
-BOOL WriteAdd(DWORD OffSet, BYTE *Code, size_t Size);
-BOOL ReadAdd(DWORD OffSet, BYTE *Code, size_t Size);
 //void CharXY();
 BYTE* CharAnalysis(BYTE* str);
 void CharAna();
@@ -39,7 +39,7 @@ typedef struct {
 int LoadPNG(const char *filepath, PNGDATA *IMAGE);
 
 //extern DWORD *ReAdd;
-extern void *RV, *RV2 , *TexEnd;
+extern void *RV, *RV2, *TexEnd;
 struct Version {
 	int HM = 0;
 	int LM = 0;
@@ -47,7 +47,6 @@ struct Version {
 	int LL = 0;
 
 };
-BOOL GetFileVersion(Version *Ver, HMODULE *hModle);
 
 extern BYTE STR[8192];
 struct OffSet {
@@ -66,11 +65,10 @@ struct PageInfo {
 	int OffSetY = 0;
 	int PX = 0;
 	int PY = 0;
-	OffSet* Page=0;
+	OffSet* Page = 0;
 	bool use = false;
 };
 extern char *localePath;
-
 class CharD {
 public:
 	std::wstring Name, Value;
@@ -88,7 +86,7 @@ public:
 };
 class wcscstr {
 private:
-	CHAR *str=0;
+	CHAR *str = 0;
 	WCHAR *wstr = 0;
 public:
 	~wcscstr() {
@@ -109,7 +107,7 @@ public:
 	wchar_t* CharToWchar(const char* c, size_t L)
 	{
 		if (wstr) { delete[] wstr;wstr = 0; }
-		if(L==NULL)L = strlen(c);
+		if (L == NULL)L = strlen(c);
 		int len = MultiByteToWideChar(CP_ACP, 0, c, L, NULL, 0);
 		wstr = new wchar_t[len + 1];
 		MultiByteToWideChar(CP_ACP, 0, c, L, wstr, len);
@@ -119,7 +117,7 @@ public:
 	wchar_t* AutoCharToWchar(const char* c)
 	{
 		if (wstr) { delete[] wstr;wstr = 0; }
-		size_t L=strlen(c);
+		size_t L = strlen(c);
 		int len = MultiByteToWideChar(CP_ACP, 0, c, L, NULL, 0);
 		wstr = new wchar_t[len + 1];
 		MultiByteToWideChar(CP_ACP, 0, c, L, wstr, len);
@@ -129,18 +127,26 @@ public:
 };
 class CharDef {
 private:
-	
+
 	WCHAR *wstr = 0;
 	wchar_t* CharToWchar(const char* c, size_t L)
 	{
-		if (wstr) { delete[] wstr;wstr = 0; }
+		if (wstr) { 
+			msgmgr(3, "WSTR=>>");
+			delete[] wstr;wstr = 0; 
+			msgmgr(3, "WST<<<==");
+		}
+		msgmgr(3, "WST<<<==0");
 		int len = MultiByteToWideChar(CP_ACP, 0, c, L, NULL, 0);
+		msgmgr(3, "WST<<<==1");
 		wstr = new wchar_t[len + 1];
 		MultiByteToWideChar(CP_ACP, 0, c, L, wstr, len);
+		msgmgr(3, "WST<<<==2");
 		wstr[len] = '\0';
 		return wstr;
 	}
 	void clear() {
+		//		msgmgr(2, "清除");
 		while (!str.empty()) {
 			CharD* P;
 			P = str.front();
@@ -152,32 +158,36 @@ private:
 		};
 		delete[] wstr;
 		wstr = 0;
+
 	}
 
 public:
 	std::vector<CharD*> str;
-	 void Initstr(char *Config) {
-		 clear();
-		 char *P1 = 0, *P2 = 0;
-		 size_t len = 0;
-		 if ((P1 = strstr(Config, "[STRDEF]")+8) != 0) {
-			 len = ((P2 = strstr(Config, "[ENDDEF]")) == 0) ? 0 : P2 - P1;
-			 if (len > 0) {
-				 CharToWchar(P1, len);
-				 Init();
-				
-				 return;
-			 }
-			 else {
-				 msgmgr(1, "字串定义未闭合");
-			 }
-		 };
-		
+	void Initstr(char *Config) {
+		clear();
+		char *P1 = 0, *P2 = 0;
+		size_t len = 0;
+		if ((P1 = strstr(Config, "[STRDEF]") + 9) != 0) {
+			//if ((P2 = strstr(Config, "[ENDDEF]")) == 0)else
+			len = ((P2 = strstr(Config, "[ENDDEF]")) == 0) ? 0 : P2 - P1;
+			if (len > 0) {
+				msgmgr(3, "Initstring==>>>>L:%d",len);
+				CharToWchar(P1, len);
+				msgmgr(3, "Initstred");
+				Init();
 
-	 }
+				return;
+			}
+			else {
+				msgmgr(1, "字串定义未闭合");
+			}
+		};
+
+
+	}
 	void Init() {
-	//	msgmgr(2, "初始化字串定义");
-		DWORD i = 0,j=0,k=0;
+		//	msgmgr(2, "初始化字串定义");
+		DWORD i = 0, j = 0, k = 0;
 		WCHAR P = 0;
 		std::wstring TMPN, TMPV;
 		bool st = false;
@@ -185,15 +195,15 @@ public:
 		while ((P = wstr[i]) != 0 && P != ';') {
 			if (P == '=')j++;
 			if (j == 0) {
-				
-				if (P != ' '&& P != '	'&& !st)  st = true;
-				else if ((P == ' '|| P == '	') && st) st = false;
+
+				if (P != ' '&& P != '	' && !st)  st = true;
+				else if ((P == ' ' || P == '	') && st) st = false;
 				if (st&&P != '\r'&&P != '\n')TMPN.push_back(P);
 			}
-			else if (j==1) { 
-				
+			else if (j == 1) {
+
 				if (P == '"')k++;
-				else if (k == 1&& P != '\r'&&P != '\n')TMPV.push_back(P);
+				else if (k == 1 && P != '\r'&&P != '\n')TMPV.push_back(P);
 				if (k == 2 || P == '\r' || P == '\n') {
 					Add(TMPN.c_str(), TMPV.c_str());
 					TMPN.clear();TMPV.clear();
@@ -201,31 +211,38 @@ public:
 					st = false;
 				};
 			}
-			
+
 			i++;
 		}
-		//msgmgr(3, "Inited");
+		msgmgr(3, "Inited");
 	}
 	~CharDef() {
 		clear();
 
 	}
-	
+
 	bool Add(std::wstring N, std::wstring V) {
-		
-		if (Find(N)==NULL) {
+		wcscstr WA, WB;
+		//msgmgr(3, "Add :N:%s:V:%s", WA.WcharToChar(N.c_str(), N.size()), WB.WcharToChar(V.c_str(), V.size()));
+		if (Find(N) == NULL) {
 			str.push_back(new CharD(N, V));
+			//	msgmgr(3, "添加 :N:%s:V:%s", WA.WcharToChar(N.c_str(), N.size()), WB.WcharToChar(V.c_str(), V.size()));
 			return true;
 		}
-		wcscstr WA, WB;
+
 		msgmgr(2, "重定义:%s=%s", WA.WcharToChar(N.c_str(), N.size()), WB.WcharToChar(V.c_str(), V.size()));
 		return false;
 	}
 	CharD* Find(std::wstring A) {//operator =
-		for (std::vector<CharD*>::const_iterator i = str.begin();i != str.end();i++){
-			
-			if ((*i)->Name.compare(A) == 0) { 
-				return *i; }
+		wcscstr WA, WB;
+		//	msgmgr(3, "查找 N:%s", WA.WcharToChar(A.c_str(), A.size()));
+		for (std::vector<CharD*>::const_iterator i = str.begin();i != str.end();i++) {
+
+			if ((*i)->Name.compare(A) == 0) {
+				//		msgmgr(3, "找到 FN:%s:FV:%s", WA.WcharToChar((*i)->Name.c_str(), (*i)->Name.size()), WB.WcharToChar((*i)->Value.c_str(), (*i)->Value.size()));
+				return *i;
+			}
+			//	else { msgmgr(1, "判断不相等:[%s]:[%s]", WA.WcharToChar((*i)->Name.c_str(), (*i)->Name.size()),WB.WcharToChar(A.c_str(),A.size())); }
 		}
 		return NULL;
 	}
@@ -252,10 +269,11 @@ class SEL {
 	wchar_t *WPstr[8] = { L"1",L"2",L"3",L"4",L"5",L"6",L"7",L"DEF" };
 	void Init(int ID, const wchar_t* str) {
 		int C = 0;
+		//	msgmgr(0, "ID:%d", ID);
 		size_t size = wcslen(str);
 		unsigned int i = 0;
 		while (i<size) {
-			if (str[i] == '\r' || str[i] == '\n'|| str[i] == ' ') {//XD XA
+			if (str[i] == '\r' || str[i] == '\n' || str[i] == ' ') {//XD XA
 				i++;
 				continue;
 			}
@@ -265,7 +283,9 @@ class SEL {
 			};
 			WChar* WT = &Wstr[str[i]];
 			if (WT->use&&str[i] != '?') {
-				msgmgr(2, "%X->%X:%X str:%d 重复 PID:%d size:%d", C, WT->ID, WT->str[1], str[i],ID, size);
+				//printf(Pstr[WIDToID(WT->ID)]);
+				msgmgr(2, "%X->%X:%X str:%d 重复 PID:%d size:%d", C, WT->ID, WT->str[1], str[i], ID, size);
+				//	printf();
 
 			}
 			else {
@@ -286,113 +306,120 @@ class SEL {
 		return wcsstr(str, TMP);
 	}
 
-	
+
 	WChar Wstr[65535];
 	WCHAR *wstr = 0;
-	
+
 	BOOL GetInfo(Addchar *AC) {
-		wchar_t *str = wcsstr(AC->wstr, L"=")+1, P=0;
+		wchar_t *str = wcsstr(AC->wstr, L"=") + 1, P = 0;
 		int size = AC->size;
 		BYTE *CON = AC->str;
 		wcscstr WA, WB;
-		
+
 
 		int i = 0, T = 0, j = 0, Ti = 0;
-		if((AC->Add = wcstol(AC->wstr, 0, 16))!=0){
-		if (str != NULL&&CON != NULL) {
-			
-		while (i < size && (P = str[i++]) != ';')if (P == '"')Ti++;
-		i = 0;
-		
-			
-		if (Ti == 2)
-			while (str[i] != 0 && (P = str[i]) != ';') {
+		if ((AC->Add = wcstol(AC->wstr, 0, 16)) != 0) {
+			if (str != NULL&&CON != NULL) {
 
-				if (P == '"') {
-					j++, i++;
-					continue;
-				}
-			
-				if (j == 1) {
-					CON[T] = BYTE(P);
-					if (Wstr[P].str[1] == 0) {
-						CON[T] = '#';
-						char *P2 = WA.WcharToChar(&P, 1);
-						if (nullstr.find(P2) == std::string::npos)nullstr += P2;
+				//	msgmgr(3, "START[%d]",size);
+				//	msgmgr(3, "ST字串:%s", WA.WcharToChar(AC->wstr, 0));
+				while (i < size && (P = str[i++]) != ';')if (P == '"')Ti++;
+				i = 0;
+
+
+				if (Ti == 2)
+					while (str[i] != 0 && (P = str[i]) != ';') {
+
+						if (P == '"') {
+							j++, i++;
+							continue;
+						}
+
+						if (j == 1) {
+							CON[T] = BYTE(P);
+							if (Wstr[P].str[1] == 0) {
+								CON[T] = '#';
+								char *P2 = WA.WcharToChar(&P, 1);
+								if (nullstr.find(P2) == std::string::npos)nullstr += P2;
+
+							}
+							else
+								if (Wstr[P].str[0] == 0) {
+									CON[T] = Wstr[P].str[1];
+								}
+								else {
+									CON[T++] = Wstr[P].str[0];
+									CON[T] = Wstr[P].str[1];
+								}
+								T++;
+						}
+						if (j == 2)break;
+						i++;
+					}
+
+				else if (Ti == 0) {
+					bool st = false;
+					std::wstring ws;
+					DWORD R = 0;
+					while ((P = str[i++]) != ';'&&P != 0) {
+						if ((P == ' ' || P == '	') && st)break;
+						else if (P != ' '&& P != '	' && !st)st = true;
+						if (st&&P != '\r'&&P != '\n')ws.push_back(P);
+					}
+					//msgmgr(3, "GETwsTMP:[%s]", WA.WcharToChar(ws.c_str(), ws.size()));
+					CharD *CP;
+					if ((CP = CD.Find(ws.c_str())) != NULL) {
+						const WCHAR *P2 = CP->Value.c_str();
+
+						//	msgmgr(3, "C:%s,P2V:%s", WA.WcharToChar(CP->Name.c_str(), CP->Name.size()),WB.WcharToChar(P2, CP->Value.size()));
+						while ((P = P2[R++]) != 0) {
+							CON[T] = BYTE(P);
+							if (Wstr[P].str[1] == 0) {
+								CON[T] = '#';
+								char *P3 = WA.WcharToChar(&P, 1);
+								if (nullstr.find(P3) == std::string::npos)nullstr += P3;
+							}
+							else if (Wstr[P].str[0] == 0)CON[T] = Wstr[P].str[1];
+							else {
+								CON[T++] = Wstr[P].str[0];
+								CON[T] = Wstr[P].str[1];
+							}
+							T++;
+
+						}
 
 					}
-					else
-						if (Wstr[P].str[0] == 0) {
-							CON[T] = Wstr[P].str[1];
-						}
-						else {
-							CON[T++] = Wstr[P].str[0];
-							CON[T] = Wstr[P].str[1];
-						}
-						T++;
-				}
-				if (j == 2)break;
-				i++;
-			}
-		
-		else if (Ti == 0) {
-			bool st = false;
-			std::wstring ws;
-			DWORD R = 0;
-			while ((P = str[i++]) != ';'&&P!=0) {
-					if ((P == ' ' || P == '	') && st)break;
-					else if (P != ' '&& P != '	'&& !st)st = true;
-					if (st&&P != '\r'&&P != '\n')ws.push_back(P);
-			}
-			CharD *CP;
-			if ((CP = CD.Find(ws.c_str())) != NULL) {
-				const WCHAR *P2 = CP->Value.c_str();
-				
-				while ((P = P2[R++]) != 0) {
-					CON[T] = BYTE(P);
-					if (Wstr[P].str[1] == 0) {
-						CON[T] = '#';
-						char *P3 = WA.WcharToChar(&P, 1);
-						if (nullstr.find(P3) == std::string::npos)nullstr += P3;
-					}
-					else if (Wstr[P].str[0] == 0)CON[T] = Wstr[P].str[1];
 					else {
-						CON[T++] = Wstr[P].str[0];
-						CON[T] = Wstr[P].str[1];
-					}
-					T++;
+						msgmgr(1, "翻译错误 字串[%s]未定义", WA.WcharToChar(ws.c_str(), ws.size()));
+						AC->Add = 0;
+					};
 
 				}
-
+				else if (Ti) {
+					msgmgr(1, "翻译错误 请检查引号是否成对出现 字串[%d]:%s ", size, WA.WcharToChar(AC->wstr, 0));
+					AC->Add = 0;
+				}
 			}
 			else {
-				msgmgr(1, "翻译错误 字串[%s]未定义", WA.WcharToChar(ws.c_str(), ws.size()));
+				msgmgr(1, "翻译错误 格式不正确或内存不足 字串[%d]:%s ", size, WA.WcharToChar(AC->wstr, 0));
 				AC->Add = 0;
-			};
-
-		}
-		else if (Ti) {
-			msgmgr(1, "翻译错误 请检查引号是否成对出现 字串[%d]:%s ", size, WA.WcharToChar(AC->wstr, 0));
-			AC->Add = 0;
+			}
 		}
 		CON[T] = 0;
-		}
-		else {
-			msgmgr(1, "翻译错误 格式不正确或内存不足 字串[%d]:%s ", size, WA.WcharToChar(AC->wstr, 0));
-			AC->Add = 0;
-		}
-		}
-		
+		//wprintf(L"WAdd:%s\n", Add);
+
+		//msgmgr(3, "33字串[%d]:%s Add:0x%X T:%d", size, WA.WcharToChar(AC->wstr, 0),AC->Add,T);
 		AC->size = T;
+		//	msgmgr(3, "Ti:%d AC->Add:%X 字串[%d]:%s ==>>>[T:%d]", Ti, AC->Add,size, WcharToChar(str, size),T);
 		return TRUE;
 	}
 
 	std::string nullstr;
-	
+
 public:
 
 	BOOL WMainInit(CHAR *Conf) {
-		
+
 		memset(Wstr, 0, sizeof(Wstr));
 		int wlen = MultiByteToWideChar(CP_ACP, 0, Conf, -1, NULL, 0);
 		wstr = new WCHAR[wlen];
@@ -413,7 +440,7 @@ public:
 			while (Inread) {
 				if (!Incom&&ps[s] == '/'&&ps[s + 1] == '/') {
 					Incom = true;
-					s+=2;
+					s += 2;
 					continue;
 				}
 				if (Incom) {
@@ -444,54 +471,72 @@ public:
 			}
 
 		}
+		msgmgr(3, "WMainInited");
 		CD.Initstr(Conf);
+		msgmgr(3, "Initstr->>>>>");
 		WStart();
+		msgmgr(3, "WStart->>>>>");
 		return TRUE;
 	}
+	//bool Inread = false;int PageId = 0;
+
 
 
 
 
 	BOOL WStart() {
-	
-		WCHAR *str = 0,Versum[20];
+
+		WCHAR *str = 0, Versum[20];
 		std::wstring wstrTMP;
 		size_t len = 0, i = 0;
 		Version Ver;
 		GetFileVersion(&Ver, &hModule2);
 		wcscstr WA;
-		int l1=wsprintf(Versum, L"[Start:%d%d%d%d]", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
-		if ((str = wcsstr(wstr, Versum)) == 0)return FALSE;
-			str+= l1;
+		/*	for (std::vector<CharD*>::const_iterator i = CD.str.begin();i != CD.str.end();i++) {
+
+		msgmgr(2, "列表:[%s]:[%s]", WA.WcharToChar((*i)->Name.c_str(), (*i)->Name.size()),WA.WcharToChar((*i)->Value.c_str(), (*i)->Value.size()));
+		}*/
+		int l1 = wsprintf(Versum, L"[Start:%d%d%d%d]", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
+		str = wcsstr(wstr, Versum) + l1;
 		wsprintf(Versum, L"[End:%d%d%d%d]", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
 		//strend= wcsstr(wstr, Versum);
-		
-		if ((len = (wcsstr(wstr, Versum) - str)) <= 0)return FALSE;
-		while (i < len&&str[i]!=0) {
+
+		if ((len = (wcsstr(wstr, Versum) - str)) == 0)return FALSE;
+		//msgmgr(3, "调试 str:%p len:%d", str,len);
+		//	msgmgr(3, "调试:%s", WA.WcharToChar(wstr, len/2));
+		while (i < len) {
 			wstrTMP.push_back(str[i]);
 			if (str[i] == '\r' || str[i] == '\n' || str[i] == ';') {
-				
-					Addchar AC;
-					AC.str = new BYTE[wstrTMP.size() * 2];
-					AC.wstr = (WCHAR*)wstrTMP.c_str();
-					AC.size = wstrTMP.size();
-					GetInfo(&AC);
-					if (AC.Add != 0) {
-						BYTE *P = (BYTE*)(Base + AC.Add);
-						memcpy(P, AC.str, AC.size);
-						P[AC.size] = 0;
-					}
-					wstrTMP.clear();
-					delete[] AC.str;
-				
-				
+
+				Addchar AC;
+				AC.str = new BYTE[wstrTMP.size() * 2];
+				AC.wstr = (WCHAR*)wstrTMP.c_str();
+				AC.size = wstrTMP.size();
+				//msgmgr(3, "调试 TMP:%s J:%d", WA.WcharToChar(TMP, j), j);
+				GetInfo(&AC);
+				if (AC.Add != 0) {
+					BYTE *P = (BYTE*)(Base + AC.Add);
+					//msgmgr(3, "写地址:0x%08p Add:0x%08X", P,AC.Add);
+					//memcpy(P, AC.str, AC.size);
+					//P[AC.size] = 0;
+					/*
+					int k = 0;
+					for (k = 0;AC.str[k] != 0 && k < 15;k++)  P[k] = AC.str[k];
+					P[k] = 0;*/
+				}
+				wstrTMP.clear();
+				delete[] AC.str;
+
+
 			}
 			i++;
 		}
-		if (nullstr.size()){msgmgr(2, "以下字符未配置:%s", nullstr.c_str());
-		nullstr.clear();
-	}
+		if (nullstr.size()) {
+			msgmgr(2, "以下字符未配置:%s", nullstr.c_str());
+			nullstr.clear();
+		}
 		delete[] wstr;
+		msgmgr(3, "WStarted");
 		return TRUE;
 
 	}
@@ -499,40 +544,40 @@ public:
 void GetError(int d);
 extern SEL WCharAdd;
 extern WCHAR *Type[2];
-extern char *ResPath[7], ConfigFilePath[256] ;
+extern char *ResPath[7], *ConfigFilePath;
 extern int ResId[7];//IDR_CONFIG
 
 class CharAdd {
 private:
-	void Err(int ID,int err) {
+	void Err(int ID, int err) {
 		msgmgr(1, "读取块:Page%s->%X %d 时出现异常", Pstr[ID], err / 2, err);
 
 	}
 
 	void InitChar(int ID, char* str) {
-			if (ID == 0) {
-				SetPage(str);return;
-			}
-			OffSet* TMP = GetPage(ID);
-			std::string str2 = str;
-			std::vector<std::string> str_list2;
-			std::string buf;
-			std::stringstream A(str);
-			while (A >> buf) {
-				if (*buf.c_str() != ' ')
-					str_list2.push_back(buf);
-			}
-			unsigned int i = 0, k = 0;
-			if (str_list2.size() != 512)  Err(ID,str_list2.size() / 2);
-			while (str_list2.size() > i) {
+		if (ID == 0) {
+			SetPage(str);return;
+		}
+		OffSet* TMP = GetPage(ID);
+		std::string str2 = str;
+		std::vector<std::string> str_list2;
+		std::string buf;
+		std::stringstream A(str);
+		while (A >> buf) {
+			if (*buf.c_str() != ' ')
+				str_list2.push_back(buf);
+		}
+		unsigned int i = 0, k = 0;
+		if (str_list2.size() != 512)  Err(ID, str_list2.size() / 2);
+		while (str_list2.size() > i) {
 
-				if (str_list2.size() < i + 1)  Err(ID,i);
-				TMP[k].Off = float(atof(str_list2[i++].c_str()));
+			if (str_list2.size() < i + 1)  Err(ID, i);
+			TMP[k].Off = float(atof(str_list2[i++].c_str()));
 
-				TMP[k].Width = float(atof(str_list2[i++].c_str()));
-				k++;
+			TMP[k].Width = float(atof(str_list2[i++].c_str()));
+			k++;
 
-			};
+		};
 
 	};
 	void SetPage(char *str) {
@@ -550,22 +595,24 @@ private:
 			if (str[i] != ' ')st = true;
 			if (str[i] == ',' || str[i] == '}' || str[i + 1] == '\0') {
 				str_list.push_back(str2);
+				//	msgmgr(3, "SETPAGE:%s", str2.c_str());
 				str2 = "";
 				st = false;
 			}
-			else if(st){
+			else if (st) {
 				str2.push_back(str[i]);
+				//	str2+=str[i];
 			}
 			i++;
 		}
 
-		
+
 		unsigned int A = 0;
 		BYTE PID1 = 0;
 		int TMP = 0;
 		while (A < str_list.size()) {
 
-			if (A + 2 > str_list.size())Err(0,A);
+			if (A + 2 > str_list.size())Err(0, A);
 			PID1 = BYTE(strtol(str_list[A++].c_str(), NULL, 16));
 			if (TMP < 3) {
 				Page[PID1].OffSetX = 16 + 16 * TMP;
@@ -584,36 +631,19 @@ private:
 			}
 			Page[PID1].Page = GetPage(TMP + 1);
 			PageId[TMP++] = PID1;
-				Page[PID1].File = str_list[A++].c_str();
+			//	const char *CP= str_list[A++].c_str();
+			//	int AA = 0;
+			//while (CP[AA++] != 0|| CP[AA] == ' '|| CP[AA] == '	');
+			Page[PID1].File = str_list[A++].c_str();
 		}
 
 	}
-	
+
 	BOOL WriteRes(int ID, int t, const char *Path) {
 
-		HRSRC hRsrc = FindResource(DLL, MAKEINTRESOURCE(ID), Type[t]);
-		if (hRsrc != NULL) {
-			HGLOBAL hGlobal = LoadResource(DLL, hRsrc);
-			if (hGlobal != NULL) {
-				LPVOID pBuffer = LockResource(hGlobal);
-				DWORD dwSize = SizeofResource(DLL, hRsrc);
-				FILE *fp;
-				fopen_s(&fp, Path, "wb+");
-				
-				if (fp != 0) {
-					msgmgr(3, "写出资源 ID:%d TYPE:%d Path:%s",ID,t, Path);
-					fwrite(pBuffer, sizeof(BYTE), dwSize, fp);
-					fclose(fp);
-					//delete[] str;
-					return TRUE;
-				}
-				
-			}
-		}
-		msgmgr(1, "写出资源失败 ID:%d TYPE:%d Path:%s", ID, t, Path);
-		GetError(16);
-		//delete[] str;
-		return FALSE;
+					
+		msgmgr(1, "写出资源 ID:%d TYPE:%d Path:%s", ID, t, Path);
+		return TRUE;
 	}
 	char* GetConfig(int ID, char* str) {
 		char TMP[256];
@@ -625,22 +655,22 @@ public:
 	BOOL MainInit() {
 		FILE *fp;
 		//AD=std::ofstream("A.txt", std::ios::app);
-		char CPath[MAX_PATH];
-		snprintf(CPath, MAX_PATH, "%s/%s", SYSTEMPATH, ConfigFilePath);
-		fopen_s(&fp, CPath, "rb+");
+		//char CPath[MAX_PATH];
+	//	snprintf(CPath, MAX_PATH, "%s/%s", SYSTEMPATH, ConfigFilePath);
+		fopen_s(&fp, ConfigFilePath, "rb+");
 		if (fp == NULL) {
-			msgmgr(3, "配置文件初始化:%s:%s:%s",CPath, SYSTEMPATH, ConfigFilePath);
-			if(!WriteRes(IDR_CONFIG, 0, CPath)) {
+			msgmgr(3, "配置文件初始化:%s:%s:%s", ConfigFilePath, SYSTEMPATH, ConfigFilePath);
+			if (!WriteRes(0, 0, ConfigFilePath)) {
 				GetError(15);
 				return FALSE;
 			};//错误标记15;
-			//	fclose(fp);
+			  //	fclose(fp);
 			InitFile();
-			fopen_s(&fp, CPath, "rb+");
+			fopen_s(&fp, ConfigFilePath, "rb+");
 		}
 		if (fp == NULL) {
 			GetError(14);
-				return FALSE;
+			return FALSE;
 		};//错误标记14
 		fseek(fp, 0L, SEEK_END);
 		DWORD FileSize = ftell(fp);
@@ -670,7 +700,7 @@ public:
 			NeedInit = 2;
 		}
 		if (NeedInit) {
-		//	char *str=new char[256];
+			//	char *str=new char[256];
 			char Tstr[256];
 			size_t Size = snprintf(Tstr, 256, NeedInit>1 ? "\n%s: %s\n" : "%s: %s\n", Verstr, Versum);
 			fwrite(Tstr, sizeof(char), Size, fp);
@@ -733,14 +763,14 @@ public:
 			}
 
 		}
-		
+
 		for (int i = 0;i < 8;i++) {
-				WID[i] = PageId[i];
-			}
+			WID[i] = PageId[i];
+		}
 		//msgmgr(3, "------------------");
-		//msgmgr(3, "MainInited");
+		msgmgr(3, "MainInited");
 		WCharAdd.WMainInit(Config);
-		//msgmgr(3, "ALLInited");
+		msgmgr(3, "ALLInited");
 		delete[] Config;
 		return TRUE;
 	}
@@ -769,13 +799,13 @@ public:
 		}
 		return 0;
 	}
-	
+
 
 
 	void InitFile() {
 		char FPATH[MAX_PATH];
-		for (int i = 0;i < 7;i++){
-			snprintf(FPATH, MAX_PATH, "%s/%s/%s", SYSTEMPATH,localePath, ResPath[i]);
+		for (int i = 0;i < 7;i++) {
+			snprintf(FPATH, MAX_PATH, "%s/%s/%s", SYSTEMPATH, localePath, ResPath[i]);
 			WriteRes(ResId[i], i > 4 ? 0 : 1, FPATH);
 		}
 
@@ -792,15 +822,3 @@ public:
 	OffSet Page7[256];
 
 };
-class SEL;
-extern CharAdd CharADD;
-void GetCharXYOffAndWid(), GetWidth980();
-extern DWORD *FunAdd,Base;
-extern void* RE0, *RE1, *RE2;
-void GetCharXYOW974();
-void GetWidth974();
-extern int *start;
-void Start();
-void SetBackWid980();
-
-
