@@ -155,6 +155,7 @@
       <SDLCheck>true</SDLCheck>
       <StringPooling>true</StringPooling>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <FloatingPointModel>Precise</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -237,8 +238,11 @@
     <ClInclude Include="targetver.h" />
     <None Include="..\eng-menu.psd" />
     <None Include="..\win1252-font.psd" />
+    <None Include="chs-gui-972.cfg" />
+    <None Include="chs-gui-974.cfg" />
     <None Include="chs-gui.cfg" />
-    <None Include="CN-font.cfg" />
+    <None Include="chs-font.cfg" />
+    <None Include="config3.bin" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -292,8 +296,9 @@
     <None Include="Config.ini" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="chs-font972.png" />
     <Image Include="chs-menu.png" />
-    <Image Include="CN-font.png" />
+    <Image Include="chs-font.png" />
     <Image Include="E:\Games\SpaceEngine 0.980\新建文件夹\Font3.png" />
     <Image Include="Font1.png" />
     <Image Include="Font2.png" />

@@ -3,32 +3,41 @@
 #pragma comment (lib, "Version.lib")   
 DWORD Base=0;
 WCHAR *Type[2] = { L"Config",L"PNG" };
-char *ResPath[7] = { "chs-font1.png","chs-font2.png","chs-font3.png","chs-menu.png","CN-font.png","chs-gui.cfg","CN-font.cfg" };
-int ResId[7] = { IDB_PNG1,IDB_PNG2,IDB_PNG3,IDB_PNG4,IDB_PNG5,IDR_CONFIG1,IDR_CONFIG2 };//IDR_CONFIG
+//char *ResPath[7] = { "chs-font1.png","chs-font2.png","chs-font3.png","chs-menu.png","chs-font.png","chs-gui.cfg","chs-font.cfg" };
+//int ResId[7] = { IDB_PNG1,IDB_PNG2,IDB_PNG3,IDB_PNG4,IDB_PNG5,IDR_CONFIG1,IDR_CONFIG2 };//IDR_CONFIG
 char ConfigFilePath[256] = "System/Config.ini";
 DWORD* FunAdd = 0;
-DWORD FunAdd980[6] = {
+DWORD FunAdd980[7] = {
 	0x1FF4E0,//Ó³Éä
 	0X1FFA73,//×ø±ê
 	0x1FFA91,//Æ«ÒÆ
 	0x1FF958,//¿í1
 	0x1FFA64,//¿í2&×ø±ê
-	0x198DA5//0x198DD2//980call
+	0x160C34,//0x198DA5,//0x198DD2//980call
+	0x20705C//BACKW
+};//12×÷·Ï
+DWORD FunAdd972[4] = {
+	0x1F0970,//START
+	0x1F0C5B,//XYO
+	0x1F80F6,//BACKW
+	0x1A4605//Call
 };
-DWORD FunAdd974[6] = {
+DWORD FunAdd974[7] = {
 //SpaceEngine.exe+1F41C8 - F3 0F10 44 96 5C      - movss xmm0,[esi+edx*4+5C] ²»Ã÷ ¿ÉÄÜÊÇ×Ö¿í
 	0x1ECBA0,//Ó³Éä
 	0x1ED117,// ×ø±ê
 	0x1ED135,// Æ«ÒÆ
 	0x1ECFFF,// ¼«ÆäÏàËÆ ×Ö¿í1
 	0x1ED0FA,// ×Ö¿í2
-	0x18AC15//TEST
+	0x155614,//0x18AC15,//TESTCALL
+	0x1F41C8//BACKW
 };
 /*
 DWORD RetAdd = (DWORD)hModule2 + 0x1FFA9A;
 void *RV = (void*)((DWORD)hModule2 + 0X3B48F4);
 void *RV2 = (void*)((DWORD)hModule2 + 0x472F90);
 */
+
 DWORD *ReAdd,
 	ReAdd980[3] = {
 	0x1FFA9A,
@@ -39,66 +48,74 @@ DWORD *ReAdd,
 	0x390DD4,
 	0x44D350
 
-},StartAdd[2] = {
+}, ReAdd972[3] = {
+	0X39B098,
+	0x39BF40,
+	0x1F0CB9
+
+},StartAdd[3] = {
 	0X407E64,
-	0x3E10B8
-},LstrAdd[2] = {
-	0X4AD788,
-	0x489F78
-}, BackWidth[2] = {//±³¾°¿í
+	0x3E10B8,
+	0x3E0160
+},BackWidth[2] = {//±³¾°¿í
 	0x20705C,//980
 	0x1F41C8//974
 
-},glAdd[2] = {
-	0x36A2BC,//980
-	0x34A2B8//974
-},TexInitAdd[2] = {
-	0x3E310,//0x03F590,//980
-	0x5C2A0//974Î´²âÊÔ<<<<<<<<<<<<<<<<<<<<<=============
+},TexInitAdd[3] = {
+	0x3EE00,//0x3E310,//0x03F590,//980
+	0x5D220,//0x5C2A0,call SpaceEngine.exe+5D220
+
+	0x5D1D0//972
+
 };
-char SYSTEMPATH[MAX_PATH];
+std::string SYSTEMPATH;
 std::string LOGPATH;
 //bool Is980 = false;
 DWORD glTexAdd = 0, *glTex2DAdd = 0, sBackWidth = 0;
 int *start = 0;// = (int*)((DWORD)hModule2 + 0X407E64);//974 0x3E10B8 
 //char *Lstr = 0;//(char*)((DWORD)hModule2 + 0X4AD788), tmp[3] = { 0 };//974 0x489F78
 DWORD ThreadId = 0;
-void *XYOAW, *GCW, *BackFun, *TexEnd;
+void *XYOAW, *GCW, *BackFun, *TexEnd;//¼ÌÐøµ÷ÓÃ
 //bool INITED = false;
 bool CanRun = false;
 HMODULE hModule2 = 0,DLL=0;
 SEL WCharAdd;
 BYTE WID[8] = { 0 };
+RWMEM RwMem;
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
 					 )
 {
-//	std::ofstream A("A.txt", std::ios::app);
+
 	
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:{
-
+		char SP[MAX_PATH];
 		hModule2 = GetModuleHandle(NULL);
-		GetModuleFileNameA(hModule2, SYSTEMPATH, MAX_PATH);
+		GetModuleFileNameA(hModule2, SP, MAX_PATH);
 		//msgmgr(0, "SYSTEMPATH A:%s", SYSTEMPATH);
-		*strrchr(SYSTEMPATH, '\\')=0;
-		*strrchr(SYSTEMPATH, '\\') = 0;
+		*strrchr(SP, '\\')=0;
+		*strrchr(SP, '\\') = 0;
 
 		int A = 0;
 		//char *P;
-		while (SYSTEMPATH[A] != 0&&A<MAX_PATH) {
-			if (SYSTEMPATH[A] == '\\')SYSTEMPATH[A] = '/';
+		while (SP[A] != 0&&A<MAX_PATH) {
+			if (SP[A] == '\\')SP[A] = '/';
 			A++;
 		}
 		//msgmgr(0, "SYSTEMPATH A:%s", SYSTEMPATH);
-		LOGPATH = SYSTEMPATH;
+		SYSTEMPATH=LOGPATH = SP;
 		LOGPATH += "/SE-Localization.log";
-		/*std::ofstream AA("AAA.log");
-		AA << LOGPATH;
-		AA.close();*/
-	//	msgmgr(0, "AAAAAAA");
+		//std::ofstream AA("AAA.log");
+		//AA <<"AAAAA:"<< LOGPATH;
+		//AA.close();
+		//std::ofstream AA(LOGPATH, std::ios::app);
+		//AA << "AAAA:"<< LOGPATH<<" AAA:"<< SYSTEMPATH;
+		//AA.close();
+		//float AF = 0.0f;
+	//	msgmgr(0, "DLLMAINSTART ");
 		DLL = hModule;
 		Start();
 
@@ -107,7 +124,13 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	case DLL_THREAD_DETACH:break;
 	case DLL_PROCESS_DETACH:
 		if (CanRun) {
-			SEMain(2);
+			//SEMain(2);
+			while (!res.empty()) {
+				RES* P=res.front();
+				res.erase(res.begin());
+				delete P;
+			}
+			RwMem.End();
 		}
 //		Dlog(0, "	STOP...");
 		break;
@@ -116,52 +139,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 	return TRUE;
 }
 //void *PglTexAdd = 0;
-char *localePath = 0;
-char *Msg[] = { "Info" ,"Error" ,"Warning" ,"Debug" ,"Null" };
-BOOL isone = TRUE;
-//0 Info 1 Error 2 Warning 3 Debug Ã»ÂÑÓÃµÄ´íÎóÊä³ö.......
-void msgmgr(int type, char* msg, ...) {
-
-	char str[2048], *str2 = new char[3072];
-	va_list vlArgs;
-	va_start(vlArgs, msg);
-	vsnprintf_s(str, 2048, msg, vlArgs);
-	va_end(vlArgs);
-	GetLocalTime(&sys_time);
-	
-	std::ofstream A,B;
-	
-	DWORD L = 0;
-	if (isone) {
-		FILE *fp;
-		fopen_s(&fp, LOGPATH.c_str(), "rb");
-		if(fp!=NULL){
-		fseek(fp, 0, SEEK_END);
-		if ((L= ftell(fp)) > 512 * 1024) {
-			fclose(fp);
-			fopen_s(&fp, LOGPATH.c_str(), "wb+");
-			if(fp!=0)fclose(fp);
-		}
-		
-		}
-		
-		A.open(LOGPATH.c_str(), std::ios::app);
-		snprintf(str2, 3072, "\nTIME %04d-%02d-%02d %02d:%02d:%02d\n --------------------------\n", sys_time.wYear, sys_time.wMonth, sys_time.wDay, sys_time.wHour, sys_time.wMinute, sys_time.wSecond);
-		A << str2;
-		isone = FALSE;
-	}
-	else {
-		A.open(LOGPATH, std::ios::app);
-	}
-	
-	snprintf(str2, 3072, "%02d:%02d:%02d.%03d [%s] %s\n",sys_time.wHour, sys_time.wMinute, sys_time.wSecond, sys_time.wMilliseconds,Msg[type>3?4: type], str);
-	B << str2;
-	B.close();
-	A << str2;
-	delete[] str2;
-	A.close();
-
-}
+std::string localePath;
 void GetError(int d) {
 	DWORD Err = GetLastError();
 	if (Err != 0) {
@@ -175,93 +153,116 @@ void GetError(int d) {
 
 
 }
+//WCHAR *Type[2] = { L"Config",L"PNG" };
+char *ResName[7] = { "chs-font1.png","chs-font2.png","chs-font3.png","chs-menu.png","chs-font.png","chs-gui.cfg","chs-font.cfg" };
+int ResId[8] = { IDB_PNG1,IDB_PNG2,IDB_PNG3,IDB_PNG4,IDB_PNG5,IDR_CONFIG1,IDR_CONFIG2 ,IDB_PNG6 };//IDR_CONFIG
+std::vector<RES*> res;
+void  CharAna972();
 void Start() {
-	DWORD  sStartAdd = 0,sTexAdd = 0;
+	DWORD  sStartAdd = 0, sTexAdd = 0;//Tick
 	mProc = GetCurrentProcess();
 	Version Ver;
 	hModule2 = GetModuleHandle(NULL);
 	Base = DWORD(hModule2);
 	if (GetFileVersion(&Ver, &hModule2)) {
+	//	msgmgr(3, "V:%d,%d,%d,%d", Ver.HM ,Ver.LM,Ver.HL,Ver.LL);
 		if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 8 && Ver.LL == 0) {
-			//Is980=
 			CanRun = true;
-			FunAdd = FunAdd980;
 			ReAdd = ReAdd980;
-			XYOAW = GetCharXYOffAndWid;
-			GCW = GetWidth980;
 			sTexAdd = TexInitAdd[0];
-			//TexCall = (void*)(Base + 0x16B76C);
-			BackFun = SetBackWid980;
-			sBackWidth = BackWidth[0];
 			sStartAdd = StartAdd[0];
-			//sglAdd = glAdd[0];
 			localePath = "data/locale";
+			res.push_back(new RES(Type[1], ResName[0],localePath, ResId[0]));
+			res.push_back(new RES(Type[1], ResName[1], localePath, ResId[1]));
+			res.push_back(new RES(Type[1], ResName[2], localePath, ResId[2]));
+			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[4]));
+			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI980));
+			RwMem.Add(CharAna, FunAdd980[0], 0xE8, 6);
+			RwMem.Add(GetWidth980, FunAdd980[3], 0xE8, 6);
+			RwMem.Add(GetCharXYOffAndWid, FunAdd980[4], 0xE9, 6);
+			RwMem.Add(TexInit, FunAdd980[5], 0xE8,5);
+			RwMem.Add(SetBackWid980, FunAdd980[6], 0xE8, 6);
 			//				DEBUG << "Ö´ÐÐ980";
 		}
-		if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 4) {
-			/*
-			RE0 = (void*)(Base + ReAdd974[0]);
-			RE1 = (void*)(Base + ReAdd974[1]);
-			RE2 = (void*)(Base + ReAdd974[2]);*/
+		else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 4) {
 			ReAdd = ReAdd974;
-
 			CanRun = true;
-			FunAdd = FunAdd974;
-			XYOAW = GetCharXYOW974;
-			GCW = GetWidth974;
-
-			BackFun = SetBackWid980;//974ÉÏ²âÊÔ
-			sBackWidth = BackWidth[1];
 			sTexAdd = TexInitAdd[1];
 			sStartAdd = StartAdd[1];
-			//sglAdd = glAdd[1];
 			localePath = "locale";
+			res.push_back(new RES(Type[1], ResName[0], localePath, ResId[0]));
+			res.push_back(new RES(Type[1], ResName[1], localePath, ResId[1]));
+			res.push_back(new RES(Type[1], ResName[2], localePath, ResId[2]));
+			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[4]));
+			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI974));
+			RwMem.Add(CharAna, FunAdd974[0], 0xE8, 6);
+			RwMem.Add(GetWidth974, FunAdd974[3], 0xE8, 6);
+			RwMem.Add(GetCharXYOW974, FunAdd974[4], 0xE9, 6);
+			RwMem.Add(TexInit, FunAdd974[5], 0xE8, 5);
+			RwMem.Add(SetBackWid980, FunAdd974[6], 0xE8, 6);
+		}
+		else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 2) {
+			
+			ReAdd = ReAdd972;
+			CanRun = true;
+			Old1 = *(float*)(Base + 0x39B180);
+			Old2 = *(float*)(Base + 0x39B098);
+			sTexAdd = TexInitAdd[2];
+			sStartAdd = StartAdd[2];
+			localePath = "locale";
+			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[7]));
+			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI972));
+			RwMem.Add(CharAna972, FunAdd972[0], 0xE8, 6);
+			RwMem.Add(GetWidthXYOFF972, FunAdd972[1], 0xE9, 9);
+		//	msgmgr(3, "SetBack972:%p TexInit:%p CharAna972:%p GetWidthXYOFF972:%p", SetBack972, TexInit,CharAna972, GetWidthXYOFF972);
+			RwMem.Add(SetBack972, FunAdd972[2], 0xE8, 9);
+			RwMem.Add(TexInit, FunAdd972[3], 0xE8, 5);
 
-			//			DEBUG << "Ö´ÐÐ974";
 		}
 	}
 	else {
 		msgmgr(1, "¶ÁÈ¡Ö÷³ÌÐòÒì³£");
 	}
+
+	if (CanRun) {
+		//char *ResName[7] = { "chs-font1.png","chs-font2.png","chs-font3.png","chs-menu.png","chs-font.png","chs-gui.cfg","chs-font.cfg" };
+		//int ResId[8] = { IDB_PNG1,IDB_PNG2,IDB_PNG3,IDB_PNG4,IDB_PNG5,IDR_CONFIG1,IDR_CONFIG2 ,IDB_PNG6 };//IDR_CONFIG
 	
-	if (CanRun){
+		res.push_back(new RES(Type[1], ResName[3], localePath, ResId[3]));
 		
-		char PH[260];
-		snprintf(PH, 260, "%s/%s/%s", SYSTEMPATH, localePath, ResPath[5]);
-		std::ifstream IF(PH);
+		res.push_back(new RES(Type[0], ResName[6], localePath, ResId[6]));
+		//char PH[260];
+		//snprintf(PH, 260, "%s/%s/%s", SYSTEMPATH.c_str(), localePath.c_str(), ResName[5]);
+		//std::string Path = SYSTEMPATH + "/" + localePath + "/" + ResName[5];
+		std::ifstream IF;
+		IF.open(SYSTEMPATH + "/"+ConfigFilePath);
+
 		if (!IF) {
-			IF.close();
-			std::ofstream OF(PH);
-			OF.close();
+
+			CharADD.InitAll();
 		}
-		IF.close();
-	/*	if (!CharADD.MainInit()) {
-			msgmgr(1, "¶ÁÈ¡ÅäÖÃÎÄ¼þÒì³£");
-			GetError(17);//´íÎó±ê¼Ç17
-			return; }*/
+		else {
+			IF.close();
+			IF.open(SYSTEMPATH + "/" + localePath + "/" + ResName[5]);
+				if (!IF) {
+					CharADD.InitFile();
+				}
+				else IF.close();
+		}
+		
+		
 		RE0 = (void*)(Base + ReAdd[0]);
 		RE1 = (void*)(Base + ReAdd[1]);
 		RE2 = (void*)(Base + ReAdd[2]);
 		TexEnd = (void*)(Base + sTexAdd);
-		//glTex2DAdd = (DWORD*)(Base + sglAdd);
 		start = (int*)(Base + sStartAdd);
-	//	PglTexAdd = glTex2D;
-		SEMain(0);
-		SEMain(1);
-		/*if (SEMain(0))
-		{
-			if (SEMain(1)) {
-		/*	DWORD dwTemp = 0, dwOldProtect;
-			if (!VirtualProtectEx(mProc, glTex2DAdd, 4, PAGE_EXECUTE_READWRITE, &dwOldProtect))GetError(0);
-			glTexAdd = *glTex2DAdd;//glTex2DAdd;
-			*glTex2DAdd = (DWORD)PglTexAdd;
-			if (!VirtualProtectEx(mProc, glTex2DAdd, 4, dwOldProtect, &dwTemp))GetError(1);
-			}
-		}*/
+	//	msgmgr(0, "START");
+		RwMem.Start();
 	}
 
 
 }
+
 //º¯Êý Æ«ÒÆ ´æ´¢
 void GetCode(void* Fun, DWORD OffSet, BYTE *Code) {
 	DWORD CODE = (DWORD)Fun - ((DWORD)hModule2 + OffSet)-5;
@@ -271,72 +272,7 @@ void GetCode(void* Fun, DWORD OffSet, BYTE *Code) {
 	}
 }
 
-BYTE CharMapCode[6] = { 0X90 }, CharMapOld[6], 
-CharXYCode[7] = { 0X90 }, CharXYOld[7],
-CharOFFCode[9] = { 0X90 }, CharOFFOld[9],
-CharWid1Code[6] = {0x90}, CharWid1Old[6],
-CharWid2Code[6] = { 0x90 }, CharWid2Old[6],//¿í2&×ø±ê
-BackWidCode[6] = {0x90}, BackWidOld[6],
-TexCode[5] = {0x90},TexCodeOld[5];//±³¾°
-
 bool RunOnce1 = true;
-BOOL SEMain(int mode) {
-	switch (mode)
-	{
-	case 0: {
-		if(ReadAdd(FunAdd[0], CharMapOld, 6))
-			//ReadAdd(FunAdd[1], CharXYOld, 7);
-			//ReadAdd(FunAdd[2], CharOFFOld, 9);;
-			if(ReadAdd(FunAdd[3], CharWid1Old, 6))
-				if(ReadAdd(FunAdd[4], CharWid2Old, 6))
-					if (ReadAdd(sBackWidth, BackWidOld, 6))
-						if(ReadAdd(TexInitAdd[0],TexCodeOld,5)) {;//¶Á±³¾°¿í
-		GetCode(BackFun, sBackWidth, BackWidCode);//»ã±àÂë
-		GetCode(CharAna, FunAdd[0], CharMapCode);
-		//GetCode(GetCharXY, FunAdd[1], CharXYCode);
-		//GetCode(GetCharOff, FunAdd[2], CharOFFCode);
-		//GetCode(GetWidth1, FunAdd[3], CharWid1Code);
-		GetCode(GCW, FunAdd[3], CharWid1Code);
-		GetCode(XYOAW, FunAdd[4], CharWid2Code);
-		GetCode(TexInit, FunAdd[5], TexCode);
-		
-	//	GetCode(GetCharXYOffAndWid, FunAdd[4], CharWid2Code);
-		TexCode[0]=CharMapCode[0] = CharXYCode[0] = CharOFFCode[0]= CharWid1Code[0]= BackWidCode[0] = 0XE8;//call
-		CharMapCode[5] = 
-			CharXYCode[5] = CharXYCode[6] = 
-			CharOFFCode[5] = CharOFFCode[6] = CharOFFCode[7] = CharOFFCode[8] =
-			CharWid1Code[5] = CharWid2Code[5]=
-			BackWidCode[5] = 0x90;//nop
-			CharWid2Code[0] = 0XE9;
-		//	GetError(11);
-			return TRUE;
-		}
-	}break;
-	case 1: {
-
-		if (WriteAdd(FunAdd[0], CharMapCode, 6))
-			//WriteAdd(FunAdd[1], CharXYCode, 7);
-		//	WriteAdd(FunAdd[2], CharOFFCode, 9);
-			if (WriteAdd(FunAdd[3], CharWid1Code, 6))
-				if (WriteAdd(FunAdd[4], CharWid2Code, 6))
-					if (WriteAdd(sBackWidth, BackWidCode, 6))
-						if(WriteAdd(FunAdd[5], TexCode, 5))return TRUE;
-			//GetError(12);
-	}break;
-	case 2: {
-		if (WriteAdd(FunAdd[0], CharMapOld, 6))
-			//	WriteAdd(FunAdd[1], CharXYOld, 7);
-			//	WriteAdd(FunAdd[2], CharOFFOld, 9);
-			if (WriteAdd(FunAdd[3], CharWid1Old, 6))
-				if (WriteAdd(FunAdd[4], CharWid2Old, 6))
-					if (WriteAdd(sBackWidth, BackWidOld, 6))
-						if (WriteAdd(FunAdd[5], TexCodeOld, 5))return TRUE;
-		
-	}break;
-	}
-	GetError(13);
-	return FALSE;
-}
 BOOL GetFileVersion(Version *Ver,HMODULE *hModle)
 {
 	
@@ -373,4 +309,47 @@ BOOL GetFileVersion(Version *Ver,HMODULE *hModle)
 
 
 
-	
+char *Msg[] = { "Info" ,"Error" ,"Warning" ,"Debug" ,"Null" };
+BOOL isone = TRUE, IS2 = TRUE;
+//0 Info 1 Error 2 Warning 3 Debug Ã»ÂÑÓÃµÄ´íÎóÊä³ö
+void msgmgr(int type, char* msg, ...) {
+	std::ofstream AA;
+	char str[2048], *str2 = new char[3072];
+	va_list vlArgs;
+	va_start(vlArgs, msg);
+	vsnprintf_s(str, 2048, msg, vlArgs);
+	va_end(vlArgs);
+	GetLocalTime(&sys_time);
+
+
+	DWORD L = 0;
+	if (isone) {
+		FILE *fp;
+		fopen_s(&fp, LOGPATH.c_str(), "rb");
+		if (fp != NULL) {
+			fseek(fp, 0, SEEK_END);
+			L = ftell(fp);
+			fclose(fp);
+			AA.open(LOGPATH, L > 512 * 1024 ? std::ios::trunc : std::ios::app);
+		}
+		else {
+			AA.open(LOGPATH);
+
+		}
+
+
+		snprintf(str2, 3072, "\nTIME %04d-%02d-%02d %02d:%02d:%02d\n --------------------------\n", sys_time.wYear, sys_time.wMonth, sys_time.wDay, sys_time.wHour, sys_time.wMinute, sys_time.wSecond);
+		AA << str2;
+		isone = FALSE;
+	}
+
+	else {
+		AA.open(LOGPATH, std::ios::app);
+	}
+	snprintf(str2, 3072, "%02d:%02d:%02d.%03d [%s] %s\n", sys_time.wHour, sys_time.wMinute, sys_time.wSecond, sys_time.wMilliseconds, Msg[type>3 ? 4 : type], str);
+
+	AA << str2;
+
+	AA.close();
+	delete[] str2;
+}

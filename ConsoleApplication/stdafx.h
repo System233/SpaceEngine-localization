@@ -20,21 +20,7 @@ struct STA{
 	char *str;
 };
 // TODO:  在此处引用程序需要的其他头文件
-/*
-struct OffSet {
-	int Off = 0;
-	int Width = 12;
-};
 
-struct PageInfo {
-	char *File;
-	int OffSetX = 0;
-	int OffSetY = 0;
-	int PX = 0;
-	int PY = 0;
-	bool use = false;
-};
-*/
 struct WChar {
 	bool use = false;
 	BYTE str[2] = { 0 };
@@ -42,7 +28,7 @@ struct WChar {
 	long Size = 0;
 	int UseSize = 0;
 };
-
+extern std::vector<std::wstring> wstrv;
 void TEST(char* In, char*Out);
 class SEL {
 	const char* ConfigFile = "Config.ini";
@@ -198,6 +184,66 @@ public:
 	//	Start(ID, L"\"dwadDAWF\"  \"昵称自定义\"     ");
 	}
 	bool O = true;
+	std::string* Start(std::wstring str, std::string *pstr) {
+
+		if (str.find(L"FontConfig")!=std::wstring::npos || str.find(L"FontTexture") != std::wstring::npos) {
+			
+			//std::string T= WcharToChar(str.c_str());
+			pstr->operator=(WcharToChar(str.c_str()));
+			
+			return pstr;
+			
+		
+		}
+		std::wstring TMP;
+		size_t size = str.size(),st=0,i = 0;
+
+		while (i < size&&str[i] != ';') {
+
+			if(st==0)pstr->push_back(BYTE(str[i]));
+			else if (st == 1) {
+
+				if(str[i]!='"')TMP.push_back(str[i]);
+			//	printf("W4[%d]\n",TMP.size());
+				pstr->push_back(BYTE(str[i]));
+			}
+			else if (st == 2) {
+				for (std::vector < std::wstring>::iterator it = wstrv.begin();it != wstrv.end();it++) if ((*it).compare(TMP) == 0) {pstr->clear();break;}
+				
+				TMP.clear();
+			//	pstr->insert(0, " \"");
+				pstr->push_back(BYTE(str[i]));
+			//	pstr->insert(pstr->size(), "\"	\"");
+
+			}
+			else if (st == 3) {
+				if (Wstr[str[i]].str[1] == 0) {
+					pstr->push_back('#');
+					if (Wstr[str[i]].Size == 0) {
+						STA S;
+						S.str = WcharToCharOne(&str[i]);
+						S.ID[0] = str[i];
+						No.push_back(S);
+					}
+					Wstr[str[i]].Size++;
+				}
+				else
+					if (Wstr[str[i]].str[0] == 0) {
+						pstr->push_back(Wstr[str[i]].str[1]);
+					}
+					else {
+						pstr->push_back(Wstr[str[i]].str[0]);
+						pstr->push_back(Wstr[str[i]].str[1]);
+						Wstr[str[i]].UseSize++;
+					}
+
+			}
+			else if (st == 4)st = 0;
+			if (str[i++] == '"')  st++;
+
+		}
+		return pstr;
+	}
 	char* Start(wchar_t*str,int size) {
 		
 		if(wcsstr(str,L"FontConfig")|| wcsstr(str, L"FontTexture")){
@@ -312,7 +358,7 @@ public:
 		m_char[2] = '\0';
 		return m_char;
 	}
-	char* WcharToChar(wchar_t* wc)
+	char* WcharToChar(const wchar_t* wc)
 	{
 
 		int len = WideCharToMultiByte(CP_ACP, 0, wc, wcslen(wc), NULL, 0, NULL, NULL);
@@ -401,3 +447,5 @@ public:
 
 
 };
+
+

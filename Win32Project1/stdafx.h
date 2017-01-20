@@ -21,8 +21,10 @@ void TexInit();
 extern DWORD glTexAdd,*glTex2DAdd, Base;
 extern HANDLE mProc;
 extern bool ReTex;
-extern char SYSTEMPATH[MAX_PATH];
-void msgmgr(int type, char* msg, ...);
+extern std::string SYSTEMPATH,localePath;
+extern float Old1, Old2;
+BYTE* CharAnalysis972(BYTE* str);
+void msgmgr(int type, char* msg, ...),SetBack972(), GetWidthXYOFF972();
 BOOL WriteAdd(DWORD OffSet, BYTE *Code, size_t Size);
 BOOL ReadAdd(DWORD OffSet, BYTE *Code, size_t Size);
 //void CharXY();
@@ -69,7 +71,7 @@ struct PageInfo {
 	OffSet* Page=0;
 	bool use = false;
 };
-extern char *localePath;
+
 
 class CharD {
 public:
@@ -246,7 +248,105 @@ struct Addchar {
 	int size = 0;
 };
 extern BYTE WID[8];
+class MEMADD {
+	void GetCode() {
+		DWORD CODE = (DWORD)Fun - ((DWORD)hModule2 + Offset) - 5;
+		BYTE* P = (BYTE*)&CODE;
+		for (int i = 0;i < 4;i++) {
+			Code[i + 1] = P[i];
+		}
+	}
+public:
+	DWORD Offset = 0;
+	LPVOID Fun = 0;
+	BYTE *Code = 0, *CodeOld = 0;
+	size_t Size = 0;
+	BYTE Method = 0xE8;
+	bool sted = false;
+	MEMADD(LPVOID F, DWORD Of, BYTE Met, size_t s) {
+		Offset = Of, Fun = F, Method = Met, Size = s;
+		Code = new BYTE[s], CodeOld = new BYTE[s];
+		ReadAdd(Offset, CodeOld, Size);
+		GetCode();
+		for (size_t i = 5;i < Size;i++)Code[i] = 0x90;
+		Code[0] = Method;
+	//	msgmgr(3, "MEMINIT:%p OF:%X M:%X S:%d", F, Of, Met, s);
+	}
+	~MEMADD() {
+		End();
+		if (Code)delete[] Code;
+		if (CodeOld)delete[] CodeOld;
+		Code = CodeOld = 0;
 
+	}
+	void Start() {
+		//msgmgr(3, "WRSTART:OF:%X C:%p S:%d", Offset, Code, Size);
+		if (!sted) {
+			WriteAdd(Offset, Code, Size);
+
+			sted = true;
+		}
+	}
+	void End() {
+	//	msgmgr(3, "WRSTART:OF:%X C:%p S:%d", Offset, Code, Size);
+		if (sted) {
+
+			WriteAdd(Offset, CodeOld, Size);
+
+			sted = false;
+		}
+	}
+};
+class RWMEM {
+	std::vector<MEMADD*> MA;
+public:
+	void Add(LPVOID Fun, DWORD Offset, BYTE Met, size_t s) {
+		MA.push_back(new MEMADD(Fun, Offset, Met, s));
+	};
+	~RWMEM() {
+		while (!MA.empty()) {
+			MEMADD *P = MA.front();
+			P->End();
+			MA.erase(MA.begin());
+			if (P != 0)delete P;
+
+		}
+	}
+	void Start() {
+		for (std::vector<MEMADD*>::iterator i = MA.begin();i != MA.end();i++) {
+
+			(*i)->Start();
+			
+		}
+
+	//	msgmgr(3, "MEMSTART");
+
+
+	}
+	void End() {
+		for (std::vector<MEMADD*>::iterator i = MA.begin();i != MA.end();i++) {
+			(*i)->End();
+			
+
+		}
+	//	msgmgr(3, "MEMEND");
+	}
+
+};
+
+class RES {
+
+public:
+
+	std::string Name, Path;
+	std::wstring Type;
+	DWORD Id = 0;
+
+	RES(std::wstring TYPE, std::string NAME, std::string PATH, DWORD ID) {
+		Name = NAME, Type = TYPE, Id = ID, Path = SYSTEMPATH + "/" + PATH + "/" + Name;
+	}
+};
+extern std::vector<RES*> res;
 class SEL {
 	CharDef CD;
 	wchar_t *WPstr[8] = { L"1",L"2",L"3",L"4",L"5",L"6",L"7",L"DEF" };
@@ -499,8 +599,8 @@ public:
 void GetError(int d);
 extern SEL WCharAdd;
 extern WCHAR *Type[2];
-extern char *ResPath[7], ConfigFilePath[256] ;
-extern int ResId[7];//IDR_CONFIG
+extern char *ResName[7], ConfigFilePath[256] ;
+extern int ResId[8];//IDR_CONFIG
 
 class CharAdd {
 private:
@@ -527,7 +627,7 @@ private:
 			while (str_list2.size() > i) {
 
 				if (str_list2.size() < i + 1)  Err(ID,i);
-				TMP[k].Off = float(atof(str_list2[i++].c_str()));
+				TMP[k].Off = float(atof(str_list2[i++].c_str()))/256.0f;//<<<<<<<<<<<<<<<<<<<<2017019
 
 				TMP[k].Width = float(atof(str_list2[i++].c_str()));
 				k++;
@@ -589,9 +689,11 @@ private:
 
 	}
 	
-	BOOL WriteRes(int ID, int t, const char *Path) {
-
-		HRSRC hRsrc = FindResource(DLL, MAKEINTRESOURCE(ID), Type[t]);
+	BOOL WriteRes(RES* R) {
+		const WCHAR*Ty = R->Type.c_str();
+		const CHAR *Path = R->Path.c_str();
+		DWORD ID = R->Id;
+		HRSRC hRsrc = FindResource(DLL, MAKEINTRESOURCE(ID), Ty);
 		if (hRsrc != NULL) {
 			HGLOBAL hGlobal = LoadResource(DLL, hRsrc);
 			if (hGlobal != NULL) {
@@ -601,7 +703,7 @@ private:
 				fopen_s(&fp, Path, "wb+");
 				
 				if (fp != 0) {
-					msgmgr(3, "写出资源 ID:%d TYPE:%d Path:%s",ID,t, Path);
+					msgmgr(3, "写出资源 ID:%d Path:%s", ID, Path);
 					fwrite(pBuffer, sizeof(BYTE), dwSize, fp);
 					fclose(fp);
 					//delete[] str;
@@ -610,7 +712,7 @@ private:
 				
 			}
 		}
-		msgmgr(1, "写出资源失败 ID:%d TYPE:%d Path:%s", ID, t, Path);
+		msgmgr(1, "写出资源失败 ID:%d Path:%s", ID,  Path);
 		GetError(16);
 		//delete[] str;
 		return FALSE;
@@ -621,22 +723,27 @@ private:
 		return strstr(str, TMP);
 	}
 public:
-
+	BOOL InitAll() {
+		msgmgr(3, "配置文件初始化");
+		RES R(Type[0], "Config.ini", "System", IDR_CONFIG);
+		if (!WriteRes(&R)) {
+			GetError(17);
+			return FALSE;
+		};//错误标记15;
+		  //	fclose(fp);
+		InitFile();
+		return TRUE;
+	};
 	BOOL MainInit() {
 		FILE *fp;
 		//AD=std::ofstream("A.txt", std::ios::app);
-		char CPath[MAX_PATH];
-		snprintf(CPath, MAX_PATH, "%s/%s", SYSTEMPATH, ConfigFilePath);
-		fopen_s(&fp, CPath, "rb+");
+		std::string CPath= SYSTEMPATH+"/"+ConfigFilePath;
+	//	snprintf(CPath, MAX_PATH, "%s/%s", SYSTEMPATH, ConfigFilePath);
+		
+		fopen_s(&fp, CPath.c_str(), "rb+");
 		if (fp == NULL) {
-			msgmgr(3, "配置文件初始化:%s:%s:%s",CPath, SYSTEMPATH, ConfigFilePath);
-			if(!WriteRes(IDR_CONFIG, 0, CPath)) {
-				GetError(15);
-				return FALSE;
-			};//错误标记15;
-			//	fclose(fp);
-			InitFile();
-			fopen_s(&fp, CPath, "rb+");
+			InitAll();
+			fopen_s(&fp, CPath.c_str(), "rb+");
 		}
 		if (fp == NULL) {
 			GetError(14);
@@ -773,11 +880,9 @@ public:
 
 
 	void InitFile() {
-		char FPATH[MAX_PATH];
-		for (int i = 0;i < 7;i++){
-			snprintf(FPATH, MAX_PATH, "%s/%s/%s", SYSTEMPATH,localePath, ResPath[i]);
-			WriteRes(ResId[i], i > 4 ? 0 : 1, FPATH);
-		}
+	for(std::vector<RES*>::iterator i=res.begin();i!=res.end();i++)
+			
+			WriteRes(*i);
 
 	}
 
@@ -802,5 +907,4 @@ void GetWidth974();
 extern int *start;
 void Start();
 void SetBackWid980();
-
 

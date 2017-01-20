@@ -1,1028 +1,0 @@
- "Galaxy"		"öõ"
- "Galaxies"		"öõ"
- "galaxy"		"öõ"
- "Star"			"ôö"
- "star"			"ôö"
- "Planet"		"óö"
- "planet"		"óö"
- "Planets"		"óö"
- "Dwarf planets"	"òóö"
- "Dwarf moons"	"òñö"
- "dwarf planet"	"òóö"
- "Dwarf planet"	"òóö"
- "Stars"			"ôö"
- "Moon"			"ñö"
- "moon"			"ñö"
- "Moons"			"ñö"
- "dwarf moon"	"òñö"
- "Dwarf moon"	"òñö"
- "Barycenter"	"ğï"
- "barycenter"	"ğï"
- "Barycenters"	"ğï"
- "comet"         "îö"
- "Comet"         "îö"
- "Comets"        "îö"
- 
- "Suns"			"ÈÇôö"
- "Atmospheres"	"ëê"
- "Planet shine"	"óöéè"
- "System"		"õç"
- "Near stars"	"åæôö"
- "Near galaxies"	"åæöõ"
- "Universe"		"äã"
- "Type"					"àß"
- "Distance"				"Şİ"
- "Distance to center"	"ŞİÜï"
- "Height"				"ÛÚ"
- "Height above surface"	"ÙØÛÚ"
- "Lat/Lon"				"×Ú/ÖÚ"
- "Latitude"				"×Ú"
- "Longitude"				"ÖÚ"
- "System diameter"		"õçÕÔ"
- "Diameter"				"ÕÔ"
- "Mass"					"ğÓ"
- "Summary mass"			"ğÓ"
- "Density"				"ÒÚ"
- "Apparent mag"			"ÑöĞ"
- "Absolute mag"			"ÏÎöĞ"
- "Luminosity"			"ÍÚ"
- "Lumin."          "ÍÚ"
- "Spectrum"				"ÍÌ"
- "Apparent size"			"ÑÕÔ"
- "Phase"					"ËÊ"
- "Age"					"ÆÈ"
- "Lifetime"				"ÅÆ"
- "Class"					"àß"
- "Temperature"				"ÅÚ"
- "Effective temperature"		"ÄÃÅÚ"
- "Gravity"					"ÂÁ"
- "Atmospheric"				"ëê"
- "Atmo pressure"				"ëêÀÁ"
- "Atmospheric pressure"		"ëêÀÁ"
- "Air density"				"¿êÒÚ"
- "Greenhouse eff"			"Å¾Ã½"
- "Greenhouse effect"			"Å¾Ã½"
- "Oblateness"				"¼º"
- "Axial tilt"				"¹¸"
- "Rotation period"			"´³²¯"
- "Orbital period"			"ª¨²¯"
- "Period"					"²¯"
- "Orbital"					"ª¨"
- "Orbits"                    "ª¨"
- "Semimajor axis"			"§¥¤"
- "with life"				    "Ä£Æ"
- "With life"			    	"Ä£Æ"
- "Life"					    "£Æ"
- "Planetary system"			"óöõç"
- "Satellites"				"ñö"
- "Cluster"		            "ö¢"
- "Clusters"		            "ö¢"
- "Quasar"		            "àöá"
- "Nebula"		            "ö¡"
- "Nebulae"		            "ö¡"
- "Main body"			        "Ÿá"
- "Black hole"                ""
- "Velocity"                  "œÚ"
- "Following"                 "š"
- "Tracking"                  "š"
- "Rotating"                  "³"
- "Mag limit"                 "öĞŒ"
- "FOV"                       "FOV"
- "Surf/sea altitude"         "ÙØ/ŠÛÚ"
- "Landscape height"		    "€ÄÛÚ"
- "Altitude"                  "€ØÛÚ"
- "Elevation"                 "ŠÛÚ"
- "Go to object"              "ÇÃÎÂ"
- "Land on object"            "ÁÀ"
- "Follow object"             "šÎÂ"
- "Rotate with object"        "¿¾³"
- "Track object"              "šÎÂ"
- "Center object"             "ÎÂ½Ü"
- "Right ascension"           "¼Ö"
- "Declination"               "¼×"
- 
- "Number of planets"					"óö»Ó"
- "Number of moons"						"ñö»Ó"
- "Number of satellites"			"ñö»Ó"
- "Number of stars"						"ôö»Ó"
- "Number of clusters"				"ö¢»Ó"
- "Number of nebulae"					"ö¡»Ó"
- "Clouds"										"¡"
- "Clouds 0"									"¡ 0"
- "Clouds 1"									"¡ 1"
- "Clouds 2"									"¡ 2"
- "Asteroids"									"ºóö"
- "Aurora"										"Í"
- "Water"											"¹"
- "3D water"									"3D ¹"
- "Comet tails"								"î¸"
- "Comet tail"								"î¸"
- "Atmo height"								"ëêÛÚ"
- "Atmo composition"					"ëê·¶"
- 
- "Markers"										"µ´"
- "Orbit marks"								"ª¨µ´"
- "Labels"										"µ³"
- "Vectors"										"²±"
- "Velocity vector"						"œÚ²±"
- 
- "Black hole quality"				"ğÓ"
- "Aurora quality"						"ÍğÓ"
- "Comet brightness"					"îö°Ú"
- "Aurora brightness"					"Í°Ú"
- "Pressure"									"ÀÁ"
- "Night side lights"					"¯®­Í"
- 
- 
- "Solar day"									"óö¬"
- "Asteroid"									"ºóö"
- "Auto increase galaxies magnitude"	"´«ªøöõöĞ"
- "Auto exposure"							"´«©Í"
- "Exposure"									"©Í"
- "Auto exposure: off"				"´«©Í: ¨"
- "Auto exposure: simple"			"´«©Í: §¦"
- "Auto exposure: normal"			"´«©Í:ùú"
- "Planet shine bright"				"óöéè°Ú"
- "Dithering"									"¥¤£«"
- "Parent"										"¢¡"
- "Radius"										"§Ô"
- "Planet radius"							"óö§Ô"
- "System radius"							"õç§Ô"
- "Neutron star"							"åæôö"
- 
- 
- "Nickname"				" Ÿ"
- "Interface language"	""
- "Interface skin"			"œ›"
- "Apply" 						"½ü"
- "Display" 						"š™"
- "Window mode" 				"˜—÷í"
- "Fullscreen" 					"–•"
- "Windowed" 						"˜—”"
- "Window size" 				"˜—ëº"
- "Large  distances" "¥Şİ"
- "Medium distances" "ÜŞİ"
- "Small  distances" "“Şİ"
- "Show background" "š™’‘"
- "Full constellation names"	    "š™Ÿ"
- "Show radius instead of diameter"		"š™§ÔŒÕÔ"
- "Switch to next display" "‹Š‰ˆ‡š™"
- "Anisotropy level" 				"†±…„ƒ‚Ğ¡"
- "Screenshots format" "€í"
- "Projection"			"~è"
- "Controls"				"}|"
- "Common controls"		"ú‚"
- "Custom display resolution"		"´zy¶xº"
- "Vertical sync"					"wÕvu"
- "Perspective"					"tÑ"
- "Fish eye"						"sr"
- "Distort interface"				"qÿpØ"
- "Interface resolution"			"pØ¶xº"
- "Rendering resolution"			"on¶xº"
- "Configure projection"			"~mlk"
- 
- "Cylindrical"			"jiÄ"
- "Image format"			"€hí"
- 
- 
- 
- 
- 
- "Object" "ÎÂ"
- "quasar" "àöá"
- "cluster" "ö¢"
- "nebula"  "ö¡"
- "asteroid" "ºóö"
- "object"  "ÎÂ"
- "Other" "¾g"
- "Surface" "ÙØ" 
- "Rings" "Íf"
- "Tidal locked" "edcz"
- "Spin-orbital resonance" "´-ª¨ba"
- "Name" "Ÿ"
- "Length" "¥Ú"
- "Age / lifetime" "ÆÈ/ÅÆ"
- "Average temperature" "`_ÅÚ"
- "Albedo" "é^º"
- "Gravity on equator" "¼¨ÂÁ"
- "Gravity on poles" "]ÂÁ"
- "Gravity polar / equat" "]/¼¨ÂÁ"
- "Atmosphere" "Atmosphere"
- "Air pressure" "êÀ"
- "Air temperature" "êÅ"
- "Exosphere temperature" "[ëê\ÅÚ"
- "Atmospheric pressure at surface" "ÙØêÀ"
- "Air density at surface" "ÙØ¿êÒÚ"
- "Air temperature at surface" "ÙØêÅ"
- "Height of homogeneous atmosphere" "_ğëêÛÚ"
- "Tropopause height" "ÎZ\ÛÚ"
- "Average molar mass" "`_YXğÓ"
- "Relative mass" "ËÎğÓ"
- "Composition" "·¶"
- "Accretion disk" "WVU"
- "Static" "TS"
- "Circular" "j"
- "Elliptical" "Rj"
- "Parabolic" "QPO" 
- 
- 
- 
- "Lighting angle" "^N¸Ú"
- "Select" "ML"
- "Cancel" "KJ"
- "Ok" "$z"
- "Yes" "H"
- "No" "G"
- "Back" "FE"
- "Add" "Dø"
- "Delete" "CB"
- "Rename" "ÂÆ"
- "Export" "A@"
- "Import" "A?"
- "Objects exported" "ÎÂA@"
- "Objects imported" "ÎÂA?"
- "Update" ">="
- "Reset" "<Ê"
- "Calibrate" ";:"
- "Clear" "9B"
- "Edit" "87"
- "Save" "65"
- "Copy" "<|"
- "Paste" "43"
- "Close" "¨2"
- "Cubemap" "1²á"
- "Resolution" "¶xº"
- "Layer" "\0"
- "Texture" "/."
- "Color map" "-¥3€"
- "Specular map" "ÛÍ3€"
- "Glow map" "ÛÍ3€"
- "Elevation map" "Û,€"
- "Normal map" "+O3€"
- "Paint up oceans" "*)Š("
- "Save alpha" "65Alpha"
- "Post-process" "'¯&."
- "Incorrect resolution" "¶xº%ù$"
- "Wait loading completeness" "Ğ#øÿ·"
- "Saving files" "65! "
- "Done" "·"
- 
- 
- 
- 
- 
- 
- "With interface" "špØ"
- "Screenshot without GUI" "GUI€"
- "Screenshot with GUI" "GUI€"
- "Recording frame" "´"
- "Start" ""
- "Switch to fullscreen" "‹Š–•"
- "Close SpaceEngine" "¨2SpaceEngine"
- "Export skybox" "A@â¿"
- "Export system" "A@õç"
- "Export planet" "A@óö"
- "Export script" "A@"
- "Export textures" "A@/."
- "Export stars data" "A@ôö»"
- "Enter file name:" "?! :"
- "Cannot save the file!" "+65! !"
- "Please select an option!" "MLˆ‡M!"
- "Exit" "@"
- "Spacecraft manager" "ış."
- "Universe map" "äã€€"
- "Universe map for selection" "MLäã€€"
- "Browse planetary system" "óöõç"
- "Selected system browser" "Mzõç"
- "Current system browser" "ÈÇõç"
- "System chart" "õç€"
- "Star browser" "ôö"
- "Find object" "ÎÂ"
- "Current" "ÈÇ"
- "Locations" "Êk"
- "Add to locations" "DøÊk"
- "Journey log" "ó¬"
- "Search radius" "§Ô"
- "Stop" "û§"
- "Search" ""
- "Systems found" "¦âáõç"
- "Info" "¥¤"
- "Center" "Üï"
- "Go to" "ÇÃ"
- "Land" "ÁÀ"
- "Go to center" "ÇÃÜï"
- "Horizon object" "Ñp£ÎÂ"
- "Go to object's center" "ÇÃÎÂÜï"
- "Free binding to object" "¢¡ zÎÂ"
- "Orbit object by joystick" "Ÿƒœª¨ÎÂ"
- "Select object by joystick" "ŸƒœMLÎÂ"
- "Select previous object" "ML›ˆ‡ÎÂ"
- "Select home object" "MLŸÎÂ"
- "Flying mode" "ıó÷í"
- "Increase velocity" "ªøœÚ"
- "Decrease velocity" "š™œÚ"
- "Next velocity" "‰ˆœÚ"
- "Previous velocity" "¨ÇœÚ"
- "Move forward" "Çş"
- "Move back" "'"
- "Move left" "ıü"
- "Move right" "ûü"
- "Move up" "›ü"
- "Move down" "‰ü"
- "Look back" "Eú"
- "Look left" "ıú"
- "Look right" "ûú"
- "Look up" "±›ú"
- "Look down" "±‰ú"
- "Turn clockwise" "ùø÷³"
- "Turn counterclockwise" "öø÷³"
- "Turn left" "ı³"
- "Turn right" "û³"
- "Turn up" "›³"
- "Turn down" "‰³"
- "Stop moving" "û§ü«"
- "Stop rotation" "û§³"
- "Zoom in" "¡ë"
- "Zoom out" "õº"
- "Reset zoom" "Âkõ¡"
- "Accelerate time speed" "øôøœ"
- "Decelerate time speed" "øôóœ"
- "Reverse time speed" "é³øô"
- "Pause time" "øôòû"
- "Resume time" "ñ<øô"
- "Game is paused!" "øôòû!"
- "Set normal time speed" "ğkùúøôœÚ"
- "Set current time" "ğkÈÇøô"
- "Spacebar" "¿ï"
- "Show objects" "š™ÎÂ"
- "Graphics" "€h"
- "Magnitude" "ëº"
- "Free camera" "¢¡Ëí"
- "Camera controls" "Ëí"
- "Ship controls" "ış"
- "Action" "ìë"
- "Keyboard" "ïU"
- "Mouse" "êµ"
- "Joystick" "œ"
- "Sensitivity of " "éèÚ"
- "Mouse sensitivity" "êµéèÚ"
- "Turn by keys speed" "³«œÚ"
- "Roll by keys speed" "ç«œÚ"
- "Physical properties" "P.æ»"
- "Axial rotation parameters" "´³æ»"
- "Landscape parameters" "€Äæ»"
- "Clouds parameters" "¡æ»"
- "Atmosphere parameters" "ëêæ»"
- "Aurora parameters" "Íæ»"
- "Star corona parameters" "¬åæ»"
- "Rings / accretion disk parameters" "Íf/WVUæ»"
- "Polar coordinates" "äµ"
- "Edit entire ship" "87ış"
- "Edit module" "87÷ã"
- "Edit behind camera" "87'kËí"
- "Edit engine effect" "87ìÉÃâ"
- "Edit docking port" "87Îáà—"
- "Edit docking port corridor" "87Îáà—Ÿ¨"
- "Hide structural modules" "ßŞİÜ÷ã"
- "Show axes" "š™¤"
- "Position" "Êk"
- "Rotation" "³«"
- "Size" "ëº"
- "Console" "}|Û"
- "Error in line" "ÚÙó"
- "Unknown command" "Ø×ÆÖ"
- "Unknown variable" "Ø×ÕÓ"
- 
- 
- 
- 
- 
- "Catalog planets only" "ÔÓóö"
- "Procedural planets only" "Ô,Òóö"
- "Catalog & Procedural planets" "ÓÑ,Òóö"
- "Procedural on catalog stars planets only" "ÓôöĞ,Òóö"
- "Catalog & Procedural on catalog stars planets" ",ÒÓôöĞÓóö"
- "Procedural & Procedural on catalog stars planets" ",ÒÓôöĞ,Òóö"
- "All planets" "ÏÄóö"
- "Stars disabled" "ôöÎü"
- "Stars enabled" "ôöÍü"
- "Catalog stars only" "ÔÓôö"
- "Procedural stars only" "Ô,Òôö"
- "Catalog & Procedural stars" "ÓÑ,Òôö"
- "Clusters disabled" "ö¢Îü"
- "Clusters enabled" "ö¢Íü"
- "Catalog clusters only" "ÔÓö¢"
- "Procedural clusters only" "Ô,Òö¢"
- "Catalog & Procedural clusters" "ÓÑ,Òö¢"
- "Nebulae disabled" "ö¡Îü"
- "Nebulae enabled" "ö¡Íü"
- "Catalog nebulae only" "ÔÓö¡"
- "Procedural nebulae only" "Ô,Òö¡"
- "Catalog & Procedural nebulae" "ÓÑ,Òö¡"
- "Galaxies disabled" "öõÎü"
- "Galaxies enabled" "öõÍü"
- "Catalog galaxies only" "ÔÓöõ"
- "Procedural galaxies only" "Ô,Òöõ"
- "Catalog & Procedural galaxies" "ÓÑ,Òöõ"
- "Vertical synchronization" "wÕvu"
- "Lens angle" "PÌÂË¸"
- 
- "Catalog"										"Ó"
- "Procedural"								",Ò£·"
- "Procedural on catalog stars"	"Óôö›£·"
- 
- 
- "Equatorial grid" "âÊÉ"
- "Selection pointer" "ML˜÷"
- "for selected" "Mz"
- "for all" "–—"
- "Crop orbits" "–•ª¨"
- "Circle crop" "–•j"
- "simple" "§¦"
- "normal" "ùú"
- "detail" "”“"
- "super" "’¡"
- "low" "™"
- "medium" "Ü"
- "high" "Û"
- "Zoom" "õ¡"
- "Grid" "É"
- "Lines" "O"
- "Magnitude/brightness settings" "ÍÚ/°Úğk"
- "Objects apparent magnitude limit" "ÎÂÑöĞŒ"
- "Default" "‘"
- "Models lighting" "÷ß^N"
- "Ambient" "f"
- "Bloom" "Í"
- "MSAA antialiasing" "MSAAŒ‹"
- "FXAA antialiasing" "FXAAŒ‹"
- "Lines antialiasing" "O„Œ‹"
- "Eclipse shadows" "Š‰ˆm"
- "Ring shadows on sky" "â¿Ífˆm"
- "Atmospheric extinction" "ëê‡ó"
- "Atmosphere from sea level" "Š`Øëê"
- "Compress textures" "Àõ/."
- "Fast landscape loading" "†œ€Äøÿ"
- "Landscape LOD" "€Ä“…\0"
- "Loading speed" "øÿœÚ"
- "Point sources" "„ƒ"
- "Scale" "‚÷"
- "Points scale" "„‚÷"
- "Overbright" "°Ú"
- "Stars overbright" "ôö°Ú"
- "Desaturate dim stars" "ôöÑÚ"
- "Star points style" "ôö„€í"
- "Planet points style" "óö„€í"
- "Points" "„"
- "Motion blur" "«S÷"
- "Motion & rot blur" "«SÑ³÷"
- "Real sun brightness" "~}|Í°Ú"
- "Real planet brightness" "~}óö°Ú"
- "Thermal emission shift" "{zèyÚ"
- "Diffraction spikes" "xè"
- "Lens flares" "ÌwÍv"
- "Diff. spikes size" "xèëº"
- "Ship warp quality" "ışqÿğÓ"
- "Loading shader" "øÿu¥"
- "Loading texture" "øÿ/."
- "Loading mesh" "øÿÉ"
- "Creating texture" "ts/."
- "Creating mesh" "tsÉ"
- "Loading spacecraft" "øÿış"
- "Loading atmosphere" "øÿëê"
- "Loading galaxy model" "øÿöõ÷ß"
- "Creating galaxy" "tsöõ"
- "Creating cluster" "tsö¢"
- "Loading nebula model" "øÿö¡÷ß"
- "Generating stars" "£·ôö"
- "Generating galaxies" "£·öõ"
- "Creating planetary system" "tsóöõç"
- "Searching stars" "ôö"
- "Planets disabled" "óöÎü"
- "Planets enabled" "óöÍü"
- 
- 
- 
- 
- 
- 
- 
- "Writing" "r?Ü"
- "Spacecrafts" "qâ"
- "Spacecraft" "qâ"
- "Astronaut" "äqp"
- "Probe" "on"
- "Shuttle" "qâıí"
- "Space station" "¿ôm"
- "Build menu" "Üsl¦"
- "Build" "Üs"
- "Destroy" "kj"
- "constructed" "Üs"
- "destroyed" "kj"
- "Player" "ih"
- "Sound" "gf"
- "Sound effects" "gfeÃ"
- "Music" "fd"
- "Music player" "fdc¡"
- "Play track" "c¡ÿÓ"
- "Pause playback" "òûc¡"
- "Stop playback" "û§c¡"
- "Previous track" "›ˆÿ"
- "Next track" "‰ˆÿ"
- "Playlist" "c¡bÙ"
- "No repeat" "%Â<"
- "Repeat track" "Â<ÿÓ"
- "Repeat playlist" "Â<c¡"
- "Play in order" "ùÒc¡"
- "Play random" "íc¡"
- "Context playing" "’‘c¡"
- "Volume" "fÓ"
- "[Playing] - " "[c¡Ü]-"
- "[Paused] - " "[aòû]-"
- "[No files]" "[! ]"
- "Game mode" "`_÷í"
- "View ship trajectory" "úışª^"
- "Switch view" "‹ŠÑ€"
- "Can't move camera in cockpit view" "+]\[ZÑ€Üü«Ëí"
- "Auto view" "´«Ñ€"
- "Cockpit view" "\[ZÑ€"
- "Behind view" "'Ñ€"
- "Select reference body" "MLæ^P"
- "Select target" "MLÓµ"
- "Nearest body" "åæPá"
- "Influence body" "mYPá"
- "Reference body" "æ^P"
- "Ref body" "æ^P"
- "Target" "Óµ"
- "Hyperdrive" "’Íœ"
- "Warp drive" "ÿœìÉ"
- "Hyperjump" "’¡XW"
- "Normal space" "ùú¿ô"
- "In warp" "VUÜ"
- "Hyperspace" "TS¿ô"
- "Flight mode" "ıó÷í"
- 
- 
- 
- 
- 
- "Visit date" "RQ¬¯"
- "Game date" "`_¬¯"
- "System date" "õç¬¯"
- "on" ""
- "off" "¨"
- "enabled" "Íü"
- "disabled" "Îü"
- "auto" "´«"
- "unsupported" "%PO"
- "ERROR" "ÚÙ"
- "Error" "ÚÙ"
- "Critical error" "NÂÚÙ"
- "Flip horizontally" "¹`M³"
- "Flip vertically" "wÕM³"
- "Reset to default" "ÂkL‘"
- "Interface" "pØ"
- "Interface: brief" "pØ:§¦"
- "Interface: full" "pØ:"
- "Real sizes" "}Çëº"
- "View angle" "Ñ¸"
- "Planets magnitude limit" "óööĞŒ"
- "Stars magnitude limit" "ôööĞŒ"
- "Galaxies magnitude limit" "öõöĞŒ"
- "Galaxies brightness" "öõ°Ú"
- "Magnitude limit" "öĞŒ|"
- "Max magnitude limit" "KëöĞŒ"
- "Increase landscape LOD" "ªø€Ä“…"
- "Decrease landscape LOD" "š™€Ä“…"
- "Increase magnitude limit" "ªøöĞŒ|"
- "Decrease magnitude limit" "š™öĞŒ|"
- "Reset magnitude limit" "öĞŒ<Ê"
- "Increase galaxies mag limit" "ªøöõöĞŒ|"
- "Decrease galaxies mag limit" "óJöõöĞŒ|"
- "Increase stars mag limit" "ªøôööĞŒ|"
- "Decrease stars mag limit" "óJôööĞŒ|"
- "Increase planets mag limit" "ªøóööĞŒ|"
- "Decrease planets mag limit" "óJóööĞŒ|"
- "Increase exposure" "ªø©Í"
- "Decrease exposure" "óJ©Í"
- "Reset exposure" "Âk©Í"
- "Increase ambient light" "ªøfÍ"
- "Decrease ambient light" "óJfÍ"
- "Increase galaxies brightness" "ªøöõ°Ú"
- "Decrease galaxies brightness" "š™öõ°Ú"
- "Increase stars overbright" "ªøôö°Ú"
- "Decrease stars overbright" "óJôö°Ú"
- "Pioneer name" "¨I"
- "Discovery date" "HG¬¯"
- "Discovery method" "HG²+"
- "Status" "FS"
- "Real object" "~}ÎÂ"
- "General" "ú‚"
- "Physical" "P."
- "Enter description here" "]E?DN"
- "Only this object" "ÔEÎÂ"
- "Only my discoveries" "CÄBĞHG"
- "All real objects" "ÏÄ~}ÎÂ"
- "All procedural objects" "ÏÄ,ÒÎÂ"
- "Radial velocity" "Ô±œÚ"
- "Transit" "A¬"
- "Astrometry" "âánÓ"
- "Microlensing" "@ìÁtÌ"
- "Direct imaging" "Õá·h"
- "Transit timing variations" "A¬øÒ?…"
- "Transit duration variations" "O>A¬øÒ?…"
- "Orbital light variations" "ª¨ÍÕ”"
- "Eclipsing binary timing" "=öŠ‰øÒ"
- "Variable star timing" "ÕöøÒ"
- "Pulsar timing" "<;øÒ"
- "Polarimetry" ":anz"
- "Auroral radio emission" "ÍO9zè"
- "Interferometry" "87nÓ"
- "Take control" "}|"
- "Teleport here" "VU65"
- "Acceleration" "øœÚ"
- "Auto velocity" "´«œÚ"
- "Frame timing mode" "zø÷í"
- "Real time mode" "}ø÷í"
- "Frame time mode" "²¯÷í"
- "Loader mode" "øÿ÷í"
- "Interleaved loading mode" "4Úøÿ÷í"
- "Asynchronous loading mode" "…uøÿ÷í"
- "Immediate loading mode" "13øÿ÷í"
- "Free mode" "´î÷í"
- "Spacecraft mode" "ış÷í"
- "Aircraft mode" "ıó÷í"
- "Time scale" "øô2Ú"
- "Time reset" "øô<Ê"
- "Time paused" "øôaòû"
- "Time resumed" "ñ<øô"
- "Debug mode" "10÷í"
- "Edit mode" "87÷í"
- "Wireframe" "O/€"
- "Freeze camera" "czËí"
- "Camera frozen" "Ëícz"
- "Camera released" "Ëí¢¡"
- "Terrain max level" "€ÄKëĞ¡"
- "Galaxies max level" "öõKëĞ¡"
- "Stars max level" "ôöKëĞ¡"
- "Stars color saturation" "ôö¥¤ÑÚ"
- "Stars color shift" "ôö¥¤Õ”"
- "Aviation" "ıó"
- "Interplanetary" "óöÇ"
- "Interstellar" "ôöÇ"
- "Intergalactic" "öõÇ"
- "Starship" "ôöÇış"
- "Planetship" "óöÇış"
- "1st cosmic vel" ".ˆäãœÚ"
- "2nd cosmic vel" ".-äãœÚ"
- "Circular / escape velocity" "f,/+*œÚ"
- "Body velocity" "´)œÚ"
- "Ship velocity" "ışœÚ"
- "Rel velocity" "ËÎœÚ"
- "Relative velocity" "ËÎœÚ"
- "Mode" "÷í"
- "Off" "¨"
- "Hor" "¹`"
- "Orb" "ª¨"
- "Warp" "ÿœ"
- "Dock" "û("
- "Off HUD" "¨2HUD"
- "Horizontal HUD" "¹`HUD"
- "Orbital HUD" "ª¨HUD"
- "Warp HUD" "ÿœHUD"
- "Docking HUD" "û(HUD"
- "Prograde" "ùó"
- "Retrograde" "öó"
- "Radial" "Ô±"
- "Antiradial" "ö±"
- "Normal Up" "ùú±›"
- "Normal Down" "ùú±‰"
- "Horizon" "¹`"
- "Rotate to target" "³¦Óµ"
- "Center on ship" "ışÜï"
- "Kill rotation" "û§³"
- "Stop engines" "¨2ìÉ"
- "Stop hyperdrive" "û§’Íœ'ş"
- "Stop warp drive" "¨2ÿœìÉ"
- "Sync velocity" "vuœÚ"
- "Sync rotation" "vu³"
- "Flight assist" "ıó&%"
- "Hold altitude" "6OÛÚ"
- "Speed of sound" "gœ"
- "Mach" "$#"
- "Dynamic pressure" "«À"
- "Arrival after" "¦©øô"
- "Efficiency" "Ãº"
- "Field is unstable, turn to the target!" "Ë%!z,³±Óµ!"
- "Boost factor" "%' "
- "Boost exponent" "%'˜»"
- "Physical velocity" "P.œÚ"
- "Effective velocity" "ÄÃœÚ"
- "Air velocity" "¿êœÚ"
- "Surf velocity" "ÙØœÚ"
- "Grav accel" "ÂÁøœÚ"
- "Aero accel" "ıóøœÚ"
- "Thrust" "'Á"
- "Total accel" "øœÚ"
- "g Force" "g Force"
- "Tidal force" "edÁ"
- "Angular velocity" "¸œÚ"
- "Angular accel" "¸øœ"
- "Attack angle" ";¸"
- "Sideslip angle" ":¸"
- "Elevator" "š"
- "Elevator +" "š +"
- "Elevator -" "š -"
- "Rudder" "²±"
- "Rudder +" "²± +"
- "Rudder -" "²± -"
- "Ailerons" ""
- "Ailerons +" " +"
- "Ailerons -" " -"
- "Flaps" ""
- "Flaps +" " +"
- "Flaps -" " -"
- "Main engines" "ŸìÉ"
- "Main engines +" "ŸìÉ +"
- "Main engines -" "ŸìÉ -"
- "Retro engines" "|«ìÉ"
- "Retro engines +" "|«ìÉ +"
- "Retro engines -" "|«ìÉ -"
- "Hover engines" "ûìÉ"
- "Hover engines +" "ûìÉ +"
- "Hover engines -" "ûìÉ -"
- "Warp drive +" "ÿœìÉ +"
- "Warp drive -" "ÿœìÉ -"
- "Thrusters" "'ş"
- "Orbital parameters" "ª¨æ»"
- "Stable orbit" "!zª¨"
- "Unstable orbit" "%!zª¨"
- "Unlimited thruster acceleration" "Œ'şøœÚ"
- "Unlimited velocity" "ŒœÚ"
- "Disable aerodynamics" "Îü¿ê«Á"
- "Disable gravity" "ÎüÂÁ"
- "Disable collision detection" "Îün"
- "Docking ports" "û(à—"
- "Docked ships" "û(ış"
- "Free docks" "¿Êk"
- "Distance to target" "ŞİÓµ"
- "Distance to ship" "Şİış"
- "Distance to dock" "Şİû(„"
- "Angle with dock" "û(¸Ú"
- "Docked with" "û("
- "Docking" "Îá"
- "Undocking" "KJû("
- "On surface" "ÙØ"
- "Free" "¿"
- "Autopilot" "´«\["
- "Program" ",Ò"
- "Stage" ""
- "Warp to target" "ÿœÇÃÓµ"
- "Fly to target" "ıó¦Óµ"
- "Fly or warp to target" "ıóÿœqó¦Óµ"
- "Hyperjump here" "’XÚÇÃ"
- "Warp here" "ÿœÇÃ"
- "Fly here" "ıóÇÃ"
- "Preparing jump vector" ":³üq±"
- "Correcting jump vector" ";ù³üq±"
- "Preparing fly vector" ":ıóq±"
- "Correcting fly vector" ";ùıóq±"
- "Accelerating" "øœ"
- "Braking" "|«"
- "Turning for braking" "³±|«"
- "Orientation" "²±"
- "To target" "ÇÃÓµ"
- "Selected coordinates" "MLäµ"
- "Stereoscopic 3D" "1á3D"
- "Oculus Rift" "VRrÌ"
- "Cross eye" "4r"
- "Horizontal stereopair" "¹`1áhÎ"
- "Vertical stereopair" "wÕ1áhÎ"
- "Anaglyph" ""
- "Active (shutter)" "«(†)"
- 
- 
- 
- 
- 
- "Main menu" "Ÿl¦"
- "File" "! "
- "Navigation" "Aq"
- "Time" "øô"
- "Settings" "ğz"
- "Planetarium" "â!ã"
- "Single player" "¦âih"
- "Multiplayer" "Tâ`_"
- "Editor" "87"
- "Edit planet" "87óö"
- "Planet editor" "óö87"
- "Edit ship" "87ış"
- "Ship editor" "ış87"
- "Video capture" "ÑáK"
- "Video capture settings" "Ñáàßğk"
- "Record in screenshots" "]€Ü´"
- "Record in AVI" "´]AVI"
- "Configure codec" "lk8Şİ"
- "Frame rate" "œº"
- "Ignore planemo" "ÜÛóğâá"
- "Key 1" "ïÊ 1"
- "Key 2" "ïÊ 2"
- "<Press key>" "<Ú‰ïU>"
- "<Move mouse>" "<ü«êµ>"
- "<Move stick>" "<ü«Ùœ>"
- "Move here" "ü«ØE"
- "Variable was reset to default value" "ÕÓaÂkL‘×"
- "Warning: value out of range" "ÖÕ:×’@ÔÓ"
- "Warning: value clamped to range" "ÖÕ:×ÒÊÔÓ"
- "Missing parameter in command" "ÆÖÑJæ»"
- "Invalid parameter in command" "ÆÖæ»Ã"
- "Already running another script!" "aÖĞóÏˆ‡!"
- "Script finished" "·"
- "Script interrupted" "ÜÎ"
- "Min diameter" "KºÕÔ"
- "Max diameter" "KëÕÔ"
- "Object's parent" "¢ÎÂ"
- "Enter object name" "?ÎÂŸ"
- "Object not found" "ÎÂØ¦"
- "No object selected" "ØMzÎÂ"
- "Information" "¥¤"
- "Confirmation" "$"
- "Are you sure?" "Í$z?"
- "This will reset all controls in the current tab to their default values. Are you sure?" "6ÌÂkÈÇMËÜÏÄ} L‘×,Í$zÊ?"
- "This will clear all bindings for the selected action. Are you sure?" "6Ì9BMzĞÏÄ z,Í$zÊ?"
- "You are trying to import location from different version of SpaceEngine. It may not exist in the current version. Are you sure?" "Éù]È0Ç%vÆĞSpaceEngineA?Êk,gÅë%5]ÄÈÇÆÜ,É$zÊ?"
- "Critical extensions missing" "¨ïĞÃÂÁ"
- "Error initializing glew library" "À”glew¿ø@Ú"
- "Error loading texture generator shaders" "øÿ/.£·u¥ø@Ú"
- "Press YES to run program with procedural planets disabled" "ÚYES¾Ğó,Ò,,ÒóöÎü"
- "Press NO to exit" "ÚNO@"
- "You have obsolete OpenGL version" "ÍÄƒøĞOpenGLÆ"
- "You have obsolete GLSL version" "ÍÄƒøĞGLSLÆ"
- "Update your graphics card driver or install compatible hardware" ">=ÍĞšËI«,Ò½¼»º¹ "
- "Sprites" "¸é"
- "Restart SpaceEngine and go to fullscreen to enable or disable the hardware shutter 3D" "Â=Í«SpaceEngine·ş?–•ÍüÎü¹ †3D"
- "Go to fullscreen to enable the hardware shutter 3D!" "ş?–•¾Íü¹ †í3D!"
- "The shutter 3D is not supported by your hardware, imitation is used" "†3D%HÍĞ¹ PO,÷¶Hµü"
- "Oculus Rift HMD not found, or Oculus Runtime version is not 0.8" "Oculus Rift HMDØ¦,OculusĞóøÆ%H0.8"
- "Distortion" "Á~"
- "Interlaced" "´ó³*"
- "Swap left/right" "ı/û4Š"
- "Lock interface" "czpØ"
- "Mirror to window" "˜—Ìh"
- "Interpup. distance" "ÜôŞİ"
- "Stereobase" "1á²:"
- "Convergence" "°­Ú"
- "Tracking lost" "š¯Á"
- "Tracking acquired" "š®­"
- "Center location" "ÜïÊk"
- "Reset orientation" "Âk²±"
- "Oculus render scale" "Oculus¬G‚÷"
- "Interface depth" "pØ«Ú"
- "Interface size" "pØëº"
- "Left lens color" "ıÌª-¥"
- "Right lens color" "ûÌª-¥"
- 
- 
- 
- "App. mag" "ÑöĞ"
- "Abs. mag" "ÏÎöĞ"
- "ESI" "ESI"
- "Temp." "ÅÚ"
- "Hyperbolic" "=ÿO"
- "Pericenter epoch" "æï¯"
- "Pericentric distance" "æïŞİ"
- "Apocentric distance" "íöŞİ"
- "Pericenter" "æï„"
- "Apocenter" "íï„"
- "Eccentricity" ":ïº"
- "Inclination" "¹¸"
- "Ascending node" "4„"
- "Argument of pericenter" "æï„ì¸"
- "Mean anomaly" "`æ„¸"
- "Longitude of pericenter" "æïÖÚ"
- "Mean longitude" "`ëÖ"
- "Hill sphere radius" "êXÊ§Ô"
- "Influence sphere radius" "mY§Ô"
- "Roche limit for satellites" "éêŒ"
- "Indeterminate" "%$z"
- "Filter settings" "ƒ‚ğk"
- "Filter" "ƒ‚"
- "Object to search" "ÎÂ"
- "System's main star" "õçŸö"
- "Object's parent sun" "¢ÎÂ"
- "Planet only" "èˆóö"
- "Moon only" "èˆñö"
- "Planet and moon" "óöÑñö"
- "Sun count" "ôö»Ó"
- "Moon count" "ñö»Ó"
- "Planet parameters" "óöæ»"
- "Moon parameters" "ñöæ»"
- "Object parameters" "ÎÂæ»"
- "Any" "çæ"
- "Doesn't matter" "¨åä"
- 
- 
- 
- "Main sequence" "ŸÒb"
- "Subdwarf" "üòö"
- "Brown dwarf" "ûòö"
- "White dwarf" "úòö"
- "Wormhole" "ù"
- "Unknown" "Ø×"
- "unknown" "Ø×"
- "No name" "Ÿ"
- "no name" "Ÿ"
- "elliptical" "RjF"
- "lenticular" "tÌF"
- "spiral" "øF"
- "barred spiral" "÷F"
- "irregular" "%‚ö"
- "globular" "ÊÄ"
- "open" "¡è"
- "diffuse" "Ãõ"
- "planetary" "óö"
- "supernova remnant" "’=öô^"
- "Multiplicity" "T€„"
- "planemo" "óğóö"
- "Planemo" "óğóö"
- "single" "¦ö"
- "binary" "=ö"
- "triple" "óö"
- "quadruple" "òö"
- "quintuple" "ñö"
- "sextuple" "ğö"
- "septuple" "ïö"
- "octuple" "îö"
- "x multiple" "Tö"
- 
- 
- "Life forms" "£ÆÄí"
- "Life biomes" "£P£PI"
- "Life origin" "£Æ±ƒ"
- "Organic life" "Äí£Æ"
- "Exotic life" "[£Æ"
- "Organic" "Äí"
- "Exotic" "["
- "unicellular" "¦“"
- "multicellular" "T“"
- "Unicellular" "¦“"
- "Multicellular" "T“"
- "Unicel. or multicel." "¦T“"
- "Any biome" "çæ£PI"
- "subglacial" "‰"
- "marine" "Š("
- "terrestrial" "À€"
- "aerial" "¿Ü"
- "Subglacial" "‰"
- "Marine" "Š("
- "Terrestrial" "À€"
- "Aerial" "¿Ü"
- "None" ""
- "Abiogenesis" "Ä£ƒD"
- "Panspermia" "£ƒD"
- "Blue hypergiant" "e’ö"
- "White hypergiant" "úe’ö"
- "Yellow hypergiant" "ëe’ö"
- "Orange hypergiant" "e’ö"
- "Red hypergiant" "e’ö"
- "Blue luminous supergiant" "ÛÍÚ’ö"
- "White luminous supergiant" "ÛÍÚú’ö"
- "Yellow luminous supergiant" "ÛÍÚë’ö"
- "Orange luminous supergiant" "ÛÍÚ’ö"
- "Red luminous supergiant" "ÛÍÚ’ö"
- "Blue supergiant" "’ö"
- "White supergiant" "ú’ö"
- "Yellow supergiant" "ë’ö"
- "Orange supergiant" "’ö"
- "Red supergiant" "’ö"
- "Blue bright giant" "°ö"
- "White bright giant" "ú°ö"
- "Yellow bright giant" "ë°ö"
- "Orange bright giant" "°ö"
- "Red bright giant" "°ö"
- "Blue giant" "ö"
- "White giant" "úö"
- "Yellow giant" "ëö"
- "Orange giant" "ö"
- "Red giant" "ö"
- "Blue subgiant" "üö"
- "White subgiant" "úüö"
- "Yellow subgiant" "ëüö"
- "Orange subgiant" "üö"
- "Red subgiant" "üö"
- "Blue main sequence star" "ŸÒö"
- "White main sequence star" "úŸÒö"
- "Yellow dwarf" "ëòö"
- "Orange dwarf" "òö"
- "Red dwarf" "òö"
- "Blue subdwarf" "üòö"
- "White subdwarf" "úüòö"
- "Yellow subdwarf" "ëüòö"
- "Orange subdwarf" "üòö"
- "Red subdwarf" "üòö"
- "Carbon star" "ö"
- "Zirconium star" "ö"
- "Wolf-Rayet star" "Xÿ·şıö"
- "Subgiant" "üö"
- 
- 
