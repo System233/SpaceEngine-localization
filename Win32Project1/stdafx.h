@@ -34,6 +34,7 @@ BOOL SEMain(int mode);
 extern HMODULE hModule2, DLL;
 typedef struct {
 	BYTE *DATA;
+	long fmt = 0;
 	long W;
 	long H;
 	long B;
@@ -54,20 +55,40 @@ BOOL GetFileVersion(Version *Ver, HMODULE *hModle);
 extern BYTE STR[8192];
 struct OffSet {
 	float Off = 0.0;
-	float Width = 12.5;
+	float Width = 12;
 };
 BOOL GetFileVersion(Version *Ver, HMODULE *hModle);
 extern char *Pstr[8];
 extern bool INITED, Is980;
 extern SYSTEMTIME sys_time;
 void DrawTexture();
-struct PageInfo {
+class PageInfo {
+public:
+
+	void Init() {
+		if (Page != 0)delete[] Page;
+		Page = 0;
+		OffSetX = OffSetY = PX = PY = ID = PID = 0;
+		File.clear();
+		use = false;
+	}
+	PageInfo() {
+		Init();
+	};
+	PageInfo(BYTE I,BYTE PI,int X,int Y,int OX,int OY,std::string F) {
+		OffSetX = OX, OffSetY = OY, PX = X, PY = Y, ID = I,PID=PI, File = F;
+	};
+	~PageInfo() {
+		Init();
+	}
 	std::string File;
 	//BYTE PageId[1];
 	int OffSetX = 0;
 	int OffSetY = 0;
 	int PX = 0;
 	int PY = 0;
+	BYTE PID = 0;// 页映射ID
+	BYTE ID=0;//页序号ID 
 	OffSet* Page=0;
 	bool use = false;
 };
@@ -206,7 +227,6 @@ public:
 			
 			i++;
 		}
-		//msgmgr(3, "Inited");
 	}
 	~CharDef() {
 		clear();
@@ -236,8 +256,8 @@ public:
 };
 struct WChar {
 	bool use = false;
-	BYTE str[2] = { 0 };
-	BYTE ID = 0;
+	BYTE str[2] = { 0 };//页ID XY
+	BYTE ID = 0;//页ID
 	long Size = 0;
 	int UseSize = 0;
 };
@@ -247,7 +267,7 @@ struct Addchar {
 	wchar_t* wstr = 0;
 	int size = 0;
 };
-extern BYTE WID[8];
+extern BYTE WID[256];
 class MEMADD {
 	void GetCode() {
 		DWORD CODE = (DWORD)Fun - ((DWORD)hModule2 + Offset) - 5;
@@ -270,7 +290,6 @@ public:
 		GetCode();
 		for (size_t i = 5;i < Size;i++)Code[i] = 0x90;
 		Code[0] = Method;
-	//	msgmgr(3, "MEMINIT:%p OF:%X M:%X S:%d", F, Of, Met, s);
 	}
 	~MEMADD() {
 		End();
@@ -280,7 +299,6 @@ public:
 
 	}
 	void Start() {
-		//msgmgr(3, "WRSTART:OF:%X C:%p S:%d", Offset, Code, Size);
 		if (!sted) {
 			WriteAdd(Offset, Code, Size);
 
@@ -288,7 +306,6 @@ public:
 		}
 	}
 	void End() {
-	//	msgmgr(3, "WRSTART:OF:%X C:%p S:%d", Offset, Code, Size);
 		if (sted) {
 
 			WriteAdd(Offset, CodeOld, Size);
@@ -319,7 +336,6 @@ public:
 			
 		}
 
-	//	msgmgr(3, "MEMSTART");
 
 
 	}
@@ -329,7 +345,6 @@ public:
 			
 
 		}
-	//	msgmgr(3, "MEMEND");
 	}
 
 };
@@ -349,11 +364,11 @@ public:
 extern std::vector<RES*> res;
 class SEL {
 	CharDef CD;
-	wchar_t *WPstr[8] = { L"1",L"2",L"3",L"4",L"5",L"6",L"7",L"DEF" };
-	void Init(int ID, const wchar_t* str) {
+	void Init(int ID, std::wstring* ws) {
+		
 		int C = 0;
-		size_t size = wcslen(str);
-		unsigned int i = 0;
+		const wchar_t *str = ws->c_str();
+		size_t size = ws->size(),i = 0;
 		while (i<size) {
 			if (str[i] == '\r' || str[i] == '\n'|| str[i] == ' ') {//XD XA
 				i++;
@@ -363,6 +378,7 @@ class SEL {
 				//		alc = true;
 				i++;C++;continue;
 			};
+			if (str[i] == 0)break;
 			WChar* WT = &Wstr[str[i]];
 			if (WT->use&&str[i] != '?') {
 				msgmgr(2, "%X->%X:%X str:%d 重复 PID:%d size:%d", C, WT->ID, WT->str[1], str[i],ID, size);
@@ -371,7 +387,7 @@ class SEL {
 			else {
 				WT->use = true;
 				WT->ID = WID[ID];
-				WT->str[0] = ID == 7 ? 0 : WID[ID];
+				WT->str[0] = ID? WID[ID] :0 ;
 				WT->str[1] = BYTE(C);
 			}
 
@@ -381,8 +397,9 @@ class SEL {
 
 	}
 	wchar_t* WGetConfig(int ID, wchar_t* str) {
-		wchar_t TMP[256];
-		swprintf(TMP, 256, L"PageChar%s", WPstr[ID]);
+		wchar_t TMP[32];
+		if(ID)swprintf(TMP, 256, L"PageChar%d", ID);//WPstr[ID]
+		else return wcsstr(str, L"PageCharDEF");
 		return wcsstr(str, TMP);
 	}
 
@@ -398,7 +415,8 @@ class SEL {
 		
 
 		int i = 0, T = 0, j = 0, Ti = 0;
-		if((AC->Add = wcstol(AC->wstr, 0, 16))!=0){
+		AC->Add = wcstol(AC->wstr, 0, 16);
+		if(AC->Add){
 		if (str != NULL&&CON != NULL) {
 			
 		while (i < size && (P = str[i++]) != ';')if (P == '"')Ti++;
@@ -492,57 +510,51 @@ class SEL {
 public:
 
 	BOOL WMainInit(CHAR *Conf) {
-		
 		memset(Wstr, 0, sizeof(Wstr));
 		int wlen = MultiByteToWideChar(CP_ACP, 0, Conf, -1, NULL, 0);
 		wstr = new WCHAR[wlen];
 		MultiByteToWideChar(CP_ACP, 0, Conf, -1, wstr, wlen);
 		if (wstr == NULL)return FALSE;
-		bool Incom = false, Inread = false, begin = false;
+		
 		std::wstring str;
 		wchar_t *ps;//, *ps2;
 
-		for (int P = 0;P < 8;P++) {
-			if ((ps = WGetConfig(P, wstr)) != 0) {
-				Inread = true;
-			}
-			else {
-				continue;
-			}
-			int s = 0;// s2 = 0;
-			while (Inread) {
-				if (!Incom&&ps[s] == '/'&&ps[s + 1] == '/') {
-					Incom = true;
-					s+=2;
-					continue;
-				}
-				if (Incom) {
-					if (ps[s] == '\n' || ps[s] == '\r') {
-						Incom = false;
+		for (int P = 0;P < 256;P++) {
+			ps = WGetConfig(P, wstr);
+			if (ps) {
+				int s = 0;// s2 = 0;
+				bool Incom = false, begin = false;
+				while (s < 10240) {
+					if (!Incom&&ps[s] == '/'&&ps[s + 1] == '/') {
+						Incom = true;
+						s += 2;
+						continue;
+					}
+					if (Incom) {
+						if (ps[s] == '\n' || ps[s] == '\r')Incom = false;
+						s++;
+						continue;
+
+					}
+					if (ps[s] == '{') {
+
+						begin = true;
+						s++;
+						continue;
+					}
+					if (ps[s] == '}') {
+						begin = false;
+						//str.push_back('\0');
+						Init(P, &str);
+						str.clear();
+						break;
+					}
+					if (begin) {
+						str.push_back(ps[s]);
 					}
 					s++;
-					continue;
-
 				}
-				if (ps[s] == '{') {
-
-					begin = true;
-					s++;
-					continue;
-				}
-				if (ps[s] == '}') {
-					begin = Inread = false;
-					str.push_back('\0');
-					Init(P, str.c_str());
-					str.clear();
-					break;
-				}
-				if (begin) {
-					str = str + ps[s];
-				}
-				s++;
 			}
-
 		}
 		CD.Initstr(Conf);
 		WStart();
@@ -564,12 +576,10 @@ public:
 		if ((str = wcsstr(wstr, Versum)) == 0)return FALSE;
 			str+= l1;
 		wsprintf(Versum, L"[End:%d%d%d%d]", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
-		//strend= wcsstr(wstr, Versum);
-		
 		if ((len = (wcsstr(wstr, Versum) - str)) <= 0)return FALSE;
 		while (i < len&&str[i]!=0) {
 			wstrTMP.push_back(str[i]);
-			if (str[i] == '\r' || str[i] == '\n' || str[i] == ';') {
+			if (str[i] == '\r' || str[i] == '\n' || str[i] == ';'|| str[i]==0) {
 				
 					Addchar AC;
 					AC.str = new BYTE[wstrTMP.size() * 2];
@@ -601,56 +611,52 @@ extern SEL WCharAdd;
 extern WCHAR *Type[2];
 extern char *ResName[7], ConfigFilePath[256] ;
 extern int ResId[8];//IDR_CONFIG
-
 class CharAdd {
 private:
 	void Err(int ID,int err) {
-		msgmgr(1, "读取块:Page%s->%X %d 时出现异常", Pstr[ID], err / 2, err);
+		msgmgr(1, "读取块:Page%d->%X %d 时出现异常", ID, err / 2, err);
 
 	}
 
-	void InitChar(int ID, char* str) {
+	void InitChar(int ID, std::string* str) {
 			if (ID == 0) {
-				SetPage(str);return;
+				SetPage(str->c_str());return;
 			}
 			OffSet* TMP = GetPage(ID);
-			std::string str2 = str;
+			if (TMP == 0)return;
+			
+			//std::string str2 = str;
 			std::vector<std::string> str_list2;
 			std::string buf;
-			std::stringstream A(str);
+			std::stringstream A(str->c_str());
+			size_t k = 0;
+			bool of = false;
 			while (A >> buf) {
-				if (*buf.c_str() != ' ')
-					str_list2.push_back(buf);
+				of = !of;
+				if(of)
+				TMP[k].Off = float(atof(buf.c_str())) / 256.0f;//<<<<<<<<<<<<<<<<<<<<2017019
+				else
+				TMP[k++].Width = float(atof(buf.c_str()));
+				buf.clear();
+
+			
+			
 			}
-			unsigned int i = 0, k = 0;
-			if (str_list2.size() != 512)  Err(ID,str_list2.size() / 2);
-			while (str_list2.size() > i) {
-
-				if (str_list2.size() < i + 1)  Err(ID,i);
-				TMP[k].Off = float(atof(str_list2[i++].c_str()))/256.0f;//<<<<<<<<<<<<<<<<<<<<2017019
-
-				TMP[k].Width = float(atof(str_list2[i++].c_str()));
-				k++;
-
-			};
 
 	};
-	void SetPage(char *str) {
+	void SetPage(const char *str) {
 		unsigned int i = 0;
 		std::vector<std::string> str_list;
-		std::string str2 = "";
+		std::string str2;
 		bool st = false;
 		while (str[i] != '\0') {
-			if (str[i] == '{') {
+			if (str[i] == '{'|| str[i] == '\n' || str[i] == '\r' || str[i] == '	') {
 				i++;continue;
-			}
-			else if (str[i] == '\n' || str[i] == '\r' || str[i] == '	') {
-				str[i] = ' ';
 			}
 			if (str[i] != ' ')st = true;
 			if (str[i] == ',' || str[i] == '}' || str[i + 1] == '\0') {
 				str_list.push_back(str2);
-				str2 = "";
+				str2.clear();
 				st = false;
 			}
 			else if(st){
@@ -659,32 +665,36 @@ private:
 			i++;
 		}
 
-		
+		str_list.push_back(str2);
 		unsigned int A = 0;
 		BYTE PID1 = 0;
-		int TMP = 0;
+		int TMP = 1;
 		while (A < str_list.size()) {
 
-			if (A + 2 > str_list.size())Err(0,A);
+			if (A + 2 > str_list.size()) { Err(0, A);break; }//超界访问
 			PID1 = BYTE(strtol(str_list[A++].c_str(), NULL, 16));
-			if (TMP < 3) {
-				Page[PID1].OffSetX = 16 + 16 * TMP;
-				Page[PID1].PX = 256 + 256 * TMP;
+			if (TMP < 4) {
+				Page[PID1].OffSetX = 16 * TMP;
+				Page[PID1].PX = 256 * TMP;
 				Page[PID1].PY = 512;
 				Page[PID1].OffSetY = 0;
 			}
 			else {
-				Page[PID1].OffSetX = 16 * (TMP - 3);
-				Page[PID1].OffSetY = 16;
-				Page[PID1].PX = 256 * (TMP - 3);
-				Page[PID1].PY = 512 + 256;
+				Page[PID1].OffSetX = 16 * (TMP%4);
+				Page[PID1].OffSetY = 16*(TMP/4);
+				Page[PID1].PX = 256 * (TMP % 4);;
+				Page[PID1].PY = 512 + 256 * (TMP / 4) ;
 			}
 			if (PID1 != 0) {
 				Page[PID1].use = true;
+				Page[PID1].Page = new OffSet[256];//GetPage(TMP + 1);
 			}
-			Page[PID1].Page = GetPage(TMP + 1);
-			PageId[TMP++] = PID1;
-				Page[PID1].File = str_list[A++].c_str();
+			
+			
+			Page[PID1].ID = BYTE(TMP);
+			Page[PID1].PID = PID1;
+			TMP++;
+			Page[PID1].File = str_list[A++];
 		}
 
 	}
@@ -706,7 +716,6 @@ private:
 					msgmgr(3, "写出资源 ID:%d Path:%s", ID, Path);
 					fwrite(pBuffer, sizeof(BYTE), dwSize, fp);
 					fclose(fp);
-					//delete[] str;
 					return TRUE;
 				}
 				
@@ -714,12 +723,12 @@ private:
 		}
 		msgmgr(1, "写出资源失败 ID:%d Path:%s", ID,  Path);
 		GetError(16);
-		//delete[] str;
 		return FALSE;
 	}
 	char* GetConfig(int ID, char* str) {
 		char TMP[256];
-		snprintf(TMP, 256, "Page%s", Pstr[ID]);
+		if(ID)snprintf(TMP, 256, "Page%d", ID);
+		else return strstr(str, "PageFile");//, "PageFile");
 		return strstr(str, TMP);
 	}
 public:
@@ -730,16 +739,20 @@ public:
 			GetError(17);
 			return FALSE;
 		};//错误标记15;
-		  //	fclose(fp);
 		InitFile();
 		return TRUE;
 	};
+	void Clear() {
+		for (int i = 0;i < 256;i++)if (Page[i].use) {
+			Page[i].Init();
+
+		}
+
+	}
 	BOOL MainInit() {
+		Clear();
 		FILE *fp;
-		//AD=std::ofstream("A.txt", std::ios::app);
 		std::string CPath= SYSTEMPATH+"/"+ConfigFilePath;
-	//	snprintf(CPath, MAX_PATH, "%s/%s", SYSTEMPATH, ConfigFilePath);
-		
 		fopen_s(&fp, CPath.c_str(), "rb+");
 		if (fp == NULL) {
 			InitAll();
@@ -763,119 +776,79 @@ public:
 		if ((pVer = strstr(Config, Verstr)) != 0) {
 			int i = 0;
 			while (pVer[0] != 0 && pVer[0] != '\n')if ((i = atoi(pVer++)) > 0)break;
-			//if (i != 0) {
 			char sum[16];
 			snprintf(sum, 16, "%d", i);
 			if (strcmp(sum, Versum) != 0) {
 				fseek(fp, strstr(Config, Verstr) - Config, SEEK_SET);
 				NeedInit = 1;
 			}
-			//}else {}
 		}
 		else {
 			fseek(fp, strrchr(Config, '}') - Config + 1, SEEK_SET);
 			NeedInit = 2;
 		}
 		if (NeedInit) {
-		//	char *str=new char[256];
 			char Tstr[256];
 			size_t Size = snprintf(Tstr, 256, NeedInit>1 ? "\n%s: %s\n" : "%s: %s\n", Verstr, Versum);
 			fwrite(Tstr, sizeof(char), Size, fp);
-			//delete[] str;
 			InitFile();
 		}
 		fclose(fp);
-		//version
-		//	int i = 0;
-		bool Incom = false, Inread = false, begin = false;
 		std::string str;
 		char *ps = 0;
-		for (int P = 0;P < 8;P++) {
-			if ((ps = GetConfig(P, Config)) != 0) {
-				Inread = true;
-			}
-			else {
-				continue;
-			}
+		for (int P = 0;P < 256;P++) {
+			ps = GetConfig(P, Config);
+			if (ps) {
+				bool Incom = false, begin = false;
+				int s = 0;
+				while (s < 10240) {
+					if (ps[s] == '/' || ps[s] == ';') {
+						Incom = true;
+						s++;
+						continue;
 
-			int s = 0;//, s2 = 0;
-			while (Inread) {
-				if (ps[s] == '/' || ps[s] == ';') {
-					Incom = true;
-					s++;
-					continue;
+					}
+					if (Incom) {
+						if (ps[s] == '\n' || ps[s] == '\r') {
+							Incom = false;
+						}
+						s++;
+						continue;
 
-				}
-				if (Incom) {
-					if (ps[s] == '\n' || ps[s] == '\r') {
-						Incom = false;
+					}
+					if (ps[s] == '{') {
+						begin = true;
+						s++;
+						continue;
+					}
+					if (ps[s] == '}') {
+						;
+						begin = false;
+						InitChar(P, &str);
+						str.clear();
+						break;
+					}
+					if (begin) {
+						str = str + ps[s];
+
 					}
 					s++;
-					continue;
-
 				}
-				if (ps[s] == '{') {
-					begin = true;
-					s++;
-					continue;
-				}
-				if (ps[s] == '}') {
-					;
-					begin = Inread = false;
-					str.push_back('\0');
-					char *TMP = new char[str.size()];
-					if (TMP == 0)  return FALSE; ;
-					strcpy_s(TMP, str.size(), str.c_str());
-					InitChar(P, TMP);
-					delete[] TMP;
-					str.clear();
-					//				printf("\n完成");
-					break;
-				}
-				if (begin) {
-					str = str + ps[s];
-
-				}
-				s++;
 			}
-
 		}
-		
-		for (int i = 0;i < 8;i++) {
-				WID[i] = PageId[i];
-			}
-		//msgmgr(3, "------------------");
-		//msgmgr(3, "MainInited");
+		for (int i = 0;i < 256;i++) WID[Page[i].ID] = Page[i].PID;
 		WCharAdd.WMainInit(Config);
-		//msgmgr(3, "ALLInited");
 		delete[] Config;
 		return TRUE;
 	}
 
+	
 	OffSet* GetPage(int ID) {
-
-		switch (ID) {
-		case 1:return Page1;break;
-		case 2:return Page2;break;
-		case 3:return Page3;break;
-		case 4:return Page4;break;
-		case 5:return Page5;break;
-		case 6:return Page6;break;
-		case 7:return Page7;break;
-		default:return 0;break;
-		}
-	}
-	//bool Inread=false;
-
-	OffSet* PidToPage(int PID) {
-		for (int i = 1;i < 8;i++) {
-			if (PageId[i] == PID) {
-				OffSet *PAGE = GetPage(i);
-				return PAGE;
-			}
-		}
+		
+		for (int i = 0;i < 256;i++)if (Page[i].ID == ID&&Page[i].use)return Page[i].Page;
 		return 0;
 	}
+
 	
 
 
@@ -887,14 +860,6 @@ public:
 	}
 
 	PageInfo Page[256];
-	BYTE PageId[8] = { 0 };
-	OffSet Page1[256];
-	OffSet Page2[256];
-	OffSet Page3[256];
-	OffSet Page4[256];
-	OffSet Page5[256];
-	OffSet Page6[256];
-	OffSet Page7[256];
 
 };
 class SEL;

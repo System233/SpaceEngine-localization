@@ -1,5 +1,6 @@
 // dllmain.cpp : 定义 DLL 应用程序的入口点。
 #include "stdafx.h"
+#include "标头.h"
 #pragma comment (lib, "Version.lib")   
 DWORD Base=0;
 WCHAR *Type[2] = { L"Config",L"PNG" };
@@ -37,7 +38,7 @@ DWORD RetAdd = (DWORD)hModule2 + 0x1FFA9A;
 void *RV = (void*)((DWORD)hModule2 + 0X3B48F4);
 void *RV2 = (void*)((DWORD)hModule2 + 0x472F90);
 */
-
+double sewid971 = 16;
 DWORD *ReAdd,
 	ReAdd980[3] = {
 	0x1FFA9A,
@@ -53,10 +54,21 @@ DWORD *ReAdd,
 	0x39BF40,
 	0x1F0CB9
 
-},StartAdd[3] = {
+}, ReAdd971[3] = {
+	0x2B80B0,0x2B82E0,0x163418
+
+}, ReAdd970[3] = {
+	0x272660,0x272440,0x14A19F
+
+}, ReAdd973[3] = {
+	0x3B6CB0,0x3B7C68,0x201BC9
+
+},
+StartAdd[4] = {
 	0X407E64,
 	0x3E10B8,
-	0x3E0160
+	0x3E0160,
+	0x3FD980//973
 },BackWidth[2] = {//背景宽
 	0x20705C,//980
 	0x1F41C8//974
@@ -80,7 +92,7 @@ void *XYOAW, *GCW, *BackFun, *TexEnd;//继续调用
 bool CanRun = false;
 HMODULE hModule2 = 0,DLL=0;
 SEL WCharAdd;
-BYTE WID[8] = { 0 };
+BYTE WID[256] = {0};
 RWMEM RwMem;
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -157,6 +169,17 @@ void GetError(int d) {
 char *ResName[7] = { "chs-font1.png","chs-font2.png","chs-font3.png","chs-menu.png","chs-font.png","chs-gui.cfg","chs-font.cfg" };
 int ResId[8] = { IDB_PNG1,IDB_PNG2,IDB_PNG3,IDB_PNG4,IDB_PNG5,IDR_CONFIG1,IDR_CONFIG2 ,IDB_PNG6 };//IDR_CONFIG
 std::vector<RES*> res;
+DWORD *FloatAdd = 0, FloatAdd973[2] = {
+	0x3B6D98,
+	 0x3B6CB0
+}, FloatAdd972[2] = {
+	0x39B180,
+	0x39B098
+}, *DoubleAdd = 0, DoubleAdd971[3] = {
+	0x2B80B0,0x2B82E0, 0x2B82F0
+}, DoubleAdd970[3] = {
+	0x272440,0x272660,0x272670
+};
 void  CharAna972();
 void Start() {
 	DWORD  sStartAdd = 0, sTexAdd = 0;//Tick
@@ -201,10 +224,31 @@ void Start() {
 			RwMem.Add(TexInit, FunAdd974[5], 0xE8, 5);
 			RwMem.Add(SetBackWid980, FunAdd974[6], 0xE8, 6);
 		}
+		else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 3) {
+
+			ReAdd = ReAdd973;
+			CanRun = true;
+			FloatAdd = FloatAdd973;
+			Old1 = *(float*)(Base + 0x3B6D98);
+			Old2 = *(float*)(Base + 0x3B6CB0);
+			sTexAdd = 0x46FD0;//SpaceEngine.exe+1B3DD5 - call SpaceEngine.exe+46FD0
+
+			sStartAdd = 0x3FD980;//StartAdd[2];3B6D98
+			localePath = "locale";
+			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[7]));
+			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI973));
+			RwMem.Add(CharAna972, 0x201880, 0xE8, 6);//SpaceEngine.exe+201880 
+
+			RwMem.Add(SetAll973, 0x201B6B, 0xE9, 9);
+			RwMem.Add(SetBack972, 0x209066, 0xE8, 9);
+			RwMem.Add(TexInit, 0x1B3DD5, 0xE8, 5);
+
+		}
 		else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 2) {
 			
 			ReAdd = ReAdd972;
 			CanRun = true;
+			FloatAdd = FloatAdd972;
 			Old1 = *(float*)(Base + 0x39B180);
 			Old2 = *(float*)(Base + 0x39B098);
 			sTexAdd = TexInitAdd[2];
@@ -217,6 +261,45 @@ void Start() {
 		//	msgmgr(3, "SetBack972:%p TexInit:%p CharAna972:%p GetWidthXYOFF972:%p", SetBack972, TexInit,CharAna972, GetWidthXYOFF972);
 			RwMem.Add(SetBack972, FunAdd972[2], 0xE8, 9);
 			RwMem.Add(TexInit, FunAdd972[3], 0xE8, 5);
+
+		}
+		else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 1) {
+
+			
+			ReAdd = ReAdd971;
+			CanRun = true;
+			DoubleAdd = DoubleAdd971;
+			DOld1 = *(double*)(Base + 0x2B80B0);
+			DOld2 = *(double*)(Base + 0x2B82E0);
+			DOld3 = *(float*)(Base + 0x2B82F0);
+			sTexAdd = 0x4530;
+			sStartAdd = 0x2FC3B0;//2F0974;//StartAdd[2];
+			localePath = "locale";
+			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[7]));
+			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI971));
+			RwMem.Add(CharAna971, 0x163180, 0xE8, 9);
+			RwMem.Add(SetAll971, 0x1633BD, 0xE9, 7);
+			RwMem.Add(SetBack971, 0x164BCB, 0xE8, 7);
+			RwMem.Add(TexInit, 0x2321D9, 0xE8, 5);
+
+		}
+		else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 0) {
+			DoubleAdd = DoubleAdd970;
+			ReAdd = ReAdd970;
+			CanRun = true;
+			DOld1 = *(double*)(Base + DoubleAdd970[0]);
+			DOld2 = *(double*)(Base + DoubleAdd970[1]);
+			DOld3 = *(float*)(Base + DoubleAdd970[2]);
+			sTexAdd = 0x4AC0;
+			sStartAdd = 0x2A4B00;//StartAdd[2];
+			localePath = "locale";
+			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[7]));
+			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI971));
+			RwMem.Add(CharAna970, 0x149E50, 0xE8, 9);
+			RwMem.Add(SetAll970, 0x14A144, 0xE9, 7);
+			RwMem.Add(SetBack970, 0x14AB8E, 0xE8, 7);
+			RwMem.Add(TexInit, 0x1FB840, 0xE8, 5);
+			sewid971 = 15.0;
 
 		}
 	}
@@ -314,10 +397,10 @@ BOOL isone = TRUE, IS2 = TRUE;
 //0 Info 1 Error 2 Warning 3 Debug 没卵用的错误输出
 void msgmgr(int type, char* msg, ...) {
 	std::ofstream AA;
-	char str[2048], *str2 = new char[3072];
+	char str[4096], *str2 = new char[5128];
 	va_list vlArgs;
 	va_start(vlArgs, msg);
-	vsnprintf_s(str, 2048, msg, vlArgs);
+	vsnprintf_s(str, 4096, msg, vlArgs);
 	va_end(vlArgs);
 	GetLocalTime(&sys_time);
 
@@ -338,7 +421,7 @@ void msgmgr(int type, char* msg, ...) {
 		}
 
 
-		snprintf(str2, 3072, "\nTIME %04d-%02d-%02d %02d:%02d:%02d\n --------------------------\n", sys_time.wYear, sys_time.wMonth, sys_time.wDay, sys_time.wHour, sys_time.wMinute, sys_time.wSecond);
+		snprintf(str2, 5128, "\nTIME %04d-%02d-%02d %02d:%02d:%02d\n --------------------------\n", sys_time.wYear, sys_time.wMonth, sys_time.wDay, sys_time.wHour, sys_time.wMinute, sys_time.wSecond);
 		AA << str2;
 		isone = FALSE;
 	}
@@ -346,7 +429,7 @@ void msgmgr(int type, char* msg, ...) {
 	else {
 		AA.open(LOGPATH, std::ios::app);
 	}
-	snprintf(str2, 3072, "%02d:%02d:%02d.%03d [%s] %s\n", sys_time.wHour, sys_time.wMinute, sys_time.wSecond, sys_time.wMilliseconds, Msg[type>3 ? 4 : type], str);
+	snprintf(str2, 5128, "%02d:%02d:%02d.%03d [%s] %s\n", sys_time.wHour, sys_time.wMinute, sys_time.wSecond, sys_time.wMilliseconds, Msg[type>3 ? 4 : type], str);
 
 	AA << str2;
 

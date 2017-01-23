@@ -27,6 +27,9 @@
     <ClInclude Include="resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="标头.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -48,24 +51,19 @@
     <None Include="Config.ini">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="chs-gui.cfg" />
     <None Include="..\eng-menu.psd" />
     <None Include="..\win1252-font.psd" />
     <None Include="chs-font.cfg" />
+    <None Include="chs-gui-972.cfg" />
+    <None Include="chs-gui-974.cfg" />
+    <None Include="config3.bin">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="chs-gui-980.cfg" />
+    <None Include="chs-gui-971.cfg" />
+    <None Include="chs-gui-973.cfg" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Font1.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="Font2.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="Font3.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="E:\Games\SpaceEngine 0.980\新建文件夹\Font3.png">
-      <Filter>资源文件</Filter>
-    </Image>
     <Image Include="chs-menu.png">
       <Filter>资源文件</Filter>
     </Image>
@@ -73,6 +71,15 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="chs-font972.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="chs-Font1.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="chs-Font2.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="chs-Font3.png">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

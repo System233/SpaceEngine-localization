@@ -62,33 +62,24 @@ public:
 		unsigned int len = ftell(fp) / 2;
 		wchar_t* Config = new wchar_t[len];
 
-		//把指针移动到文件开头 因为我们一开始把指针移动到结尾，如果不移动回来 会出错
 		rewind(fp);
-		//跳过unicode标志位 0xfeff
-		//	fread(Config, 2, 1, fp);
 		fseek(fp, 2L, SEEK_SET);
 
 		//size_t SIZE = 
 		fread(Config, sizeof(wchar_t), len - 1, fp);
-		//	printf("%X %X", Config[0], Config[1]);
 		Config[len - 1] = 0;
-		//	int tick = 0;
-		//wchar_t* Config[81920] = { 0 };
-		//	BYTE Buf[1];
-		//size_t SIZE = fread(Config, sizeof(char), 81920, fp);
-		//	int i = 0;
 		bool Incom = false, Inread = false, begin = false;
 		//char str[8192];
 		std::wstring str;
 		wchar_t *ps;//, *ps2;
-		for (int P = 0;P < 9;P++) {
+		for (int P = -1;P < 256;P++) {
 			if ((ps = WGetConfig(P, Config)) != 0) {
 				Inread = true;
 			}
 			else {
 				continue;
 			}
-			printf("读取配置:Page%s...", Pstr[P]);
+			printf("读取配置:Page%d...", P);
 			int s = 0;// s2 = 0;
 			while (Inread) {
 				if (ps[s] == '/'&&ps[s + 1] == '/') {
@@ -114,13 +105,9 @@ public:
 					//		printf("结束");
 					begin = Inread = false;
 					str.push_back('\0');
-					//wchar_t *TMP = new wchar_t[str.size()];
-					//		printf("\n复制副本 Size:%d str:\n %p", str.size(), str.c_str(), TMP);
-					//wcscpy_s(TMP, str.size(), str.c_str());
-					//printf("%X %X :%X %X",str[0],str[1], TMP[0], TMP[1]);
 					Init(P, str.c_str());
 					str.clear();
-					printf("  完成\n\n");
+					printf("  完成\n");
 					break;
 				}
 				if (begin) {
@@ -137,11 +124,14 @@ public:
 
 	wchar_t* WGetConfig(int ID, wchar_t* str) {
 		wchar_t TMP[256];
-		swprintf(TMP, 256, L"Page%s", WPstr[ID]);
+		
+		if (ID == -1)return wcsstr(str, L"PageFile");
+		else if(ID==0)return wcsstr(str, L"PageDEF");
+		swprintf(TMP, 256, L"Page%d", ID);
 		return wcsstr(str, TMP);
 	}
 	void Init(int ID,const wchar_t* str) {
-		if (ID == 0) {
+		if (ID == -1) {
 			SetPage(str);
 			return;
 		}
@@ -170,25 +160,20 @@ public:
 			}
 			else {
 				WT->use = true;
-				WT->ID = WID[ID-1];
-				WT->str[0] = ID==8?0:WID[ID-1];
+				WT->ID = WID[ID];
+				WT->str[0] = WID[ID];
 				WT->str[1] = BYTE(C);
 			}
 			
-			//printf("")
-		//	C << ID << i << std::endl;
 			i++, C++;// C++;
 		
 		}
-		
-	//	Start(ID, L"\"dwadDAWF\"  \"昵称自定义\"     ");
 	}
 	bool O = true;
 	std::string* Start(std::wstring str, std::string *pstr) {
 
 		if (str.find(L"FontConfig")!=std::wstring::npos || str.find(L"FontTexture") != std::wstring::npos) {
 			
-			//std::string T= WcharToChar(str.c_str());
 			pstr->operator=(WcharToChar(str.c_str()));
 			
 			return pstr;
@@ -211,9 +196,7 @@ public:
 				for (std::vector < std::wstring>::iterator it = wstrv.begin();it != wstrv.end();it++) if ((*it).compare(TMP) == 0) {pstr->clear();break;}
 				
 				TMP.clear();
-			//	pstr->insert(0, " \"");
 				pstr->push_back(BYTE(str[i]));
-			//	pstr->insert(pstr->size(), "\"	\"");
 
 			}
 			else if (st == 3) {
@@ -244,16 +227,11 @@ public:
 		}
 		return pstr;
 	}
-	char* Start(wchar_t*str,int size) {
+	char* Start(const wchar_t*str,int size) {
 		
 		if(wcsstr(str,L"FontConfig")|| wcsstr(str, L"FontTexture")){
 //			int i = 0;
 			return WcharToChar(str);
-		/*	while (i < size&&str[i]!=0) {
-				CON[i] = BYTE(str[i]);
-				i++;*/
-		//}
-		//	return CON;
 		}
 		char *CON = new char[size * 2];
 //		for (int a = 0;a < size;a++) {
@@ -270,7 +248,6 @@ public:
 			}
 			}
 			if (j == 3) {
-			//	printf("T:%d I:%d byte:%X %X\n",T,Wstr[str[i]].str[0], Wstr[str[i]].str[1]);
 				if (Wstr[str[i]].str[1] == 0) {
 					CON[T] = '#';
 					if (Wstr[str[i]].Size == 0) { 
@@ -304,13 +281,6 @@ public:
 		}
 		CON[T] = '\0';
 		return CON;
-		//CON[T - 2] = '"';
-	/*	FILE* fp;
-		char F[256];
-		snprintf(F, 256, "%s.txt", Pstr[ID]);
-		fopen_s(&fp, F, "wb");
-		fwrite(CON, sizeof(char), T-1, fp);
-		fclose(fp);*/
 	}
 	void SetPage(const wchar_t*str) {
 		WChar* S = &Wstr[' '];
@@ -325,7 +295,7 @@ public:
 		S->str[1] = '?';
 		int i = 0;
 		wchar_t sum[256];
-		int ID=0,j=0;
+		int ID=1,j=0;
 		//printf("\n");
 		while ((sum[j++]=str[i++]) != '\0') {
 			
@@ -349,7 +319,7 @@ public:
 		}
 		return 0;
 	}
-	char* WcharToCharOne(wchar_t* wc)
+	char* WcharToCharOne(const wchar_t* wc)
 	{
 //		void Release();
 //		int len = WideCharToMultiByte(CP_ACP, 0, wc, wcslen(wc), NULL, 0, NULL, NULL);
@@ -367,15 +337,7 @@ public:
 		m_char[len] = '\0';
 		return m_char;
 	}
-	BYTE WID[8] = { 0 };
-/*	WChar IDToW(int ID) {
-		switch (ID) {
-		case 1:break;
-		case 2:
-		case 3:
-		}
-
-	}*/
+	BYTE WID[256] = { 0 };
 	WChar Wstr[65535];
 	std::vector<STA> No;
 
@@ -438,7 +400,6 @@ public:
 
 			}
 			
-			//ReadProcessMemory(hProc, (LPVOID)(Base+strtol(str,0,16)), PVOID pvBufferLocal, DWORD dwSize, PDWORD pdwNumBytesRead);
 		
 		}
 		IF.close();

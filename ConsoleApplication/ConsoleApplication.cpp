@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #pragma comment (lib, "Version.lib")   
-void TEST(char* In, char*In2, char*Out);
+void TEST(char* In, char*In2, char*Out,int mode);
 BOOL GetFileVersion()
 {
 	
@@ -94,9 +94,15 @@ int main(int argc, char *argv[])
 		TEST(argv[1], argv[2]);
 	}
 	else if (argc==5) {
+		
+		if(strcmp(argv[1],"-A")==0){
+			printf("[排除并翻译]\n");
+			WCharAdd.WMainInit();
+			TEST(argv[2], argv[3],argv[4],0);
+	}else{
 		printf("[读取内存模式]\n");
 		ReadAdd RA(argv[1], argv[2], argv[3],atoi(argv[4]));
-	
+		}
 	
 	}
 	else if (argc==4) {
@@ -105,13 +111,13 @@ int main(int argc, char *argv[])
 		}
 		else { 
 			printf("[排除模式]\n");
-			TEST(argv[1], argv[2], argv[3]); }
+			TEST(argv[1], argv[2], argv[3],1); }
 
 	}
 	else {
 		
 		Color(0XA);
-		printf("\n用法:	自动翻译: %s [输入文件]  [输出文件]\n	排除翻译: %s [输入文件] [排除列表文件] [输出文件]\n	读取SE内存: %s [偏移列表文件] [输出文件] [输出格式] [PID] \n	CE XML格式地址析出 %s [输入文件] [输出文件] [输出格式]", argv[0], argv[0], argv[0], argv[0]);
+		printf("\n用法:	自动翻译: %s [输入文件]  [输出文件]\n	排除翻译: %s [-A] [输入文件] [排除列表文件] [输出文件]\n	读取SE内存: %s [偏移列表文件] [输出文件] [输出格式] [PID] \n	CE XML格式地址析出 %s [输入文件] [输出文件] [输出格式]", argv[0], argv[0], argv[0], argv[0]);
 		Color(0xC);
 		printf("\n [翻译模式] 输入文件必须使用Unicode编码,现在存在FontConfig\\FontTexture字符的行会被忽略,请以空行结尾.\n");
 		Color(0x7);
@@ -122,7 +128,7 @@ int main(int argc, char *argv[])
 		printf(" 输入文件内容:	\"SYSTEM\" \"系统\"	\n");
 
 		Color(0x7);
-		printf("\n [排除翻译] 排除列表文件内粘贴SE.log里提示的未知翻译 输出过滤后的翻译,过滤对于某版本无用的翻译可以增加加载速度\n示例");
+		printf("\n [排除翻译] 排除列表文件内粘贴SE.log里提示的未知翻译 输出过滤后的翻译,过滤对于某版本无用的翻译可以增加加载速度\n	使用-A在排除的同时进行翻译\n示例");
 		Color(0xB);
 		printf("\n 命令:		 %s gui.txt exc.txt gui2.txt\n ", argv[0]);
 		Color(0x7);
@@ -186,16 +192,23 @@ int main(int argc, char *argv[])
     return 0;
 }
 std::vector<std::wstring> wstrv;
-
-void TEST(char* In, char*In2,char*Out) {
-	FILE*fp, *fp2,*fp3;
+#include <deque>
+void TEST(char* In, char*In2,char*Out,int mode) {
+	FILE*fp=0, *fp2=0,*fp3=0;
+	//bool mode = 0;
 	fopen_s(&fp, In, "rb");
-	fopen_s(&fp2, In2, "rb");
-	fopen_s(&fp3, Out, "wb+");
-	if (fp == 0|| fp3 == 0 || fp2 == 0) {
-		printf("打开文件失败");
-		return;
+	if (!fp) { printf("无法打开%s\n",In);return;
 	}
+
+		//mode = 1;
+	fopen_s(&fp2, In2, "rb");
+	if (!fp2) { printf("无法打开%s\n", In2); return;
+	}
+	
+	fopen_s(&fp3, Out, "wb+");
+	if (!fp3) { printf("无法打开%s\n", Out); return;
+	}
+	std::vector<std::wstring> dew;
 	fseek(fp2, 0, SEEK_END);
 	size_t len = ftell(fp2) / 2;
 	wchar_t *buf2 = new WCHAR[len];
@@ -206,6 +219,7 @@ void TEST(char* In, char*In2,char*Out) {
 	WCHAR P = 0;
 	std::wstring ws;
 	printf("读取排除列表\n");
+
 	while (l < len) {
 		P = buf2[l++];
 		
@@ -220,6 +234,7 @@ void TEST(char* In, char*In2,char*Out) {
 		else if (st == 2) {
 			if(ws.size()>0){
 			wstrv.push_back(ws);
+		//	printf("PUSH:%ws\n", ws.c_str());
 			ws.clear();
 			}
 			//st = 0;
@@ -228,7 +243,7 @@ void TEST(char* In, char*In2,char*Out) {
 		
 
 	}
-	delete[] buf2;
+	if(buf2)delete[] buf2;
 	fseek(fp, 0, SEEK_END);
 	len = ftell(fp) / 2;
 	rewind(fp);
@@ -240,6 +255,7 @@ void TEST(char* In, char*In2,char*Out) {
 	st = 0;
 	ws.clear();
 	printf("开始排除\n");
+	int Y=0,Z=0,X=0;
 	std::wstring TMP;
 	while (l <len) {
 		P= buf[l++];
@@ -248,31 +264,64 @@ void TEST(char* In, char*In2,char*Out) {
 		if (st == 1 && P != '"')TMP.push_back(P);
 		if (P == '\r' || P == '\n'){
 			st = 0;
-			if (ws.size() > 4) {
+		
+			if (ws.size()> 4) {
+
+
+				Z++;
+				for (std::vector<std::wstring>::iterator i = dew.begin();i != dew.end();i++) {
+					if ((*i).compare(ws) == 0) {
+						printf("已检测到重复[%d]->%ws", Z, ws.c_str());
+						printf("\n");
+						goto NO;
+					}
+
+				}
 				for (std::vector < std::wstring>::iterator it = wstrv.begin();it != wstrv.end();it++){
-				//	if(ws.find(L"Accelerating")!=std::string::npos) printf("W2[%d]:[%d] %ws\n", ws.size(), TMP.size(), ws.c_str());
-					if ((*it).compare(TMP) == 0) { TMP.clear(), ws.clear(); }
+					
+
+					
+					if ((*it).compare(TMP) == 0) { 
+						Y++;
+						TMP.clear(), ws.clear(); 
+						break;
+					}
 			}
 
-			//WCharAdd.Start(ws, &str);
-		//	printf("W2[%d]\n", ws.size());
 				if(ws.size()>0){
+					X++;
+
+					dew.push_back(ws);
 			if (ws.find('\n') == std::wstring::npos)ws.push_back('\n');
+			if (mode)
+
 			fwrite(ws.c_str(), sizeof(WCHAR), ws.size(), fp3);
-			ws.clear();
+			else {
+				std::string str;
+				WCharAdd.Start(ws, &str);
+				if (!str.empty()) {
+					fwrite(str.c_str(), sizeof(CHAR), str.size(), fp3);
+				}
+				else { printf("分配内存失败\n"); }
+			}//dew.push_back(ws);
+			
 				}
 			}
-		
+			NO:
+			ws.clear();
 			TMP.clear();
 			//st = 0;
 			//st = 0;
 		}
 		
 	}
-	delete[] buf;
-	fclose(fp);
-	fclose(fp2);
-	fclose(fp3);
+	dew.clear();
+	printf("共排除 %d/%d/%d 个\n", X, Y,Z);
+	if (X == Z)printf("=>>>>文件编码可能不是Unicode\n");
+	if(buf)delete[] buf;
+	if(fp)fclose(fp);
+	if (fp2)fclose(fp2);
+	if (fp3)(fp3);
 }
 
 void TEST(char* In, char*Out) {
