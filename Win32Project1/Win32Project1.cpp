@@ -8,9 +8,10 @@
 #pragma  comment(lib, "opengl32.lib")
 CharAdd CharADD;
 char *Pstr[8] = { "File","1","2","3","4","5","6","7" };
-//std::vector<BYTE> Charvec;
+std::vector<BYTE> StrTemp;
 //std::deque<BYTE> Bque;
 std::deque<BYTE> Charvec;
+
 int strX = 0, strY = 0;
 HANDLE mProc =0;
 //偏移 写入代码 大小
@@ -40,17 +41,24 @@ BOOL ReadAdd(DWORD OffSet, BYTE *Code, size_t Size) {
 }
 #define GL_TEXTURE_BASE_LEVEL 0x813C  
 SYSTEMTIME sys_time;
-BYTE STR[8192];
+//BYTE STR[8192];
+void DEFASM CharAna974RC2() {
+	__asm {
 
+	}
+
+}
 void DEFASM CharAna() {//字符串解析
 	__asm {
 		push ecx
-		push[esp + 0xC]
+		push[esp + 0xC+4*0]
 		call CharAnalysis
-		mov[esp + 0x10], eax
+		mov[esp + 0x10+4*0], eax
 		add esp, 0x4
+
 		pop ecx
 		pop eax
+
 		push ebp
 		mov ebp, esp
 		and esp, -0x10
@@ -76,6 +84,7 @@ void DEFASM CharAna972() {
 		add esp, 0x4
 		pop ecx
 		pop eax
+
 		push ebp
 		mov ebp, esp
 		and esp, -0x40// { 192 }
@@ -125,7 +134,7 @@ int LoadPNG(const char *filepath, PNGDATA *IMAGE)
 	png_infop info_ptr;
 	png_bytep* row_pointers;
 	char buf[PNG_BYTES_TO_CHECK];
-	int w, h, x, y, temp, color_type;
+	size_t w, h, temp, color_type;
 
 	fopen_s(&fp, filepath, "rb");
 	if (fp == NULL) {
@@ -152,7 +161,6 @@ int LoadPNG(const char *filepath, PNGDATA *IMAGE)
 	png_init_io(png_ptr, fp);
 	png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND, 0);
 	color_type = png_get_color_type(png_ptr, info_ptr);
-	//IMAGE->fmt = color_type;
 	w = png_get_image_width(png_ptr, info_ptr);
 	h = png_get_image_height(png_ptr, info_ptr);
 	IMAGE->B = png_get_bit_depth(png_ptr, info_ptr);
@@ -163,44 +171,20 @@ int LoadPNG(const char *filepath, PNGDATA *IMAGE)
 	if (IMG == NULL)return -4;
 	row_pointers = png_get_rows(png_ptr, info_ptr);
 
-	int Xsize = 0;
+	for (size_t y = 0, Xsize = 0, cw = channels*w; y<h; y++) {
+		memcpy(&IMG[Xsize], row_pointers[y], cw);
+		Xsize += cw;
+	}
 	switch (color_type) {
 	case PNG_COLOR_TYPE_RGB_ALPHA:
 		IMAGE->fmt = GL_RGBA;
-		for (y = 0; y<h; ++y) {
-			for (x = 0; x<w * channels; ) {
-				IMG[Xsize++] = row_pointers[y][x++]; // red  
-				IMG[Xsize++] = row_pointers[y][x++]; // green  
-				IMG[Xsize++] = row_pointers[y][x++]; // blue  
-				IMG[Xsize++] = row_pointers[y][x++]; // alpha  
-			}
-		}
 		break;
-
 	case PNG_COLOR_TYPE_RGB:
 		IMAGE->fmt = GL_RGB;
-		for (y = 0; y<h; ++y) {
-			for (x = 0; x<w * channels; ) {
-				IMG[Xsize++] = row_pointers[y][x++]; // red  
-				IMG[Xsize++] = row_pointers[y][x++]; // green  
-				IMG[Xsize++] = row_pointers[y][x++]; // blue  
-			//	IMG[Xsize++] = 255;
-			}
-		}
-	
 		break;
 	case 0:
 		IMAGE->fmt = GL_ALPHA;
-		for (y = 0; y<h; ++y) {
-			for (x = 0; x<w * channels; ) {
-				IMG[Xsize++] = row_pointers[y][x++]; // red  
-			}
-		}
 		break;
-	default:
-		fclose(fp);
-		png_destroy_read_struct(&png_ptr, &info_ptr, 0);
-		return 0;
 	}
 	fclose(fp);
 	png_destroy_read_struct(&png_ptr, &info_ptr, 0);
@@ -211,6 +195,7 @@ bool ReTex = false;
 
 BYTE* CharAnalysis(BYTE* str) {
 
+	if(str){
 	if (ReTex) {
 		if (TMSO) {
 			TMSO = false;
@@ -223,25 +208,23 @@ BYTE* CharAnalysis(BYTE* str) {
 			TMSO = true;
 		}
 	}
-
-	
 	Charvec.clear();
-	
-	int i = 0, s = 0;
-	
-	while (str[i] != '\0') {
-
-		if (CharADD.Page[STR[s] = str[i]].use)Charvec.push_back(str[++i]);
-		s++;i++;
+	StrTemp.clear();
+	size_t i = 0;
+	while (str[i] != 0) {
+		StrTemp.push_back(str[i]);
+		if (CharADD.Page[str[i]].use)Charvec.push_back(str[++i]);
+		i++;
 	}
-	STR[s] = 0;
-	return STR;
-
+	StrTemp.push_back(0);
+	return StrTemp.data();
+	}
+	return str;
 }
 
 float Old1 = 0.0f,Old2=0.0f;
 BYTE* CharAnalysis972(BYTE* str) {
-
+	if(str){
 	if (ReTex) {
 		if (TMSO) {
 			TMSO = false;
@@ -296,16 +279,17 @@ BYTE* CharAnalysis972(BYTE* str) {
 
 
 	Charvec.clear();
-	int i = 0, s = 0;
-
+	int i = 0;
+	StrTemp.clear();
 	while (str[i] != '\0') {
-
-		if (CharADD.Page[STR[s] = str[i]].use)Charvec.push_back(str[++i]);
-		s++;i++;
+		StrTemp.push_back(str[i]);
+		if (CharADD.Page[str[i]].use)Charvec.push_back(str[++i]);
+		i++;
 	}
-	STR[s] = 0;
-	return STR;
-
+	StrTemp.push_back(0);
+	return StrTemp.data();
+	}
+	return str;
 }
 
 double DOld1 = 0, DOld2 = 0;float DOld3 = 0;
@@ -368,14 +352,15 @@ BYTE* CharAnalysis971(BYTE* str) {
 
 
 	Charvec.clear();
-	int i = 0, s = 0;
+	StrTemp.clear();
+	int i = 0;
 	while (str[i] != '\0') {
-
-		if (CharADD.Page[STR[s] = str[i]].use)Charvec.push_back(str[++i]);
-		s++;i++;
+		StrTemp.push_back(str[i]);
+		if (CharADD.Page[str[i]].use)Charvec.push_back(str[++i]);
+		i++;
 	}
-	STR[s] = 0;
-	return STR;
+	StrTemp.push_back(0);
+	return StrTemp.data();
 	}else return str;
 }
 void DrawTexture() {
@@ -387,10 +372,9 @@ void DrawTexture() {
 			PNGDATA IMAGE;
 			std::string Path = SYSTEMPATH + "/" + localePath + "/" + CharADD.Page[PID].File;
 			int ERR = LoadPNG(Path.c_str(), &IMAGE);
-			msgmgr(2, "加载纹理[%d]:%d*%d*%d X:%d Y:%d FMT:%d Path:%s", ERR, IMAGE.W, IMAGE.H, IMAGE.B, x, y, IMAGE.fmt,Path.c_str());
 			if (ERR != 0 || IMAGE.W != IMAGE.H || IMAGE.W != 256) {
 				CharADD.Page[PID].use = false;
-				msgmgr(2, "纹理加载失败[%d]:%d*%d*%d X:%d Y:%d Path:%s", ERR, IMAGE.W, IMAGE.H, IMAGE.B, x, y, Path.c_str());
+				msgmgr(1, "纹理加载失败[%d]:%d*%d*%d X:%d Y:%d Path:%s", ERR, IMAGE.W, IMAGE.H, IMAGE.B, x, y, Path.c_str());
 				//continue;
 			}else{
 			glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, IMAGE.W, IMAGE.H, IMAGE.fmt, GL_UNSIGNED_BYTE, IMAGE.DATA);
@@ -399,29 +383,7 @@ void DrawTexture() {
 		}
 
 	}
-	/*for (int i = 0;i<7;i++) {
-		
-		BYTE PID = CharADD.PageId[i];
-		if (!CharADD.Page[PID].use)continue;
-		int x = CharADD.Page[PID].PX;
-		int y = CharADD.Page[PID].PY;
-		PNGDATA IMAGE;
-		
-		const char *File = CharADD.Page[PID].File.c_str();
-		
-	
-		std::string Path = SYSTEMPATH + "/" + localePath + "/"+File;
-		int ERR = LoadPNG(Path.c_str(), &IMAGE);
 
-		if (ERR != 0 || IMAGE.W != IMAGE.H || IMAGE.W != 256) {
-			CharADD.Page[PID].use = false;	
-			msgmgr(2, "纹理加载失败[%d]:%d*%d*%d X:%d Y:%d Path:%s", ERR, IMAGE.W, IMAGE.H, IMAGE.B, x,y, Path.c_str());
-			//continue;
-		}
-		glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, IMAGE.W, IMAGE.H, GL_RGBA, GL_UNSIGNED_BYTE, IMAGE.DATA);
-		delete[] IMAGE.DATA;
-	}
-	*/
 }
 
 float OneByte = 0.004f;
@@ -663,7 +625,7 @@ void DEFASM GetWidth980() {
 		mulss xmm4, Width
 		ret 0
 		NOCONFIG:
-	mulss xmm4, [esi + eax * 0X4 + 0X5C]
+	mulss xmm4, [esi + eax * 0x4 + 0x5C]
 		ret 0
 	}
 
@@ -808,6 +770,61 @@ void DEFASM GetCharXYOffAndWid() {//宽度 偏移 坐标 三合一
 
 
 }
+void DEFASM GetXYOW974RC3() {
+	/*movss xmm5,[esi+edx*4+5C]
+mulss xmm5,[SpaceEngine.exe+3B2B34] { [0.00] }
+push ecx
+movd xmm7,eax
+movzx eax,cl
+mov ecx,SpaceEngine.exe+471300 { [000004B0] }
+cvtdq2ps xmm7,xmm7
+movd xmm6,eax
+cvtdq2ps xmm6,xmm6
+mulss xmm7,xmm0
+mulss xmm6,xmm0
+addss xmm7,[esi+edx*4+0000045C]
+*/
+	__asm {
+		cmp HasConfig, 0
+		push edi
+		jz NOCONFIG
+		movss xmm5, Width//[esi + edx * 0x4 + 0x5C]
+		mov edi, [RE1]
+		mulss xmm5, [edi]// [SpaceEngine.exe + 0x3B2B34]{ [0.00] }
+		pop edi
+
+		push ecx
+		mov eax, strX
+		movd xmm7, eax
+		movzx eax, strY
+		mov ecx, [RE2]//SpaceEngine.exe + 0x471300 { [000004B0] }
+		cvtdq2ps xmm7, xmm7
+		movd xmm6, eax
+		cvtdq2ps xmm6, xmm6
+		mulss xmm7, xmm0
+		mulss xmm6, xmm0
+		addss xmm7, OFFSetA//[esi + edx * 0x4 + 0x0000045C]
+		jmp[RE0]
+		NOCONFIG:
+		movss xmm5, [esi + edx * 0x4 + 0x5C]
+		mov edi,[RE1]
+		mulss xmm5,[edi]// [SpaceEngine.exe + 0x3B2B34]{ [0.00] }
+		pop edi
+
+		push ecx
+		movd xmm7, eax
+		movzx eax, cl
+		mov ecx, [RE2]//SpaceEngine.exe + 0x471300 { [000004B0] }
+		cvtdq2ps xmm7, xmm7
+		movd xmm6, eax
+		cvtdq2ps xmm6, xmm6
+		mulss xmm7, xmm0
+		mulss xmm6, xmm0
+		addss xmm7, [esi + edx * 0x4 + 0x0000045C]
+		jmp [RE0]
+	}
+}
+
 void DEFASM GetCharXYOW974() {
 
 	__asm{
@@ -818,7 +835,8 @@ void DEFASM GetCharXYOW974() {
 		and al, 0x0F//{ 15 }
 		mov edi, [RE1]
 		mulss xmm5,[edi] //SpaceEngine.exe + 0x390DD4]//{ [0.00] }
-			pop edi
+		pop edi
+
 		movzx eax, al
 		movss xmm3, [esp + 0x14]
 		shr cl, 0x04 //{ 4 }
@@ -834,12 +852,14 @@ void DEFASM GetCharXYOW974() {
 		mulss xmm6, xmm0
 		addss xmm7, OFFSetA
 		jmp RE0
+
 		NOCONFIG:
 		movss xmm5, [esi + edx * 0x4 + 0x5C]
 		and al, 0x0F//{ 15 }
 		mov edi,[RE1]
 		mulss xmm5, [edi]//SpaceEngine.exe + 0x390DD4]//{ [0.00] }
-			pop edi
+		pop edi
+
 		movzx eax, al
 		movss xmm3, [esp + 0x14]
 		shr cl, 0x04 //{ 4 }
@@ -877,7 +897,10 @@ void GetOffset() {
 			return;
 		}
 	}else {
+	//	if(LPage)
+	//	msgmgr(1, "LPage:%p", LPage);
 		Offset2 = LPage[ostr].Width;
+		
 		ohas = 1;
 		OH2 = false;
 		return;

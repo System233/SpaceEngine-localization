@@ -49,6 +49,14 @@ DWORD *ReAdd,
 	0x390DD4,
 	0x44D350
 
+}, ReAdd974RC2[3] = {
+	0x1FE65E ,//SpaceEngine.exe+1FE65E 
+	0x3ABB74,//mulss xmm5,[SpaceEngine.exe + 3ABB74]{ [0.00] }
+	0x469530//mov ecx,SpaceEngine.exe+469530 { [000004B0] }
+}, ReAdd974RC3[3] = {
+	0x1FEB3A  ,//SpaceEngine.exe+1FEB3A 
+	0x3B2B34,//mulss xmm5,[SpaceEngine.exe+3B2B34] { [0.00] }
+	0x471300//mov ecx,SpaceEngine.exe+471300 { [000004B0] }
 }, ReAdd972[3] = {
 	0X39B098,
 	0x39BF40,
@@ -181,15 +189,29 @@ DWORD *FloatAdd = 0, FloatAdd973[2] = {
 	0x272440,0x272660,0x272670
 };
 void  CharAna972();
+MD5 md5;
 void Start() {
 	DWORD  sStartAdd = 0, sTexAdd = 0;//Tick
 	mProc = GetCurrentProcess();
-	Version Ver;
+	//Version Ver;
 	hModule2 = GetModuleHandle(NULL);
 	Base = DWORD(hModule2);
-	if (GetFileVersion(&Ver, &hModule2)) {
+	TCHAR strFile[MAX_PATH];
+	GetModuleFileName(hModule2, strFile, MAX_PATH);
+	std::ifstream SEIF(strFile, std::ios::binary);
+
+//	IF.read(ss,IF.SI)
+	//if (GetFileVersion(&Ver, &hModule2)) {
+	if(SEIF){
 	//	msgmgr(3, "V:%d,%d,%d,%d", Ver.HM ,Ver.LM,Ver.HL,Ver.LL);
-		if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 8 && Ver.LL == 0) {
+		std::stringstream ss;
+		ss << SEIF.rdbuf();
+		const std::string &SEData = ss.str();
+		md5.GenerateMD5((BYTE*)SEData.c_str(), SEData.size());
+		SEIF.close();
+		
+	//	if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 8 && Ver.LL == 0) {
+		if (md5.compare("2A6C6DF6FEDEF93A09B2640C5AD735BE")) {
 			CanRun = true;
 			ReAdd = ReAdd980;
 			sTexAdd = TexInitAdd[0];
@@ -207,7 +229,9 @@ void Start() {
 			RwMem.Add(SetBackWid980, FunAdd980[6], 0xE8, 6);
 			//				DEBUG << "执行980";
 		}
-		else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 4) {
+		//else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 4) {
+		else if (md5.compare("B495D5CA0CA6DACE5DEC3C967405D9EA")) {
+			//MD5：B495D5CA0CA6DACE5DEC3C967405D9EA
 			ReAdd = ReAdd974;
 			CanRun = true;
 			sTexAdd = TexInitAdd[1];
@@ -224,8 +248,57 @@ void Start() {
 			RwMem.Add(TexInit, FunAdd974[5], 0xE8, 5);
 			RwMem.Add(SetBackWid980, FunAdd974[6], 0xE8, 6);
 		}
-		else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 3) {
+		else if (md5.compare("F239BC8DFB544608BCED4B369C27DCD8")) {//974 RC2
+			//MD5：F239BC8DFB544608BCED4B369C27DCD8
+			ReAdd = ReAdd974RC2;
+			CanRun = true;
+			sTexAdd = 0x45440;//SpaceEngine.exe+1647B4 - call SpaceEngine.exe+45440
 
+			sStartAdd =0x3FE7AC;//SpaceEngine.exe+3FE7AC
+			localePath = "data/locale";
+			res.push_back(new RES(Type[1], ResName[0], localePath, ResId[0]));
+			res.push_back(new RES(Type[1], ResName[1], localePath, ResId[1]));
+			res.push_back(new RES(Type[1], ResName[2], localePath, ResId[2]));
+			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[4]));
+			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI974));
+			RwMem.Add(CharAna, 0x1FE0C0, 0xE8, 6);//SpaceEngine.exe+1FE0C0 
+			RwMem.Add(GetWidth974,0x1FE51F, 0xE8, 6);//SpaceEngine.exe+1FE51F 
+			RwMem.Add(GetCharXYOW974, 0x1FE61A, 0xE9, 6);//SpaceEngine.exe+1FE61A 
+			RwMem.Add(TexInit,0x1647B4, 0xE8, 5);
+			RwMem.Add(SetBackWid980, 0x205CC8, 0xE8, 6);//SpaceEngine.exe+205CC8 
+
+		
+		}
+		else if (md5.compare("174EE0924E76036B7C177160E9752614")) {//974 RC3
+		//MD5：174EE0924E76036B7C177160E9752614
+			ReAdd = ReAdd974RC3;
+			CanRun = true;
+			sTexAdd = 0x3E710;//SpaceEngine.exe+1647B4 - call SpaceEngine.exe+45440
+
+			sStartAdd = 0x405C88;//SpaceEngine.exe+405C88
+			localePath = "data/locale";
+			res.push_back(new RES(Type[1], ResName[0], localePath, ResId[0]));
+			res.push_back(new RES(Type[1], ResName[1], localePath, ResId[1]));
+			res.push_back(new RES(Type[1], ResName[2], localePath, ResId[2]));
+			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[4]));
+			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI974));
+			RwMem.Add(CharAna, 0x1FE580, 0xE8, 6);//SpaceEngine.exe+1FE580 
+
+			RwMem.Add(GetWidth980, 0x1FE9F8, 0xE8, 6);//SpaceEngine.exe+1FE9F8 - F3 0F59 64 86 5C      - mulss xmm4,[esi+eax*4+5C]
+
+			RwMem.Add(GetXYOW974RC3, 0x1FEB04, 0xE9, 6);//SpaceEngine.exe+1FEB04 
+
+			RwMem.Add(TexInit, 0x15FC04, 0xE8, 5);//SpaceEngine.exe+15FC04 - call SpaceEngine.exe+3E710
+
+			RwMem.Add(SetBackWid980, 0x20611C, 0xE8, 6);//SpaceEngine.exe+20611C - movss xmm0,[esi+edx*4+5C]
+
+
+
+
+		}
+		//else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 3) {
+		else if (md5.compare("A003AEF8F41389600BFD6831A0212A7C")) {
+			//MD5：A003AEF8F41389600BFD6831A0212A7C
 			ReAdd = ReAdd973;
 			CanRun = true;
 			FloatAdd = FloatAdd973;
@@ -244,8 +317,9 @@ void Start() {
 			RwMem.Add(TexInit, 0x1B3DD5, 0xE8, 5);
 
 		}
-		else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 2) {
-			
+	//	else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 2) {
+		else if (md5.compare("CF969C362A5FFCA9E132B318BDCA5043")) {
+			//MD5：CF969C362A5FFCA9E132B318BDCA5043
 			ReAdd = ReAdd972;
 			CanRun = true;
 			FloatAdd = FloatAdd972;
@@ -263,9 +337,9 @@ void Start() {
 			RwMem.Add(TexInit, FunAdd972[3], 0xE8, 5);
 
 		}
-		else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 1) {
-
-			
+		//else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 1) {
+		else if (md5.compare("51F74355E759302FE68A8FF3DFB8681C")) {
+			//MD5：51F74355E759302FE68A8FF3DFB8681C
 			ReAdd = ReAdd971;
 			CanRun = true;
 			DoubleAdd = DoubleAdd971;
@@ -283,7 +357,9 @@ void Start() {
 			RwMem.Add(TexInit, 0x2321D9, 0xE8, 5);
 
 		}
-		else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 0) {
+		//else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 0) {
+		else if (md5.compare("DE13DEEFDD2400DA2BF557740397377A")) {
+			//MD5：DE13DEEFDD2400DA2BF557740397377A
 			DoubleAdd = DoubleAdd970;
 			ReAdd = ReAdd970;
 			CanRun = true;
@@ -304,19 +380,14 @@ void Start() {
 		}
 	}
 	else {
-		msgmgr(1, "读取主程序异常");
+		msgmgr(1, "主程序校验异常");
 	}
 
 	if (CanRun) {
-		//char *ResName[7] = { "chs-font1.png","chs-font2.png","chs-font3.png","chs-menu.png","chs-font.png","chs-gui.cfg","chs-font.cfg" };
-		//int ResId[8] = { IDB_PNG1,IDB_PNG2,IDB_PNG3,IDB_PNG4,IDB_PNG5,IDR_CONFIG1,IDR_CONFIG2 ,IDB_PNG6 };//IDR_CONFIG
 	
 		res.push_back(new RES(Type[1], ResName[3], localePath, ResId[3]));
 		
 		res.push_back(new RES(Type[0], ResName[6], localePath, ResId[6]));
-		//char PH[260];
-		//snprintf(PH, 260, "%s/%s/%s", SYSTEMPATH.c_str(), localePath.c_str(), ResName[5]);
-		//std::string Path = SYSTEMPATH + "/" + localePath + "/" + ResName[5];
 		std::ifstream IF;
 		IF.open(SYSTEMPATH + "/"+ConfigFilePath);
 
@@ -341,6 +412,10 @@ void Start() {
 		start = (int*)(Base + sStartAdd);
 	//	msgmgr(0, "START");
 		RwMem.Start();
+	/*	CharADD.MainInit();
+		if (!CharADD.MainInit())msgmgr(1, "失败!");
+		//	CharADD.MainInit();
+		else msgmgr(1, "完成");*/
 	}
 
 

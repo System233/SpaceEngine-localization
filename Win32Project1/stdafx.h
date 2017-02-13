@@ -5,7 +5,6 @@
 
 #pragma once
 #define  PNG_BYTES_TO_CHECK 4
-#include "targetver.h"
 #define DEFASM __declspec(naked) 
 #define WIN32_LEAN_AND_MEAN             // 从 Windows 头中排除极少使用的资料
 // Windows 头文件: 
@@ -17,6 +16,7 @@
 #include <vector>
 #include <sstream> 
 #include <fstream>
+#include "targetver.h"
 void TexInit();
 extern DWORD glTexAdd,*glTex2DAdd, Base;
 extern HANDLE mProc;
@@ -24,6 +24,7 @@ extern bool ReTex;
 extern std::string SYSTEMPATH,localePath;
 extern float Old1, Old2;
 BYTE* CharAnalysis972(BYTE* str);
+
 void msgmgr(int type, char* msg, ...),SetBack972(), GetWidthXYOFF972();
 BOOL WriteAdd(DWORD OffSet, BYTE *Code, size_t Size);
 BOOL ReadAdd(DWORD OffSet, BYTE *Code, size_t Size);
@@ -61,13 +62,14 @@ BOOL GetFileVersion(Version *Ver, HMODULE *hModle);
 extern char *Pstr[8];
 extern bool INITED, Is980;
 extern SYSTEMTIME sys_time;
+extern MD5 md5;
 void DrawTexture();
 class PageInfo {
 public:
 
 	void Init() {
-		if (Page != 0)delete[] Page;
-		Page = 0;
+		if (Page){delete[] Page;Page = 0;
+	}
 		OffSetX = OffSetY = PX = PY = ID = PID = 0;
 		File.clear();
 		use = false;
@@ -97,14 +99,10 @@ public:
 class CharD {
 public:
 	std::wstring Name, Value;
-	CharD(std::wstring N, std::wstring V) {
+	CharD(std::wstring &N, std::wstring &V) {
 		Name = N;
 		Value = V;
 
-	}
-	void claer() {
-		Name.clear();
-		Value.clear();
 	}
 
 
@@ -165,15 +163,11 @@ private:
 	}
 	void clear() {
 		while (!str.empty()) {
-			CharD* P;
-			P = str.front();
-			P->claer();
-			delete P;
-			str.erase(str.begin());
-
-
+			CharD* P = str.back();
+			if(P)delete P;
+			str.pop_back();
 		};
-		delete[] wstr;
+		if(wstr)delete[] wstr;
 		wstr = 0;
 	}
 
@@ -199,7 +193,6 @@ public:
 
 	 }
 	void Init() {
-	//	msgmgr(2, "初始化字串定义");
 		DWORD i = 0,j=0,k=0;
 		WCHAR P = 0;
 		std::wstring TMPN, TMPV;
@@ -218,7 +211,7 @@ public:
 				if (P == '"')k++;
 				else if (k == 1&& P != '\r'&&P != '\n')TMPV.push_back(P);
 				if (k == 2 || P == '\r' || P == '\n') {
-					Add(TMPN.c_str(), TMPV.c_str());
+					Add(TMPN, TMPV);
 					TMPN.clear();TMPV.clear();
 					j = 0, k = 0;
 					st = false;
@@ -233,7 +226,7 @@ public:
 
 	}
 	
-	bool Add(std::wstring N, std::wstring V) {
+	bool Add(std::wstring &N, std::wstring &V) {
 		
 		if (Find(N)==NULL) {
 			str.push_back(new CharD(N, V));
@@ -243,7 +236,7 @@ public:
 		msgmgr(2, "重定义:%s=%s", WA.WcharToChar(N.c_str(), N.size()), WB.WcharToChar(V.c_str(), V.size()));
 		return false;
 	}
-	CharD* Find(std::wstring A) {//operator =
+	CharD* Find(std::wstring &A) {//operator =
 		for (std::vector<CharD*>::const_iterator i = str.begin();i != str.end();i++){
 			
 			if ((*i)->Name.compare(A) == 0) { 
@@ -264,8 +257,8 @@ struct WChar {
 struct Addchar {
 	DWORD Add = 0;
 	BYTE *str = 0;
-	wchar_t* wstr = 0;
-	int size = 0;
+	std::wstring wstr;
+	size_t size = 0;
 };
 extern BYTE WID[256];
 class MEMADD {
@@ -364,11 +357,11 @@ public:
 extern std::vector<RES*> res;
 class SEL {
 	CharDef CD;
-	void Init(int ID, std::wstring* ws) {
+	void Init(int ID, std::wstring &str) {
 		
 		int C = 0;
-		const wchar_t *str = ws->c_str();
-		size_t size = ws->size(),i = 0;
+		//std::wstring &str = *ws;
+		size_t size = str.size(),i = 0;
 		while (i<size) {
 			if (str[i] == '\r' || str[i] == '\n'|| str[i] == ' ') {//XD XA
 				i++;
@@ -408,19 +401,21 @@ class SEL {
 	WCHAR *wstr = 0;
 	
 	BOOL GetInfo(Addchar *AC) {
-		wchar_t *str = wcsstr(AC->wstr, L"=")+1, P=0;
-		int size = AC->size;
-		BYTE *CON = AC->str;
-		wcscstr WA, WB;
 		
-
-		int i = 0, T = 0, j = 0, Ti = 0;
-		AC->Add = wcstol(AC->wstr, 0, 16);
+		TCHAR P = 0;
+		BYTE *&CON = AC->str;
+		wcscstr WA, WB;
+		size_t i = 0, T = 0, j = 0, Ti = 0,l=0, size = AC->size;;
+		
+		std::wstring &str = AC->wstr;
+		l = str.rfind('=');
+		AC->Add = wcstol(str.c_str(), 0, 16);
+		
 		if(AC->Add){
-		if (str != NULL&&CON != NULL) {
+		if (l!=std::wstring::npos&&CON != NULL) {
 			
 		while (i < size && (P = str[i++]) != ';')if (P == '"')Ti++;
-		i = 0;
+		i = l+1;
 		
 			
 		if (Ti == 2)
@@ -463,8 +458,8 @@ class SEL {
 					if (st&&P != '\r'&&P != '\n')ws.push_back(P);
 			}
 			CharD *CP;
-			if ((CP = CD.Find(ws.c_str())) != NULL) {
-				const WCHAR *P2 = CP->Value.c_str();
+			if ((CP = CD.Find(ws)) != NULL) {
+				std::wstring &P2 = CP->Value;
 				
 				while ((P = P2[R++]) != 0) {
 					CON[T] = BYTE(P);
@@ -490,13 +485,13 @@ class SEL {
 
 		}
 		else if (Ti) {
-			msgmgr(1, "翻译错误 请检查引号是否成对出现 字串[%d]:%s ", size, WA.WcharToChar(AC->wstr, 0));
+			msgmgr(1, "翻译错误 请检查引号是否成对出现 字串[%d]:%s ", size, WA.WcharToChar(str.c_str(), 0));
 			AC->Add = 0;
 		}
 		CON[T] = 0;
 		}
 		else {
-			msgmgr(1, "翻译错误 格式不正确或内存不足 字串[%d]:%s ", size, WA.WcharToChar(AC->wstr, 0));
+			msgmgr(1, "翻译错误 格式不正确或内存不足 字串[%d]:%s ", size, WA.WcharToChar(str.c_str(), 0));
 			AC->Add = 0;
 		}
 		}
@@ -545,7 +540,7 @@ public:
 					if (ps[s] == '}') {
 						begin = false;
 						//str.push_back('\0');
-						Init(P, &str);
+						Init(P, str);
 						str.clear();
 						break;
 					}
@@ -566,30 +561,38 @@ public:
 
 	BOOL WStart() {
 	
-		WCHAR *str = 0,Versum[20];
+		WCHAR *str = 0,Versum[128];
 		std::wstring wstrTMP;
 		size_t len = 0, i = 0;
-		Version Ver;
-		GetFileVersion(&Ver, &hModule2);
-		wcscstr WA;
-		int l1=wsprintf(Versum, L"[Start:%d%d%d%d]", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
+		//Version Ver;
+		//GetFileVersion(&Ver, &hModule2);
+	//	wcscstr WA;
+		//int l1=wsprintf(Versum, L"[Start:%d%d%d%d]", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
+		std::wstring Md5Str = md5.GetCapMd5W();
+		int l1 = wsprintf(Versum, L"[Start:%s]", Md5Str.c_str());
 		if ((str = wcsstr(wstr, Versum)) == 0)return FALSE;
 			str+= l1;
-		wsprintf(Versum, L"[End:%d%d%d%d]", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
+		//wsprintf(Versum, L"[End:%d%d%d%d]", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
+		wsprintf(Versum, L"[End:%s]", Md5Str.c_str());
+		
 		if ((len = (wcsstr(wstr, Versum) - str)) <= 0)return FALSE;
+
 		while (i < len&&str[i]!=0) {
 			wstrTMP.push_back(str[i]);
 			if (str[i] == '\r' || str[i] == '\n' || str[i] == ';'|| str[i]==0) {
-				
+			
 					Addchar AC;
 					AC.str = new BYTE[wstrTMP.size() * 2];
-					AC.wstr = (WCHAR*)wstrTMP.c_str();
+					AC.wstr = wstrTMP;
 					AC.size = wstrTMP.size();
 					GetInfo(&AC);
 					if (AC.Add != 0) {
 						BYTE *P = (BYTE*)(Base + AC.Add);
-						memcpy(P, AC.str, AC.size);
-						P[AC.size] = 0;
+					//	msgmgr(1, "P[%X][%d]:%s",P, AC.size,AC.str);
+						if (!IsBadWritePtr(P, AC.size)) {
+							memcpy(P, AC.str, AC.size);
+							P[AC.size] = 0;
+						}
 					}
 					wstrTMP.clear();
 					delete[] AC.str;
@@ -618,9 +621,9 @@ private:
 
 	}
 
-	void InitChar(int ID, std::string* str) {
+	void InitChar(int ID, std::string &str) {
 			if (ID == 0) {
-				SetPage(str->c_str());return;
+				SetPage(str);return;
 			}
 			OffSet* TMP = GetPage(ID);
 			if (TMP == 0)return;
@@ -628,7 +631,7 @@ private:
 			//std::string str2 = str;
 			std::vector<std::string> str_list2;
 			std::string buf;
-			std::stringstream A(str->c_str());
+			std::stringstream A(str);
 			size_t k = 0;
 			bool of = false;
 			while (A >> buf) {
@@ -644,7 +647,7 @@ private:
 			}
 
 	};
-	void SetPage(const char *str) {
+	void SetPage(std::string &str) {
 		unsigned int i = 0;
 		std::vector<std::string> str_list;
 		std::string str2;
@@ -700,20 +703,17 @@ private:
 	}
 	
 	BOOL WriteRes(RES* R) {
-		const WCHAR*Ty = R->Type.c_str();
-		const CHAR *Path = R->Path.c_str();
-		DWORD ID = R->Id;
-		HRSRC hRsrc = FindResource(DLL, MAKEINTRESOURCE(ID), Ty);
+		HRSRC hRsrc = FindResource(DLL, MAKEINTRESOURCE(R->Id), R->Type.c_str());
 		if (hRsrc != NULL) {
 			HGLOBAL hGlobal = LoadResource(DLL, hRsrc);
 			if (hGlobal != NULL) {
 				LPVOID pBuffer = LockResource(hGlobal);
 				DWORD dwSize = SizeofResource(DLL, hRsrc);
 				FILE *fp;
-				fopen_s(&fp, Path, "wb+");
+				fopen_s(&fp, R->Path.c_str(), "wb+");
 				
 				if (fp != 0) {
-					msgmgr(3, "写出资源 ID:%d Path:%s", ID, Path);
+					msgmgr(3, "写出资源 ID:%d Path:%s", R->Id, R->Path.c_str());
 					fwrite(pBuffer, sizeof(BYTE), dwSize, fp);
 					fclose(fp);
 					return TRUE;
@@ -721,7 +721,7 @@ private:
 				
 			}
 		}
-		msgmgr(1, "写出资源失败 ID:%d Path:%s", ID,  Path);
+		msgmgr(1, "写出资源失败 ID:%d Path:%s", R->Id, R->Path.c_str());
 		GetError(16);
 		return FALSE;
 	}
@@ -743,10 +743,7 @@ public:
 		return TRUE;
 	};
 	void Clear() {
-		for (int i = 0;i < 256;i++)if (Page[i].use) {
-			Page[i].Init();
-
-		}
+		for (int i = 0;i < 256;i++)Page[i].Init();
 
 	}
 	BOOL MainInit() {
@@ -824,7 +821,7 @@ public:
 					if (ps[s] == '}') {
 						;
 						begin = false;
-						InitChar(P, &str);
+						InitChar(P, str);
 						str.clear();
 						break;
 					}

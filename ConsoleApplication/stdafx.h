@@ -234,10 +234,6 @@ public:
 			return WcharToChar(str);
 		}
 		char *CON = new char[size * 2];
-//		for (int a = 0;a < size;a++) {
-//			printf("%X ", str[a]);
-//		}
-//		printf("\n");
 		int i = 0,T=0,j=0;
 		while (i < size&&str[i] != ';') {
 			CON[T] = BYTE(str[i]);
@@ -256,9 +252,6 @@ public:
 						S.ID[0] = str[i];
 						No.push_back(S); }
 					Wstr[str[i]].Size++;
-			//		printf("н╢ур╣╫ ап:%d str:%s\n",i, WcharToCharOne(&str[i]));
-				
-					//No.push();
 				}else 
 				if (Wstr[str[i]].str[0] == 0) {
 					CON[T] = Wstr[str[i]].str[1];
