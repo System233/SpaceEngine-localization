@@ -4,7 +4,7 @@
 //
 
 #pragma once
-
+#define _CRT_SECURE_NO_WARNINGS
 #include "targetver.h"
 
 #include <stdio.h>
@@ -19,6 +19,16 @@
 #include <vector>
 #include <sstream> 
 #include <fstream>
+#define SET_DESK 20001
+#define SET_CON 20002
+#define SET_RST 20003
+#define GET_DESK 20004
+#define GET_CON 20005
+#define UN_DESK 20006
+#define UN_CON 20007
+#define SET_WIN 20009
+#define SET_CAP 20010
+/*
 void TexInit();
 extern DWORD glTexAdd, *glTex2DAdd, Base;
 extern HANDLE mProc;
@@ -28,7 +38,6 @@ void msgmgr(int type, char* msg, ...);
 //void CharXY();
 BYTE* CharAnalysis(BYTE* str);
 void CharAna();
-BOOL SEMain(int mode);
 extern HMODULE hModule2, DLL;
 typedef struct {
 	BYTE *DATA;
@@ -492,10 +501,6 @@ public:
 		Version Ver;
 		GetFileVersion(&Ver, &hModule2);
 		wcscstr WA;
-		/*	for (std::vector<CharD*>::const_iterator i = CD.str.begin();i != CD.str.end();i++) {
-
-		msgmgr(2, "列表:[%s]:[%s]", WA.WcharToChar((*i)->Name.c_str(), (*i)->Name.size()),WA.WcharToChar((*i)->Value.c_str(), (*i)->Value.size()));
-		}*/
 		int l1 = wsprintf(Versum, L"[Start:%d%d%d%d]", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
 		str = wcsstr(wstr, Versum) + l1;
 		wsprintf(Versum, L"[End:%d%d%d%d]", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
@@ -519,10 +524,6 @@ public:
 					//msgmgr(3, "写地址:0x%08p Add:0x%08X", P,AC.Add);
 					//memcpy(P, AC.str, AC.size);
 					//P[AC.size] = 0;
-					/*
-					int k = 0;
-					for (k = 0;AC.str[k] != 0 && k < 15;k++)  P[k] = AC.str[k];
-					P[k] = 0;*/
 				}
 				wstrTMP.clear();
 				delete[] AC.str;
@@ -822,3 +823,414 @@ public:
 	OffSet Page7[256];
 
 };
+
+
+*/
+#include "TlHelp32.h"
+#include "Psapi.h"  
+#include<conio.h>
+class Inject {
+	DWORD dwProcessID,Pid;
+	std::wstring Path, DllName;
+	HANDLE hProcessHandle, hThreadHandle;
+	LPVOID pAddrStart;
+	BOOL jed = false;
+public:
+	Inject(DWORD pid, LPCSTR path):Pid(pid) {
+		std::wstringstream wss;
+		wss<<path;
+		Path = wss.str();
+		size_t i = Path.rfind('\\');
+		if (i != std::wstring::npos||(i = Path.rfind('/')) != std::wstring::npos) {
+			DllName = Path.substr(i+1);
+		}
+		else DllName = Path;
+	}
+	int Start() {
+		return jed= dll_inject(Pid, Path);
+
+	}
+	int Free() {
+		if (jed) { jed = false;
+		return dll_free(Pid, DllName);
+		}
+		return false;
+	}
+
+	/*****************************
+	*函数名：GetProcessIdByName
+	*功  能：根据进程名查找进程ID
+	*入  参：const char*ProcessName，进程名
+	*出  参：无
+	*返回值：进程ID，失败返回-1
+	*****************************/
+	DWORD GetProcessIdByName(LPCWSTR ProcessName)
+	{
+		PROCESSENTRY32 stProcess;
+		HANDLE hProcessShot;
+		stProcess.dwSize = sizeof(PROCESSENTRY32);
+		hProcessShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+		Process32First(hProcessShot, &stProcess);
+		do if (!wcscmp(ProcessName, stProcess.szExeFile))return stProcess.th32ProcessID;
+		while (Process32Next(hProcessShot, &stProcess));
+		CloseHandle(hProcessShot);
+		return -1;
+	}
+
+
+
+	/*****************************
+	*函数名：dll_inject
+	*功  能：将dll注入到指定的进程中
+	*入  参：const char*ProcessName，进程名
+	const char *pDllName，dll名
+	*出  参：无
+	*返回值：成功返回0，失败返回-1
+	*****************************/
+	void GetError() {
+		DWORD Err = GetLastError();
+		char ErrInfo[256];
+		//if (Err != 0) {
+		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, Err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), ErrInfo, 256, NULL);
+
+		printf("ErrorInfo: %s", ErrInfo);
+
+	}
+
+	int dll_inject(std::wstring &pProcessName, std::wstring &Path)
+	{
+		dwProcessID = GetProcessIdByName(pProcessName.c_str());
+		if (dwProcessID == -1)
+		{
+			printf("%ws 未运行", pProcessName.c_str());
+			return -1;
+		}
+		printf("进程:%ws PID:%d", pProcessName.c_str(), dwProcessID);
+		printf("%ws>>>%ws", Path.c_str(), pProcessName.c_str());
+		dll_inject(dwProcessID, Path);
+	}
+	int dll_inject(DWORD dwProcessID, std::wstring &Path)
+	{
+
+		//根据进程名获取进程ID  
+
+		//根据进程ID获取进程句柄  
+		hProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, dwProcessID);
+		if (hProcessHandle == NULL)
+		{
+			GetError();
+			printf("OpenProcess获取进程句柄失败\n");
+			return false;
+		}
+
+
+		//用VirtualAllocEx在进程内申请内存  
+		pAddrStart = VirtualAllocEx(hProcessHandle, 0, Path.size() * 2, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+		if (pAddrStart == NULL)
+		{
+			GetError();
+			printf("进程内存申请失败!\n");
+			return false;
+		}
+
+		printf("[%X]地址:0x%08p", dwProcessID, pAddrStart);
+		if (!WriteProcessMemory(hProcessHandle, pAddrStart, Path.c_str(), Path.size() * 2, 0))
+		{
+			printf("写入内存失败！");
+			return false;
+		}
+		hThreadHandle = CreateRemoteThread(hProcessHandle, 0, 0, (LPTHREAD_START_ROUTINE)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "LoadLibraryW"), pAddrStart, 0, 0);
+
+		if (hThreadHandle == NULL)
+		{
+
+			GetError();
+			printf("创建远程线程失败");
+			return false;
+		}
+		WaitForSingleObject(hThreadHandle, INFINITE);
+		//释放  
+		VirtualFreeEx(hProcessHandle, pAddrStart, Path.size(), MEM_RELEASE);
+		CloseHandle(hThreadHandle);
+		CloseHandle(hProcessHandle);
+		printf("注入完成");
+		return TRUE;
+	}
+	/*****************************
+	*函数名：dll_free
+	*功  能：卸载注入到进程中的dll
+	*入  参：const char*ProcessName，进程名
+	const char *pDllName，dll名
+	*出  参：无
+	*返回值：成功返回0，失败返回-1
+	*****************************/
+	int dll_free(std::wstring &pProcessName, std::wstring &pDllName)
+	{
+		dwProcessID = GetProcessIdByName(pProcessName.c_str());
+		if (dwProcessID == -1)
+		{
+			printf("%ws 未运行", pProcessName.c_str());
+			return -1;
+		}
+		printf("进程:%ws PID:%d", pProcessName.c_str(), dwProcessID);
+		printf("%ws>>>%ws", pProcessName.c_str(), pDllName.c_str());
+	}
+	int dll_free(DWORD dwProcessID, std::wstring &pDllName)
+	{
+
+		HANDLE hModuleSnap = INVALID_HANDLE_VALUE;
+		HANDLE hProcess = NULL;
+		HANDLE hThread = NULL;
+		// 获取模块快照    
+		hModuleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, dwProcessID);
+		if (INVALID_HANDLE_VALUE == hModuleSnap)
+		{
+			return false;
+		}
+		MODULEENTRY32 me32;
+		memset(&me32, 0, sizeof(MODULEENTRY32));
+		me32.dwSize = sizeof(MODULEENTRY32);
+		// 开始遍历    
+		if (FALSE == Module32First(hModuleSnap, &me32))
+		{
+			CloseHandle(hModuleSnap);
+			return false;
+		}
+
+		do
+		{
+			if (0 == pDllName.compare(me32.szModule) &&me32.th32ProcessID == dwProcessID) // 找到指定模块    
+			{
+				printf("[%X]找到指定模块:%ws\n", dwProcessID, pDllName.c_str());
+				//根据进程ID获取进程句柄  
+				hProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, dwProcessID);
+				if (hProcessHandle == NULL)
+				{
+					GetError();
+					printf("无法打开进程\n");
+					return false;
+				}
+				hThreadHandle = CreateRemoteThread(hProcessHandle, NULL, 0, (LPTHREAD_START_ROUTINE)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "FreeLibrary"), me32.modBaseAddr, 0, NULL);
+				//释放  
+				if(hThreadHandle==NULL){
+					GetError();
+					return false;
+				}
+				WaitForSingleObject(hThreadHandle, INFINITE);
+				CloseHandle(hThreadHandle);
+				CloseHandle(hProcessHandle);
+
+				printf("卸载完成\n");
+				return TRUE;
+			}
+		} while (TRUE == ::Module32Next(hModuleSnap, &me32));
+		CloseHandle(hModuleSnap);
+		printf("未找到模块\n");
+		return FALSE;
+	}
+
+};
+#include<memory>
+extern long ww, wh;
+extern HWND hWnds;
+struct Work {
+	HWND *dsk, *bkg;
+};
+typedef LRESULT(CALLBACK  *OWndProc)(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK EnumWorkerWProc(HWND hWnd, LPARAM lParam);
+BOOL CALLBACK EnumDeskProc(HWND hWnd, LPARAM lParam);
+BOOL CALLBACK EnumSpaceEngineProc(HWND hWnd, LPARAM lParam);
+/*class Desktop {
+	static HWND Worker, Desk, SpaceEngine, Background;
+	HWND Controller,Parent;
+	ULONG_PTR style;
+	bool set, con;
+	//RECT rt;
+	WINDOWPLACEMENT wndpl;
+	static OWndProc OldWndProc, DeskProc;
+	static LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	bool isBad()const {
+		if (IsWindow(Worker) && IsWindow(Desk) && IsWindow(SpaceEngine) && IsWindow(Background))return false;
+		
+		if (!IsWindow(Worker))feedback(3, "Worker:%X", Worker);
+		if (!IsWindow(Desk))feedback(3, "Desk:%X", Desk);
+		if (!IsWindow(SpaceEngine))feedback(3, "SpaceEngine:%X", SpaceEngine);
+		if (!IsWindow(Background))feedback(3, "Background:%X", Background);
+		return true;
+		
+		
+	}
+	LRESULT feedback(UINT _Ty,LPCSTR lParam,...)const {
+		
+		char* str(new char[4096]);
+		va_list vlArgs;
+		va_start(vlArgs, lParam);
+		DWORD len = vsnprintf(str, 4096, lParam, vlArgs);
+		va_end(vlArgs);
+		COPYDATASTRUCT data{ 1<<16|_Ty,(len + 1)* sizeof(char),str };
+		LRESULT result =
+			SendMessage(Controller, WM_COPYDATA, 0, (LPARAM)&data);
+		delete[]str;
+		return result;
+		
+	}
+	LRESULT feedback(UINT _Ty, LPCWSTR lParam, ...)const {
+		wchar_t* str(new wchar_t[4096]);
+		va_list vlArgs;
+		va_start(vlArgs, lParam);
+		DWORD len = vswprintf(str, 4096, lParam, vlArgs);
+		va_end(vlArgs);
+		COPYDATASTRUCT data{ _Ty,(len+1)*sizeof(wchar_t),str};
+		LRESULT result =
+			SendMessage(Controller, WM_COPYDATA, 0, (LPARAM)&data);
+		delete[]str;
+		return result;
+	}
+	HBITMAP hBitmap;
+	HDC chdc,hdc;
+public:
+	bool getDesk()const { return set; }
+	bool getCon()const { return con; }
+	Desktop() :wndpl{ 0 },con(false), set(false) ,
+		hBitmap(nullptr), chdc(nullptr), hdc(nullptr){
+		Reset();
+		wndpl.length = sizeof(WINDOWPLACEMENT);
+	
+	}
+	void Reset() {
+		unDesk();
+		unControl();
+		Work wk{ &Desk ,&Background };
+		EnumWindows(EnumDeskProc, (LPARAM)&wk);
+		SpaceEngine=FindWindow(_T("SpaceEngine Window"), NULL);
+		//EnumWindows(EnumSpaceEngineProc, (LPARAM)&SpaceEngine);
+		EnumWindows(EnumWorkerWProc, (LPARAM)&Worker);
+		Controller=FindWindow(_T("WIN32TEST"),_T("Win32Test"));
+		if (Controller == NULL)MessageBoxA(Desk,"DAW","DAWA",MB_OK);
+		style = GetWindowLongPtr(SpaceEngine, GWL_STYLE);
+		con = set = false;
+		feedback(1, "Reset");
+
+	}
+	BOOL setDesk() {
+		if (!set&&!isBad()) {
+			
+			//wndpl.length = sizeof(WINDOWPLACEMENT);
+			GetWindowPlacement(SpaceEngine, &wndpl);
+			//else GetClientRect(SpaceEngine, &rt);
+			if (wndpl.showCmd == SW_SHOWMINIMIZED) { 
+				WINDOWPLACEMENT wp(wndpl);
+				wp.showCmd= SW_NORMAL;
+				SetWindowPlacement(SpaceEngine, &wp);
+			}
+			if(hdc)ReleaseDC(Worker, hdc);
+			if (chdc)DeleteDC(chdc);
+			if (hBitmap)DeleteObject(hBitmap);
+			hdc = GetDC(Worker);
+			chdc = CreateCompatibleDC(hdc);
+			hBitmap = CreateCompatibleBitmap(chdc, ww, wh);
+			BitBlt(chdc, 0, 0, ww, wh, hdc, 0, 0, SRCCOPY);
+			set = true;
+			SetWindowPos(SpaceEngine, 0, 0, 0, ww, wh, SWP_ASYNCWINDOWPOS | SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+			style = GetWindowLongPtr(SpaceEngine, GWL_STYLE);
+			SetWindowLongPtr(SpaceEngine, GWL_STYLE, WS_VISIBLE | WS_CHILD);
+			Parent=SetParent(SpaceEngine, Worker);
+			feedback(1, "setDeskErr:%d", GetLastError());
+			UpdateWindow(SpaceEngine);
+			return TRUE;
+		}
+		feedback(1, "setDesk:%d isbad:%d", set, isBad());
+		return FALSE;
+	}
+	BOOL unDesk() {
+		if (set && !isBad()) {
+			SetParent(SpaceEngine, Parent);
+			SetWindowLongPtr(SpaceEngine, GWL_STYLE, style);
+			set = false;
+			SetWindowPlacement(SpaceEngine, &wndpl);
+			InvalidateWin(Background);
+			InvalidateWin(Desk);
+			InvalidateWin(Worker);
+			//SetWindowPos(SpaceEngine, 0, rt.left, rt.top, abs(rt.left - rt.right), abs(rt.top - rt.bottom), SWP_ASYNCWINDOWPOS | SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+
+			UpdateWindow(SpaceEngine);
+			BitBlt(hdc, 0, 0, ww, wh, chdc, 0, 0, SRCCOPY);
+			ReleaseDC(Worker,hdc);
+			DeleteDC(chdc);
+			DeleteObject(hBitmap);
+			hdc=NULL,chdc=NULL,hBitmap = NULL;
+			return TRUE;
+		}
+		feedback(1, "unDesk:%d isbad:%d", set, isBad());
+		return FALSE;
+
+	}
+	BOOL setControl() {
+		if (!con && !isBad()) {
+
+			DWORD id = GetCurrentProcessId(), pid = 0;
+			GetWindowThreadProcessId(Background, &pid);
+			//fprintf(fp, "CID:%X PID:%X\n",id,pid);
+			if(pid==id){
+
+			OldWndProc = (OWndProc)GetWindowLongPtr(Background, GWLP_WNDPROC);
+			DeskProc = (OWndProc)GetWindowLongPtr(Desk, GWLP_WNDPROC);
+			SetWindowLongPtr(Background, GWLP_WNDPROC, (LONG_PTR)NewWndProc);
+			SetWindowLongPtr(Desk, GWLP_WNDPROC, (LONG_PTR)NewWndProc);
+			
+			con = true;
+			return TRUE;
+			}
+		}
+		feedback(1, "setControl:%d isbad:%d", con, isBad());
+		return FALSE;
+	}
+	void InvalidateWin(HWND hWnd) {
+		//RECT rt;
+	//	GetWindowRect(hWnd, &rt);
+		InvalidateRect(hWnd, NULL, TRUE);
+		UpdateWindow(hWnd);
+	}
+	BOOL unControl() {
+		if (con && !isBad()) {
+			//MessageBoxA(Desk, "结束控制", "控制", MB_OK);
+			con = false;
+			SetWindowLongPtr(Background, GWLP_WNDPROC, (LONG_PTR)OldWndProc);
+			SetWindowLongPtr(Desk, GWLP_WNDPROC, (LONG_PTR)DeskProc);
+			InvalidateWin(Background);
+			InvalidateWin(Desk);
+
+			InvalidateWin(Worker);
+			return TRUE;
+		};
+		feedback(1, "unControl:%d isbad:%d",  con, isBad());
+		return FALSE;
+	}
+	void setWindow(HWND hWnd) {
+		
+		if (set) {
+			unDesk();
+			SpaceEngine = hWnd;
+			//GetWindowPlacement(hWnd, &wndpl);
+			style = GetWindowLongPtr(hWnd, GWL_STYLE);
+			setDesk();
+		}else SpaceEngine = hWnd;
+		/*Work wk{ &Desk ,&Background };
+		EnumWindows(EnumDeskProc, (LPARAM)&wk);
+		SpaceEngine = hWnd;
+		EnumWindows(EnumWorkerWProc, (LPARAM)&Worker);
+		Controller = FindWindow(_T("WIN32TEST"), _T("Win32Test"));
+		style = GetWindowLongPtr(SpaceEngine, GWL_STYLE);
+		con = set = false;//*
+		feedback(1, "setWindow");
+	}
+	~Desktop() {
+		unControl();
+		unDesk();
+		con = set = false;
+	}
+	//Desktop() :wndpl{0}{}
+};*/
+#include<Commctrl.h>
+LRESULT CALLBACK NewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK DeskWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
