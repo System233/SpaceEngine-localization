@@ -82,6 +82,9 @@ public:
 	};
 
 };
+bool stacmp(STA&a, STA &b) {
+	return WCharAdd.Wstr[a.ID[0]].Size > WCharAdd.Wstr[b.ID[0]].Size;
+}
 int main(int argc, char *argv[])
 {
 	hHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -128,7 +131,7 @@ int main(int argc, char *argv[])
 		printf(" 输入文件内容:	\"SYSTEM\" \"系统\"	\n");
 
 		Color(0x7);
-		printf("\n [排除翻译] 排除列表文件内粘贴SE.log里提示的未知翻译 输出过滤后的翻译,过滤对于某版本无用的翻译可以增加加载速度\n	使用-A在排除的同时进行翻译\n示例");
+		printf("\n [排除翻译] 排除列表文件内粘贴SE.log里提示的未知翻译 输出过滤后的翻译,过滤对于某版本无用的翻译可以增加加载速度\n	前置-A选项在排除的同时进行翻译\n示例");
 		Color(0xB);
 		printf("\n 命令:		 %s gui.txt exc.txt gui2.txt\n ", argv[0]);
 		Color(0x7);
@@ -152,14 +155,36 @@ int main(int argc, char *argv[])
 	}
 	setlocale(LC_CTYPE, ".936");
 
-	std::vector<STA> A = WCharAdd.No;
+	std::vector<STA> &A = WCharAdd.No;
+	std::sort(A.begin(), A.end(), stacmp);
 	DWORD Err = 0;
+	for (WCHAR T = 0XFF; T < 0XFFFF; T++) {
+		WChar &wc = WCharAdd.Wstr[T];
+		if (wc.use&&wc.UseSize == 0) {
+			if (Err == 0)printf("未使用的字符(不包含内存修改部分):\n"), Err = 1;
+			//printf("%d:", T);
+			printf("%s", WCharAdd.WcharToCharOne(&T));
+
+		}
+	}
+/*	for (const WChar &wc : WCharAdd.Wstr) {
+		
+		if (wc.use&&wc.Size==0) {
+			if (Err == 0)printf("未使用的字符:\n"),Err=1;
+			WCHAR T = (&wc - WCharAdd.Wstr) / sizeof(WChar);
+			printf("%d:", T);
+			printf("%s ", WCharAdd.WcharToCharOne(&T)); 
+		
+		}
+	}*/
+	Err = 0;
+	printf("\n");
 	if (!A.empty()) {
 		Color(0xE);
 		printf("以下字符未配置 ");
 		Color(0x7);
 		printf("输出格式 [字符:频度]\n");
-		for (unsigned int i = 0;i < A.size();i++) {
+		for (size_t i = 0;i < A.size();i++) {
 			printf("%s:%d ", A[i].str, WCharAdd.Wstr[A[i].ID[0]].Size);
 		}
 	}
@@ -167,7 +192,7 @@ int main(int argc, char *argv[])
 		char MsgBuf[256];
 		FormatMessageA( FORMAT_MESSAGE_FROM_SYSTEM , NULL, Err, 0,MsgBuf,256, NULL);
 		Color(0xC);
-		printf("错误:%d", Err);
+		printf("过程中出现错误:%d", Err);
 		Color(0x7);
 		printf(" 描述:%s\n",  MsgBuf);
 	
@@ -180,12 +205,17 @@ int main(int argc, char *argv[])
 	};
 
 	printf("\n");
-	while (!A.empty()) {
+	for (const STA &a : A) {
+		printf("%s", a.str);
+		delete[] a.str;
+	}
+	A.clear();
+	/*while (!A.empty()) {
 		printf("%s", A.back().str);
 		delete[] A.back().str;
 		A.pop_back();
 
-	}
+	}*/
 
 	Color(0x7);
 	CloseHandle(hHandle);
@@ -316,7 +346,7 @@ void TEST(char* In, char*In2,char*Out,int mode) {
 		
 	}
 	dew.clear();
-	printf("共排除 %d/%d/%d 个\n", X, Y,Z);
+	printf("统计:[输出/排除/总数] %d/%d/%d 个\n", X, Y,Z);
 	if (X == Z)printf("=>>>>文件编码可能不是Unicode\n");
 	if(buf)delete[] buf;
 	if(fp)fclose(fp);

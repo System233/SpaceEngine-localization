@@ -1,54 +1,17 @@
 // dllmain.cpp : 定义 DLL 应用程序的入口点。
 #include "stdafx.h"
-#include "标头.h"
-#pragma comment (lib, "Version.lib")   
+#include "Define.h"
 DWORD Base=0;
-WCHAR *Type[2] = { L"Config",L"PNG" };
-//char *ResPath[7] = { "chs-font1.png","chs-font2.png","chs-font3.png","chs-menu.png","chs-font.png","chs-gui.cfg","chs-font.cfg" };
-//int ResId[7] = { IDB_PNG1,IDB_PNG2,IDB_PNG3,IDB_PNG4,IDB_PNG5,IDR_CONFIG1,IDR_CONFIG2 };//IDR_CONFIG
-char ConfigFilePath[256] = "System/Config.ini";
-DWORD* FunAdd = 0;
-DWORD FunAdd980[7] = {
-	0x1FF4E0,//映射
-	0X1FFA73,//坐标
-	0x1FFA91,//偏移
-	0x1FF958,//宽1
-	0x1FFA64,//宽2&坐标
-	0x160C34,//0x198DA5,//0x198DD2//980call
-	0x20705C//BACKW
-};//12作废
-DWORD FunAdd972[4] = {
-	0x1F0970,//START
-	0x1F0C5B,//XYO
-	0x1F80F6,//BACKW
-	0x1A4605//Call
-};
-DWORD FunAdd974[7] = {
-//SpaceEngine.exe+1F41C8 - F3 0F10 44 96 5C      - movss xmm0,[esi+edx*4+5C] 不明 可能是字宽
-	0x1ECBA0,//映射
-	0x1ED117,// 坐标
-	0x1ED135,// 偏移
-	0x1ECFFF,// 极其相似 字宽1
-	0x1ED0FA,// 字宽2
-	0x155614,//0x18AC15,//TESTCALL
-	0x1F41C8//BACKW
-};
-/*
-DWORD RetAdd = (DWORD)hModule2 + 0x1FFA9A;
-void *RV = (void*)((DWORD)hModule2 + 0X3B48F4);
-void *RV2 = (void*)((DWORD)hModule2 + 0x472F90);
-*/
+std::wstring SYSTEMROOT;// "System/Config.json";
+MD5 md5;
+LPCSTR Lang;
+LPCWSTR localePath;
 double sewid971 = 16;
-DWORD *ReAdd,
-	ReAdd980[3] = {
-	0x1FFA9A,
-	0X3B48F4,
-	0x472F90
-},ReAdd974[3] = {
-	0x1ED13E,
-	0x390DD4,
-	0x44D350
-
+DWORD *FunAdd = 0, *ReAdd,
+ReAdd980[3] = {
+0x1FFA9A,0x3B48F4,0x472F90
+}, ReAdd974[3] = {
+	0x1ED13E,0x390DD4,0x44D350
 }, ReAdd974RC2[3] = {
 	0x1FE65E ,//SpaceEngine.exe+1FE65E 
 	0x3ABB74,//mulss xmm5,[SpaceEngine.exe + 3ABB74]{ [0.00] }
@@ -58,456 +21,316 @@ DWORD *ReAdd,
 	0x3B2B34,//mulss xmm5,[SpaceEngine.exe+3B2B34] { [0.00] }
 	0x471300//mov ecx,SpaceEngine.exe+471300 { [000004B0] }
 }, ReAdd972[3] = {
-	0X39B098,
-	0x39BF40,
-	0x1F0CB9
-
+	0X39B098,0x39BF40,0x1F0CB9
 }, ReAdd971[3] = {
 	0x2B80B0,0x2B82E0,0x163418
-
 }, ReAdd970[3] = {
 	0x272660,0x272440,0x14A19F
-
 }, ReAdd973[3] = {
 	0x3B6CB0,0x3B7C68,0x201BC9
+}, ReAdd980e[3] = {
+	0x20DE9A,//SpaceEngine.exe+20DE9A - movaps xmm4,xmm6
+	0x3BDC00,//SpaceEngine.exe+20DE6A - mulss xmm5,[SpaceEngine.exe+3BDC00] { [0.00] }
+	0x4D6B10//SpaceEngine.exe+20DE7A - mov ecx,SpaceEngine.exe+4D6B10 { [000004B0] }
+},glTexAdd = 0, *glTex2DAdd = 0, sBackWidth = 0;
+size_t *start = 0, maxLogSize(128<<10);
+void *TexEnd(0);
+bool runtime_check(false);
+Hook mHook;
 
-},
-StartAdd[4] = {
-	0X407E64,
-	0x3E10B8,
-	0x3E0160,
-	0x3FD980//973
-},BackWidth[2] = {//背景宽
-	0x20705C,//980
-	0x1F41C8//974
+DWORD *FloatAdd = 0, 
+	FloatAdd973[2] = {0x3B6D98, 0x3B6CB0}, 
+	FloatAdd972[2] = {0x39B180,0x39B098}, 
+	*DoubleAdd = 0, 
+	DoubleAdd971[3] = {0x2B80B0,0x2B82E0, 0x2B82F0}, 
+	DoubleAdd970[3] = {0x272440,0x272660,0x272670};
+void Start() {
 
-},TexInitAdd[3] = {
-	0x3EE00,//0x3E310,//0x03F590,//980
-	0x5D220,//0x5C2A0,call SpaceEngine.exe+5D220
+}
 
-	0x5D1D0//972
+const char *const Msg[] = { "Info" ,"Error" ,"Warning" ,"Debug" ,"Null" };
+std::mutex mtx;
+union MsgData{
+	wchar_t wstr[2048];
+	char str[sizeof(wchar_t)*2048];
+};
+ static MsgData mData;
+std::ofstream& openLog(MsgType _Ty) {
+	static std::ofstream log;
+	
+	if (!log.is_open()) {
+		std::wstring Path(SYSTEMROOT+L"/System/localization.log");
+		size_t size(0);
+		HANDLE handle = CreateFileW(Path.c_str(), FILE_READ_EA, FILE_SHARE_READ, 0, OPEN_ALWAYS, 0, 0);
+		if (handle != INVALID_HANDLE_VALUE)
+		{
+			size=GetFileSize(handle, NULL);
+			CloseHandle(handle);
+		}
+		log.open(Path, (size > maxLogSize) ? std::ios::trunc : std::ios::app);//128k
+		if (size>maxLogSize ||!size)log.write("\xEF\xBB\xBF",3);
+		GetLocalTime(&sys_time);
+		snprintf(mData.str, sizeof(MsgData::wstr), "\n %04d-%02d-%02d %02d:%02d:%02d\n--------------------------\n", sys_time.wYear, sys_time.wMonth, sys_time.wDay, sys_time.wHour, sys_time.wMinute, sys_time.wSecond);
+		log << mData.str;
+	}
+	
+	return log;
+}
+void Exception(DWORD code, LPCWSTR Info, LPCWSTR fotmat) {
+	mtx.unlock();
+	msgmgr(MsgType::Error, L"Exception(0x%X) %s FormatError:%s", code, Info, fotmat);
+	mtx.lock();
+}/*
+//0 Info 1 Error 2 Warning 3 Debug
+void msgmgr(MsgType _Ty, const char* msg, ...) {
+	if (maxLogSize) {
+		std::lock_guard<std::mutex> mtx_locker(mtx);
+		__try {
+		std::ofstream &log = openLog(_Ty);
+			va_list vlArgs;
+			va_start(vlArgs, msg);
+			vsnprintf(mData.str, sizeof(MsgData::wstr), msg, vlArgs);
+			va_end(vlArgs);
+			log << mData.str << std::endl;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER) {
+		/*	mtx_locker.~lock_guard();
+			LPWSTR Info(nullptr);
+			DWORD code(GetExceptionCode());
+			FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, NULL, code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&Info, NULL, NULL);
+		//	Exception(code, Info ? Info : L"Null", UTF::Decode(msg).c_str());
+			if (Info)LocalFree(Info);
+		}
+	}
+	//log.close();
+}*/
+int mwsprintf(wchar_t* const _Buffer,size_t  const _BufferCount,wchar_t const* const _Format,va_list   _ArgList) {
+	__try {
+		
+	return vswprintf(_Buffer, _BufferCount, _Format, _ArgList);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+	//	mtx_locker.~lock_guard();
+		
+		LPWSTR Info(nullptr);
+		DWORD code(GetExceptionCode());
+		FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER| FORMAT_MESSAGE_MAX_WIDTH_MASK, NULL, code&0x3FFFFFFF, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&Info, NULL, NULL);
+
+		Exception(code, Info ? Info : L"Null", _Format);
+		
+		if (Info)LocalFree(Info);
+	}
+	return -1;
+}
+void msgmgr(MsgType _Ty, const std::wstring msg, ...) {
+	if (maxLogSize) {
+		mtx.lock();
+		std::ofstream &log = openLog(_Ty);
+		va_list vlArgs;
+		va_start(vlArgs, msg);
+		//vswprintf(mData.wstr, 2048, msg.c_str(), vlArgs);
+		GetLocalTime(&sys_time);
+		char MsgId[32];
+		snprintf(MsgId, 32, "%02d:%02d:%02d.%03d [%s] ", sys_time.wHour, sys_time.wMinute, sys_time.wSecond, sys_time.wMilliseconds, Msg[int(_Ty)>3 ? 4 : int(_Ty)]);
+		if(mwsprintf(mData.wstr, 2048, msg.c_str(), vlArgs)!=-1)
+			log << MsgId<< UTF::Encode(std::wstring(mData.wstr)) << std::endl;
+		va_end(vlArgs);
+		mtx.unlock();
+	}
+//	log.close();
 
 };
-std::string SYSTEMPATH;
-std::string LOGPATH;
-//bool Is980 = false;
-DWORD glTexAdd = 0, *glTex2DAdd = 0, sBackWidth = 0;
-int *start = 0;// = (int*)((DWORD)hModule2 + 0X407E64);//974 0x3E10B8 
-//char *Lstr = 0;//(char*)((DWORD)hModule2 + 0X4AD788), tmp[3] = { 0 };//974 0x489F78
-DWORD ThreadId = 0;
-void *XYOAW, *GCW, *BackFun, *TexEnd;//继续调用
-//bool INITED = false;
-bool CanRun = false;
-HMODULE hModule2 = 0,DLL=0;
-SEL WCharAdd;
-BYTE WID[256] = {0};
-RWMEM RwMem;
-BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-					 )
-{
+void openErr(const std::wstring&path) {
+	LPWSTR Info;
+	if (FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER| FORMAT_MESSAGE_MAX_WIDTH_MASK, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&Info, NULL, NULL)) {
+		msgmgr(MsgType::Error, L"%s %s", Info, path.c_str());
+		LocalFree(Info);
+	}
+}
 
-	
+BOOL APIENTRY DllMain(HMODULE hModule,
+	DWORD  ul_reason_for_call,
+	LPVOID lpReserved
+)
+{
 	switch (ul_reason_for_call)
 	{
-	case DLL_PROCESS_ATTACH:{
-		char SP[MAX_PATH];
-		hModule2 = GetModuleHandle(NULL);
-		GetModuleFileNameA(hModule2, SP, MAX_PATH);
-		//msgmgr(0, "SYSTEMPATH A:%s", SYSTEMPATH);
-		*strrchr(SP, '\\')=0;
-		*strrchr(SP, '\\') = 0;
+	case DLL_PROCESS_ATTACH: {
+		DWORD  sStartAdd = 0, sTexAdd = 0, //sWidAdd=0,sTABWid=0,sUWid=NULL,
+			sLang(0);//Timer TexCheck WidStrcut
+		mProc = GetCurrentProcess();
+		HMODULE hModule = GetModuleHandle(NULL);
+		Base = DWORD(hModule);
+		//size_t len = GetModuleFileNameW(hModule, (LPWSTR)SYSTEMROOT.data(), NULL);
+		SYSTEMROOT.resize(MAX_PATH);
+		size_t len = GetModuleFileNameW(hModule, (LPWSTR)SYSTEMROOT.data(), MAX_PATH);
+		SYSTEMROOT.reserve();
+		std::ifstream sModule(SYSTEMROOT, std::ios::binary);
+		if (sModule) {
+			std::stringstream ss;
+			ss << sModule.rdbuf();
+			const std::string &SEData = ss.str();
+			md5.GenerateMD5((BYTE*)SEData.c_str(), SEData.size());
+			sModule.close();
+			runtime_check = true;
+			if (md5 == "03D1FDE3675AF345D20F263EB253984D") {//980E
+				ReAdd = ReAdd980e;
+				sTexAdd = 0x43160;
+				sStartAdd = 0x461910;
+				localePath = L"data/locale";
+				sLang = 0x513C18;
+				mHook.Add(CharAna, 0x20D8E0, 0xE8, 6);
+				mHook.Add(TexInit, 0x16FFA1, 0xE8, 5);
+				mHook.Add(GetWidth980, 0x20DD58, 0xE8, 6);		//SpaceEngine.exe+20DD58 - mulss xmm4,[esi+eax*4+5C]
+				mHook.Add(GetCharXYOffAndWid, 0x20DE64, 0xE9, 6);	//SpaceEngine.exe+20DE64 - movss xmm5,[esi+edx*4+5C]
+				mHook.Add(TexInit, 0x16FFA1, 0xE8, 5);
+				mHook.Add(SetBackWid980, 0x2153DC, 0xE8, 6);//SpaceEngine.exe+2153DC - movss xmm0,[esi+edx*4+5C]
 
-		int A = 0;
-		//char *P;
-		while (SP[A] != 0&&A<MAX_PATH) {
-			if (SP[A] == '\\')SP[A] = '/';
-			A++;
+			}
+			else if (md5 == "2A6C6DF6FEDEF93A09B2640C5AD735BE") {//980
+				ReAdd = ReAdd980;
+				sTexAdd = 0x3EE00;
+				sStartAdd = 0x407E64;
+				localePath = L"data/locale";
+				sLang = 0x4AD788;
+				IRETADD = (void*)(Base + 0x3F3BA);
+				mHook.Add(CharAna, 0x1FF4E0, 0xE8, 6);
+				mHook.Add(GetWidth980, 0x1FF958, 0xE8, 6);
+				mHook.Add(GetCharXYOffAndWid, 0x1FFA64, 0xE9, 6);
+				mHook.Add(TexInit, 0x160C34, 0xE8, 5);
+				mHook.Add(SetBackWid980, 0x20705C, 0xE8, 6);
+
+			}
+			else if (md5 == "B495D5CA0CA6DACE5DEC3C967405D9EA") {//974 RC1
+																 //MD5：B495D5CA0CA6DACE5DEC3C967405D9EA
+				ReAdd = ReAdd974;
+				sTexAdd = 0x5D220;
+				sStartAdd = 0x3E10B8;
+				localePath = L"locale";
+				sLang = 0x489F78;
+				mHook.Add(CharAna, 0x1ECBA0, 0xE8, 6);
+				mHook.Add(GetWidth974, 0x1ECFFF, 0xE8, 6);
+				mHook.Add(GetCharXYOW974, 0x1ED0FA, 0xE9, 6);
+				mHook.Add(TexInit, 0x155614, 0xE8, 5);
+				mHook.Add(SetBackWid980, 0x1F41C8, 0xE8, 6);
+			}
+			else if (md5 == "F239BC8DFB544608BCED4B369C27DCD8") {//974 RC2
+																 //MD5：F239BC8DFB544608BCED4B369C27DCD8
+				ReAdd = ReAdd974RC2;
+				sTexAdd = 0x45440;//SpaceEngine.exe+1647B4 - call SpaceEngine.exe+45440
+				sLang = 0x4A60E8;
+				sStartAdd = 0x3FE7AC;//SpaceEngine.exe+3FE7AC
+				localePath = L"data/locale";
+				mHook.Add(CharAna, 0x1FE0C0, 0xE8, 6);//SpaceEngine.exe+1FE0C0 
+				mHook.Add(GetWidth974, 0x1FE51F, 0xE8, 6);//SpaceEngine.exe+1FE51F 
+				mHook.Add(GetCharXYOW974, 0x1FE61A, 0xE9, 6);//SpaceEngine.exe+1FE61A 
+				mHook.Add(TexInit, 0x1647B4, 0xE8, 5);
+				mHook.Add(SetBackWid980, 0x205CC8, 0xE8, 6);//SpaceEngine.exe+205CC8 
+
+
+			}
+			else if (md5 == "174EE0924E76036B7C177160E9752614") {//974 RC3
+																 //MD5：174EE0924E76036B7C177160E9752614
+				ReAdd = ReAdd974RC3;
+				sTexAdd = 0x3E710;//SpaceEngine.exe+1647B4 - call SpaceEngine.exe+45440
+				sLang = 0x4AB568;
+				sStartAdd = 0x405C88;//SpaceEngine.exe+405C88
+				localePath = L"data/locale";
+				mHook.Add(CharAna, 0x1FE580, 0xE8, 6);//SpaceEngine.exe+1FE580 
+				mHook.Add(GetWidth980, 0x1FE9F8, 0xE8, 6);//SpaceEngine.exe+1FE9F8 - F3 0F59 64 86 5C      - mulss xmm4,[esi+eax*4+5C]
+				mHook.Add(GetXYOW974RC3, 0x1FEB04, 0xE9, 6);//SpaceEngine.exe+1FEB04 
+				mHook.Add(TexInit, 0x15FC04, 0xE8, 5);//SpaceEngine.exe+15FC04 - call SpaceEngine.exe+3E710
+				mHook.Add(SetBackWid980, 0x20611C, 0xE8, 6);//SpaceEngine.exe+20611C - movss xmm0,[esi+edx*4+5C]
+			}
+			else if (md5 == "A003AEF8F41389600BFD6831A0212A7C") {//973
+																 //MD5：A003AEF8F41389600BFD6831A0212A7C
+				ReAdd = ReAdd973;
+				FloatAdd = FloatAdd973;
+				Old1 = *(float*)(Base + 0x3B6D98);
+				Old2 = *(float*)(Base + 0x3B6CB0);
+				sTexAdd = 0x46FD0;//SpaceEngine.exe+1B3DD5 - call SpaceEngine.exe+46FD0
+				sLang = 0x4C12D8;
+				sStartAdd = 0x3FD980;//StartAdd[2];3B6D98
+				localePath = L"locale";
+				mHook.Add(CharAna972, 0x201880, 0xE8, 6);//SpaceEngine.exe+201880 
+				mHook.Add(SetAll973, 0x201B6B, 0xE9, 9);
+				mHook.Add(SetBack972, 0x209066, 0xE8, 9);
+				mHook.Add(TexInit, 0x1B3DD5, 0xE8, 5);
+
+			}
+			else if (md5 == "CF969C362A5FFCA9E132B318BDCA5043") {//972
+																 //MD5：CF969C362A5FFCA9E132B318BDCA5043
+				ReAdd = ReAdd972;
+				FloatAdd = FloatAdd972;
+				Old1 = *(float*)(Base + 0x39B180);
+				Old2 = *(float*)(Base + 0x39B098);
+				sTexAdd = 0x5D1D0;
+				sStartAdd = 0x3E0160;
+				sLang = 0x4A0AF8;
+				localePath = L"locale";
+				mHook.Add(CharAna972, 0x1F0970, 0xE8, 6);
+				mHook.Add(GetWidthXYOFF972, 0x1F0C5B, 0xE9, 9);
+				mHook.Add(SetBack972, 0x1F80F6, 0xE8, 9);
+				mHook.Add(TexInit, 0x1A4605, 0xE8, 5);
+
+			}
+			else if (md5 == "51F74355E759302FE68A8FF3DFB8681C") {//971
+																 //MD5：51F74355E759302FE68A8FF3DFB8681C
+				ReAdd = ReAdd971;
+				DoubleAdd = DoubleAdd971;
+				DOld1 = *(double*)(Base + 0x2B80B0);
+				DOld2 = *(double*)(Base + 0x2B82E0);
+				DOld3 = *(float*)(Base + 0x2B82F0);
+				sTexAdd = 0x4530;
+				sLang = 0x37686C;
+				sStartAdd = 0x2FC3B0;//2F0974;//StartAdd[2];
+				localePath = L"locale";
+				mHook.Add(CharAna971, 0x163180, 0xE8, 9);
+				mHook.Add(SetAll971, 0x1633BD, 0xE9, 7);
+				mHook.Add(SetBack971, 0x164BCB, 0xE8, 7);
+				mHook.Add(TexInit, 0x2321D9, 0xE8, 5);
+
+			}
+			else if (md5 == "DE13DEEFDD2400DA2BF557740397377A") {//970
+																 //MD5：DE13DEEFDD2400DA2BF557740397377A
+				DoubleAdd = DoubleAdd970;
+				ReAdd = ReAdd970;
+				sLang = 0x322540;
+				DOld1 = *(double*)(Base + DoubleAdd970[0]);
+				DOld2 = *(double*)(Base + DoubleAdd970[1]);
+				DOld3 = *(float*)(Base + DoubleAdd970[2]);
+				sTexAdd = 0x4AC0;
+				sStartAdd = 0x2A4B00;//StartAdd[2];
+				localePath = L"locale";
+				mHook.Add(CharAna970, 0x149E50, 0xE8, 9);
+				mHook.Add(SetAll970, 0x14A144, 0xE9, 7);
+				mHook.Add(SetBack970, 0x14AB8E, 0xE8, 7);
+				mHook.Add(TexInit, 0x1FB840, 0xE8, 5);
+				sewid971 = 15.0;
+			}
+			else runtime_check = false;
 		}
-		//msgmgr(0, "SYSTEMPATH A:%s", SYSTEMPATH);
-		SYSTEMPATH=LOGPATH = SP;
-		LOGPATH += "/SE-Localization.log";
-		//std::ofstream AA("AAA.log");
-		//AA <<"AAAAA:"<< LOGPATH;
-		//AA.close();
-		//std::ofstream AA(LOGPATH, std::ios::app);
-		//AA << "AAAA:"<< LOGPATH<<" AAA:"<< SYSTEMPATH;
-		//AA.close();
-		//float AF = 0.0f;
-	//	msgmgr(0, "DLLMAINSTART ");
-		DLL = hModule;
-		Start();
+		else openErr(SYSTEMROOT);
+		for (auto &ch : SYSTEMROOT)if (ch == '\\')ch = '/';
+		SYSTEMROOT.erase(SYSTEMROOT.rfind('/', SYSTEMROOT.rfind('/') - 1) + 1);
+		if (runtime_check) {
+			RE0 = (void*)(Base + ReAdd[0]);
+			RE1 = (void*)(Base + ReAdd[1]);
+			RE2 = (void*)(Base + ReAdd[2]);
+			TexEnd = (void*)(Base + sTexAdd);
+			start = (size_t*)(Base + sStartAdd);
+			Lang = (LPSTR)(Base + sLang);
+			mHook.HookAll();
+		}
 
-	}break;
+
+	
+	}; break;
 	case DLL_THREAD_ATTACH:break;
 	case DLL_THREAD_DETACH:break;
 	case DLL_PROCESS_DETACH:
-		if (CanRun) {
-			//SEMain(2);
-			while (!res.empty()) {
-				RES* P=res.front();
-				res.erase(res.begin());
-				delete P;
-			}
-			RwMem.End();
-		}
-//		Dlog(0, "	STOP...");
+		if (runtime_check)mHook.unHookAll();
 		break;
 	}
-//	DEBUG.close();
 	return TRUE;
-}
-//void *PglTexAdd = 0;
-std::string localePath;
-void GetError(int d) {
-	DWORD Err = GetLastError();
-	if (Err != 0) {
-		char ErrInfo[256], ERR[512];
-		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, Err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), ErrInfo, 256, NULL);
-		snprintf(ERR, 512, "位置:%d 错误(0x%X):%s", d, Err, ErrInfo);
-		MessageBoxA(0, ERR, "Error", MB_OK);
-		msgmgr(1, ERR);
-		SetLastError(0);
-	}
-
-
-}
-//WCHAR *Type[2] = { L"Config",L"PNG" };
-char *ResName[7] = { "chs-font1.png","chs-font2.png","chs-font3.png","chs-menu.png","chs-font.png","chs-gui.cfg","chs-font.cfg" };
-int ResId[8] = { IDB_PNG1,IDB_PNG2,IDB_PNG3,IDB_PNG4,IDB_PNG5,IDR_CONFIG1,IDR_CONFIG2 ,IDB_PNG6 };//IDR_CONFIG
-std::vector<RES*> res;
-DWORD *FloatAdd = 0, FloatAdd973[2] = {
-	0x3B6D98,
-	 0x3B6CB0
-}, FloatAdd972[2] = {
-	0x39B180,
-	0x39B098
-}, *DoubleAdd = 0, DoubleAdd971[3] = {
-	0x2B80B0,0x2B82E0, 0x2B82F0
-}, DoubleAdd970[3] = {
-	0x272440,0x272660,0x272670
-};
-void  CharAna972();
-MD5 md5;
-void Start() {
-	DWORD  sStartAdd = 0, sTexAdd = 0;//Tick
-	mProc = GetCurrentProcess();
-	//Version Ver;
-	hModule2 = GetModuleHandle(NULL);
-	Base = DWORD(hModule2);
-	TCHAR strFile[MAX_PATH];
-	GetModuleFileName(hModule2, strFile, MAX_PATH);
-	std::ifstream SEIF(strFile, std::ios::binary);
-
-//	IF.read(ss,IF.SI)
-	//if (GetFileVersion(&Ver, &hModule2)) {
-	if(SEIF){
-	//	msgmgr(3, "V:%d,%d,%d,%d", Ver.HM ,Ver.LM,Ver.HL,Ver.LL);
-		std::stringstream ss;
-		ss << SEIF.rdbuf();
-		const std::string &SEData = ss.str();
-		md5.GenerateMD5((BYTE*)SEData.c_str(), SEData.size());
-		SEIF.close();
-		
-	//	if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 8 && Ver.LL == 0) {
-		if (md5.compare("2A6C6DF6FEDEF93A09B2640C5AD735BE")) {
-			CanRun = true;
-			ReAdd = ReAdd980;
-			sTexAdd = TexInitAdd[0];
-			sStartAdd = StartAdd[0];
-			localePath = "data/locale";
-			res.push_back(new RES(Type[1], ResName[0],localePath, ResId[0]));
-			res.push_back(new RES(Type[1], ResName[1], localePath, ResId[1]));
-			res.push_back(new RES(Type[1], ResName[2], localePath, ResId[2]));
-			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[4]));
-			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI980));
-			RwMem.Add(CharAna, FunAdd980[0], 0xE8, 6);
-			RwMem.Add(GetWidth980, FunAdd980[3], 0xE8, 6);
-			RwMem.Add(GetCharXYOffAndWid, FunAdd980[4], 0xE9, 6);
-			RwMem.Add(TexInit, FunAdd980[5], 0xE8,5);
-			RwMem.Add(SetBackWid980, FunAdd980[6], 0xE8, 6);
-			//				DEBUG << "执行980";
-		}
-		//else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 4) {
-		else if (md5.compare("B495D5CA0CA6DACE5DEC3C967405D9EA")) {
-			//MD5：B495D5CA0CA6DACE5DEC3C967405D9EA
-			ReAdd = ReAdd974;
-			CanRun = true;
-			sTexAdd = TexInitAdd[1];
-			sStartAdd = StartAdd[1];
-			localePath = "locale";
-			res.push_back(new RES(Type[1], ResName[0], localePath, ResId[0]));
-			res.push_back(new RES(Type[1], ResName[1], localePath, ResId[1]));
-			res.push_back(new RES(Type[1], ResName[2], localePath, ResId[2]));
-			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[4]));
-			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI974));
-			RwMem.Add(CharAna, FunAdd974[0], 0xE8, 6);
-			RwMem.Add(GetWidth974, FunAdd974[3], 0xE8, 6);
-			RwMem.Add(GetCharXYOW974, FunAdd974[4], 0xE9, 6);
-			RwMem.Add(TexInit, FunAdd974[5], 0xE8, 5);
-			RwMem.Add(SetBackWid980, FunAdd974[6], 0xE8, 6);
-		}
-		else if (md5.compare("F239BC8DFB544608BCED4B369C27DCD8")) {//974 RC2
-			//MD5：F239BC8DFB544608BCED4B369C27DCD8
-			ReAdd = ReAdd974RC2;
-			CanRun = true;
-			sTexAdd = 0x45440;//SpaceEngine.exe+1647B4 - call SpaceEngine.exe+45440
-
-			sStartAdd =0x3FE7AC;//SpaceEngine.exe+3FE7AC
-			localePath = "data/locale";
-			res.push_back(new RES(Type[1], ResName[0], localePath, ResId[0]));
-			res.push_back(new RES(Type[1], ResName[1], localePath, ResId[1]));
-			res.push_back(new RES(Type[1], ResName[2], localePath, ResId[2]));
-			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[4]));
-			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI974));
-			RwMem.Add(CharAna, 0x1FE0C0, 0xE8, 6);//SpaceEngine.exe+1FE0C0 
-			RwMem.Add(GetWidth974,0x1FE51F, 0xE8, 6);//SpaceEngine.exe+1FE51F 
-			RwMem.Add(GetCharXYOW974, 0x1FE61A, 0xE9, 6);//SpaceEngine.exe+1FE61A 
-			RwMem.Add(TexInit,0x1647B4, 0xE8, 5);
-			RwMem.Add(SetBackWid980, 0x205CC8, 0xE8, 6);//SpaceEngine.exe+205CC8 
-
-		
-		}
-		else if (md5.compare("174EE0924E76036B7C177160E9752614")) {//974 RC3
-		//MD5：174EE0924E76036B7C177160E9752614
-			ReAdd = ReAdd974RC3;
-			CanRun = true;
-			sTexAdd = 0x3E710;//SpaceEngine.exe+1647B4 - call SpaceEngine.exe+45440
-
-			sStartAdd = 0x405C88;//SpaceEngine.exe+405C88
-			localePath = "data/locale";
-			res.push_back(new RES(Type[1], ResName[0], localePath, ResId[0]));
-			res.push_back(new RES(Type[1], ResName[1], localePath, ResId[1]));
-			res.push_back(new RES(Type[1], ResName[2], localePath, ResId[2]));
-			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[4]));
-			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI974));
-			RwMem.Add(CharAna, 0x1FE580, 0xE8, 6);//SpaceEngine.exe+1FE580 
-
-			RwMem.Add(GetWidth980, 0x1FE9F8, 0xE8, 6);//SpaceEngine.exe+1FE9F8 - F3 0F59 64 86 5C      - mulss xmm4,[esi+eax*4+5C]
-
-			RwMem.Add(GetXYOW974RC3, 0x1FEB04, 0xE9, 6);//SpaceEngine.exe+1FEB04 
-
-			RwMem.Add(TexInit, 0x15FC04, 0xE8, 5);//SpaceEngine.exe+15FC04 - call SpaceEngine.exe+3E710
-
-			RwMem.Add(SetBackWid980, 0x20611C, 0xE8, 6);//SpaceEngine.exe+20611C - movss xmm0,[esi+edx*4+5C]
-
-
-
-
-		}
-		//else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 3) {
-		else if (md5.compare("A003AEF8F41389600BFD6831A0212A7C")) {
-			//MD5：A003AEF8F41389600BFD6831A0212A7C
-			ReAdd = ReAdd973;
-			CanRun = true;
-			FloatAdd = FloatAdd973;
-			Old1 = *(float*)(Base + 0x3B6D98);
-			Old2 = *(float*)(Base + 0x3B6CB0);
-			sTexAdd = 0x46FD0;//SpaceEngine.exe+1B3DD5 - call SpaceEngine.exe+46FD0
-
-			sStartAdd = 0x3FD980;//StartAdd[2];3B6D98
-			localePath = "locale";
-			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[7]));
-			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI973));
-			RwMem.Add(CharAna972, 0x201880, 0xE8, 6);//SpaceEngine.exe+201880 
-
-			RwMem.Add(SetAll973, 0x201B6B, 0xE9, 9);
-			RwMem.Add(SetBack972, 0x209066, 0xE8, 9);
-			RwMem.Add(TexInit, 0x1B3DD5, 0xE8, 5);
-
-		}
-	//	else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 2) {
-		else if (md5.compare("CF969C362A5FFCA9E132B318BDCA5043")) {
-			//MD5：CF969C362A5FFCA9E132B318BDCA5043
-			ReAdd = ReAdd972;
-			CanRun = true;
-			FloatAdd = FloatAdd972;
-			Old1 = *(float*)(Base + 0x39B180);
-			Old2 = *(float*)(Base + 0x39B098);
-			sTexAdd = TexInitAdd[2];
-			sStartAdd = StartAdd[2];
-			localePath = "locale";
-			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[7]));
-			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI972));
-			RwMem.Add(CharAna972, FunAdd972[0], 0xE8, 6);
-			RwMem.Add(GetWidthXYOFF972, FunAdd972[1], 0xE9, 9);
-		//	msgmgr(3, "SetBack972:%p TexInit:%p CharAna972:%p GetWidthXYOFF972:%p", SetBack972, TexInit,CharAna972, GetWidthXYOFF972);
-			RwMem.Add(SetBack972, FunAdd972[2], 0xE8, 9);
-			RwMem.Add(TexInit, FunAdd972[3], 0xE8, 5);
-
-		}
-		//else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 1) {
-		else if (md5.compare("51F74355E759302FE68A8FF3DFB8681C")) {
-			//MD5：51F74355E759302FE68A8FF3DFB8681C
-			ReAdd = ReAdd971;
-			CanRun = true;
-			DoubleAdd = DoubleAdd971;
-			DOld1 = *(double*)(Base + 0x2B80B0);
-			DOld2 = *(double*)(Base + 0x2B82E0);
-			DOld3 = *(float*)(Base + 0x2B82F0);
-			sTexAdd = 0x4530;
-			sStartAdd = 0x2FC3B0;//2F0974;//StartAdd[2];
-			localePath = "locale";
-			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[7]));
-			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI971));
-			RwMem.Add(CharAna971, 0x163180, 0xE8, 9);
-			RwMem.Add(SetAll971, 0x1633BD, 0xE9, 7);
-			RwMem.Add(SetBack971, 0x164BCB, 0xE8, 7);
-			RwMem.Add(TexInit, 0x2321D9, 0xE8, 5);
-
-		}
-		//else if (Ver.HM == 0 && Ver.LM == 9 && Ver.HL == 7 && Ver.LL == 0) {
-		else if (md5.compare("DE13DEEFDD2400DA2BF557740397377A")) {
-			//MD5：DE13DEEFDD2400DA2BF557740397377A
-			DoubleAdd = DoubleAdd970;
-			ReAdd = ReAdd970;
-			CanRun = true;
-			DOld1 = *(double*)(Base + DoubleAdd970[0]);
-			DOld2 = *(double*)(Base + DoubleAdd970[1]);
-			DOld3 = *(float*)(Base + DoubleAdd970[2]);
-			sTexAdd = 0x4AC0;
-			sStartAdd = 0x2A4B00;//StartAdd[2];
-			localePath = "locale";
-			res.push_back(new RES(Type[1], ResName[4], localePath, ResId[7]));
-			res.push_back(new RES(Type[0], ResName[5], localePath, IDR_GUI971));
-			RwMem.Add(CharAna970, 0x149E50, 0xE8, 9);
-			RwMem.Add(SetAll970, 0x14A144, 0xE9, 7);
-			RwMem.Add(SetBack970, 0x14AB8E, 0xE8, 7);
-			RwMem.Add(TexInit, 0x1FB840, 0xE8, 5);
-			sewid971 = 15.0;
-
-		}
-	}
-	else {
-		msgmgr(1, "主程序校验异常");
-	}
-
-	if (CanRun) {
-	
-		res.push_back(new RES(Type[1], ResName[3], localePath, ResId[3]));
-		
-		res.push_back(new RES(Type[0], ResName[6], localePath, ResId[6]));
-		std::ifstream IF;
-		IF.open(SYSTEMPATH + "/"+ConfigFilePath);
-
-		if (!IF) {
-
-			CharADD.InitAll();
-		}
-		else {
-			IF.close();
-			IF.open(SYSTEMPATH + "/" + localePath + "/" + ResName[5]);
-				if (!IF) {
-					CharADD.InitFile();
-				}
-				else IF.close();
-		}
-		
-		
-		RE0 = (void*)(Base + ReAdd[0]);
-		RE1 = (void*)(Base + ReAdd[1]);
-		RE2 = (void*)(Base + ReAdd[2]);
-		TexEnd = (void*)(Base + sTexAdd);
-		start = (int*)(Base + sStartAdd);
-	//	msgmgr(0, "START");
-		RwMem.Start();
-	/*	CharADD.MainInit();
-		if (!CharADD.MainInit())msgmgr(1, "失败!");
-		//	CharADD.MainInit();
-		else msgmgr(1, "完成");*/
-	}
-
-
-}
-
-//函数 偏移 存储
-void GetCode(void* Fun, DWORD OffSet, BYTE *Code) {
-	DWORD CODE = (DWORD)Fun - ((DWORD)hModule2 + OffSet)-5;
-	BYTE* P = (BYTE*)&CODE;
-	for (int i = 0;i < 4;i++) {
-		Code[i+1] = P[i];
-	}
-}
-
-bool RunOnce1 = true;
-BOOL GetFileVersion(Version *Ver,HMODULE *hModle)
-{
-	
-	DWORD VerSize,dwHandle;
-	TCHAR strFile[256];
-	//printf("信息:");
-	GetModuleFileName(*hModle, strFile, sizeof(strFile)/2);
-	VerSize = GetFileVersionInfoSize(strFile, &dwHandle);
-	
-	if (VerSize == 0)
-		return FALSE;
-	TCHAR *lpdata = new TCHAR[VerSize];
-	if (lpdata == 0)return FALSE;
-	if (GetFileVersionInfo(strFile, 0, VerSize, lpdata))
-	{
-		//printf("信息2");
-		VS_FIXEDFILEINFO * pInfo=0;
-		unsigned int nInfoLen;
-
-		if (VerQueryValue(lpdata, L"\\", (LPVOID*)&pInfo, &nInfoLen))
-		{
-			Ver->HM = HIWORD(pInfo->dwFileVersionMS);
-			Ver->LM = LOWORD(pInfo->dwFileVersionMS);
-			Ver->HL = HIWORD(pInfo->dwFileVersionLS);
-			Ver->LL = LOWORD(pInfo->dwFileVersionLS);
-
-			delete[] lpdata;
-			return TRUE;
-		}
-	}
-	delete[] lpdata;
-	return FALSE;
-}
-
-
-
-char *Msg[] = { "Info" ,"Error" ,"Warning" ,"Debug" ,"Null" };
-BOOL isone = TRUE, IS2 = TRUE;
-//0 Info 1 Error 2 Warning 3 Debug 没卵用的错误输出
-void msgmgr(int type, char* msg, ...) {
-	std::ofstream AA;
-	char str[4096], *str2 = new char[5128];
-	va_list vlArgs;
-	va_start(vlArgs, msg);
-	vsnprintf_s(str, 4096, msg, vlArgs);
-	va_end(vlArgs);
-	GetLocalTime(&sys_time);
-
-
-	DWORD L = 0;
-	if (isone) {
-		FILE *fp;
-		fopen_s(&fp, LOGPATH.c_str(), "rb");
-		if (fp != NULL) {
-			fseek(fp, 0, SEEK_END);
-			L = ftell(fp);
-			fclose(fp);
-			AA.open(LOGPATH, L > 512 * 1024 ? std::ios::trunc : std::ios::app);
-		}
-		else {
-			AA.open(LOGPATH);
-
-		}
-
-
-		snprintf(str2, 5128, "\nTIME %04d-%02d-%02d %02d:%02d:%02d\n --------------------------\n", sys_time.wYear, sys_time.wMonth, sys_time.wDay, sys_time.wHour, sys_time.wMinute, sys_time.wSecond);
-		AA << str2;
-		isone = FALSE;
-	}
-
-	else {
-		AA.open(LOGPATH, std::ios::app);
-	}
-	snprintf(str2, 5128, "%02d:%02d:%02d.%03d [%s] %s\n", sys_time.wHour, sys_time.wMinute, sys_time.wSecond, sys_time.wMilliseconds, Msg[type>3 ? 4 : type], str);
-
-	AA << str2;
-
-	AA.close();
-	delete[] str2;
 }

@@ -18,6 +18,9 @@
 struct STA{
 	wchar_t ID[1];
 	char *str;
+	/*bool operator<(STA&a) {
+
+	};*/
 };
 // TODO:  在此处引用程序需要的其他头文件
 
@@ -32,8 +35,8 @@ extern std::vector<std::wstring> wstrv;
 void TEST(char* In, char*Out);
 class SEL {
 	const char* ConfigFile = "Config.ini";
-	char *Pstr[9] = { "File","1","2","3","4","5","6","7","DEF" };
-	wchar_t *WPstr[9] = { L"File",L"1",L"2",L"3",L"4",L"5",L"6",L"7",L"DEF" };
+	//char *Pstr[9] = { "File","1","2","3","4","5","6","7","DEF" };
+//	wchar_t *WPstr[9] = { L"File",L"1",L"2",L"3",L"4",L"5",L"6",L"7",L"DEF" };
 public:
 
 
@@ -123,11 +126,11 @@ public:
 	//bool Inread = false;int PageId = 0;
 
 	wchar_t* WGetConfig(int ID, wchar_t* str) {
-		wchar_t TMP[256];
+		wchar_t TMP[32];
 		
 		if (ID == -1)return wcsstr(str, L"PageFile");
 		else if(ID==0)return wcsstr(str, L"PageDEF");
-		swprintf(TMP, 256, L"Page%d", ID);
+		swprintf(TMP, 32, L"Page%d", ID);
 		return wcsstr(str, TMP);
 	}
 	void Init(int ID,const wchar_t* str) {
@@ -155,7 +158,7 @@ public:
 			WChar* WT = &Wstr[str[i]];
 			if (WT->use&&str[i] !='?') {
 				//printf(Pstr[WIDToID(WT->ID)]);
-				printf("警告:%X->%X:%X str:%d 重复\n",C,WT->ID,WT->str[1], str[i]);
+				printf("警告:%X->%X:%X str:%X 重复\n",C,WT->ID,WT->str[1], str[i]);
 				
 			}
 			else {
@@ -200,6 +203,7 @@ public:
 
 			}
 			else if (st == 3) {
+				Wstr[str[i]].UseSize++;
 				if (Wstr[str[i]].str[1] == 0) {
 					pstr->push_back('#');
 					if (Wstr[str[i]].Size == 0) {
@@ -217,7 +221,7 @@ public:
 					else {
 						pstr->push_back(Wstr[str[i]].str[0]);
 						pstr->push_back(Wstr[str[i]].str[1]);
-						Wstr[str[i]].UseSize++;
+						
 					}
 
 			}
@@ -317,7 +321,7 @@ public:
 //		void Release();
 //		int len = WideCharToMultiByte(CP_ACP, 0, wc, wcslen(wc), NULL, 0, NULL, NULL);
 		char* m_char = new char[2+1];
-		WideCharToMultiByte(CP_ACP, 0, wc, wcslen(wc), m_char, 2, NULL, NULL);
+		WideCharToMultiByte(CP_ACP, 0, wc, 1, m_char, 2, NULL, NULL);
 		m_char[2] = '\0';
 		return m_char;
 	}

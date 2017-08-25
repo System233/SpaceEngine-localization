@@ -3,59 +3,65 @@
 #include "stdafx.h"
 #include <vector>
 #include <stack>
-#include "gl/gl.h"
-#include "标头.h"
+#include "Define.h"
 #pragma  comment(lib, "opengl32.lib")
-CharAdd CharADD;
-char *Pstr[8] = { "File","1","2","3","4","5","6","7" };
+Localization StrMap;
 std::vector<BYTE> StrTemp;
 //std::deque<BYTE> Bque;
-std::deque<BYTE> Charvec;
-
+std::deque<BYTE> StrVec;
+float *WidAdd = NULL,*TABWid=NULL,*UWid=NULL;//输入部分:不需要
 int strX = 0, strY = 0;
 HANDLE mProc =0;
-//偏移 写入代码 大小
-BOOL WriteAdd(DWORD OffSet, BYTE *Code, size_t Size)
-{
 
-	LPVOID lpAddress = (void*)((DWORD)hModule2 + OffSet);
+//偏移 写入代码 大小
+BOOL WriteAdd(LPVOID lpAddress, const uint8_t *Code, size_t Size)
+{
 	DWORD dwTemp = 0, dwOldProtect = 0;
-	if (Code == 0 || lpAddress == 0 || Size == 0)return FALSE;
+	if (Code == 0 || lpAddress == 0 || Size == 0|| IsBadReadPtr(lpAddress,Size))return FALSE;
 	VirtualProtectEx(mProc, lpAddress, Size, PAGE_EXECUTE_READWRITE, &dwOldProtect);
-	if(!WriteProcessMemory(mProc, lpAddress, Code, Size, 0))return FALSE;
+	if (!WriteProcessMemory(mProc, lpAddress, Code, Size, 0))return FALSE;
 	VirtualProtectEx(mProc, lpAddress, Size, dwOldProtect, &dwTemp);
 	return TRUE;
-	
-	
 }
-BOOL ReadAdd(DWORD OffSet, BYTE *Code, size_t Size) {
-	LPVOID lpAddress = (void*)((DWORD)hModule2 + OffSet);
-	DWORD dwTemp = 0, dwOldProtect=0;
-	if (Code == 0 || lpAddress == 0 || Size == 0)return FALSE;
+BOOL WriteAdd(DWORD Offset, const uint8_t *Code, size_t Size)
+{
+	return WriteAdd((LPVOID)(Base + Offset), Code, Size);
+}
+BOOL ReadAdd(DWORD Offset, uint8_t *Code, size_t Size) {
+	return ReadAdd((LPVOID)(Base + Offset), Code, Size);
+}
+BOOL ReadAdd(LPVOID lpAddress, uint8_t *Code, size_t Size) {
+	DWORD dwTemp = 0, dwOldProtect = 0;
+	if (Code == 0 || lpAddress == 0 || Size == 0||IsBadReadPtr(lpAddress, Size))return FALSE;
 	VirtualProtectEx(mProc, lpAddress, Size, PAGE_EXECUTE_READWRITE, &dwOldProtect);
 	if (!ReadProcessMemory(mProc, lpAddress, Code, Size, 0))return FALSE;
 	VirtualProtectEx(mProc, lpAddress, Size, dwOldProtect, &dwTemp);
-	
 	return TRUE;
-	
 }
 #define GL_TEXTURE_BASE_LEVEL 0x813C  
 SYSTEMTIME sys_time;
-//BYTE STR[8192];
-void DEFASM CharAna974RC2() {
-	__asm {
-
-	}
-
+void save_texture() {
+	GLint Width, Height, Level;
+	
+	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, &Level);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, Level, GL_TEXTURE_WIDTH, &Width);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, Level, GL_TEXTURE_HEIGHT, &Height);
+	uint8_t *data = new uint8_t[Height*Width * 4];
+	glGetTexImage(GL_TEXTURE_2D, Level, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	GetLocalTime(&sys_time);
+	WCHAR path[MAX_PATH];
+	swprintf(path, MAX_PATH, L"%04d-%02d-%02d %02d-%02d-%02d-%03d.png", sys_time.wYear, sys_time.wMonth, sys_time.wDay, sys_time.wHour, sys_time.wMinute, sys_time.wSecond, sys_time.wMilliseconds);
+	PNG::write_png(path,data,Width,Height);
+	delete[]data;
+	msgmgr(MsgType::Debug, L"writing %s", path);
 }
 void DEFASM CharAna() {//字符串解析
 	__asm {
 		push ecx
 		push[esp + 0xC+4*0]
-		call CharAnalysis
+		call StringHook
 		mov[esp + 0x10+4*0], eax
 		add esp, 0x4
-
 		pop ecx
 		pop eax
 
@@ -64,7 +70,6 @@ void DEFASM CharAna() {//字符串解析
 		and esp, -0x10
 		jmp eax
 	}
-
 }
 //CALL==972
 void DEFASM CharAna973() {
@@ -79,7 +84,7 @@ void DEFASM CharAna972() {
 	__asm {
 		push ecx
 		push[esp + 0xC]
-		call CharAnalysis972
+		call StringHook972
 		mov[esp + 0x10], eax
 		add esp, 0x4
 		pop ecx
@@ -98,7 +103,7 @@ void DEFASM CharAna971() {
 	__asm {
 		push ecx
 		push [esp+0x18]
-		call CharAnalysis971
+		call StringHook971
 		mov [esp + 0x1C],eax
 		add esp,4
 		pop ecx
@@ -115,7 +120,7 @@ void DEFASM CharAna970() {
 	__asm {
 		push ecx
 		push[esp + 0x18]
-		call CharAnalysis971
+		call StringHook971
 		mov[esp + 0x1C], eax
 		add esp, 4
 		pop ecx
@@ -127,94 +132,50 @@ void DEFASM CharAna970() {
 
 	}
 }
-int LoadPNG(const char *filepath, PNGDATA *IMAGE)
-{
-	FILE *fp;
-	png_structp png_ptr;
-	png_infop info_ptr;
-	png_bytep* row_pointers;
-	char buf[PNG_BYTES_TO_CHECK];
-	size_t w, h, temp, color_type;
-
-	fopen_s(&fp, filepath, "rb");
-	if (fp == NULL) {
-		return -1;
+void DrawTexture() {
+	for (int i = 1; i < 256; i++) {
+		if (StrMap.Page[i].use) {
+			BYTE PID = StrMap.Page[i].PID;
+			std::wstring Path = SYSTEMROOT + localePath + L'/' + StrMap.Page[PID].File;
+			PNG img(Path);
+			long x = StrMap.Page[PID].OffsetX * 16, y = StrMap.Page[PID].OffsetY * 16 + 512, w = img.getWidth(), h = img.getHeight(), b = img.getBit();
+			if (!img || h != w || w != 256)
+				StrMap.Page[PID].use = false, msgmgr(MsgType::Error, Localization::sTexErr, (img ? Localization::sFmtErr : Localization::sLoadErr).c_str(), img.getError(), PID, w, h, b, x, y, Path.c_str());
+			else
+				glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, img.getFormat(), GL_UNSIGNED_BYTE, img.getData());
+			//	for (GLenum err;(err = glGetError()) != GL_NO_ERROR;)msgmgr(1,"GLERR ",gluErrorString(err));
+			// msgmgr(3, "加载[%d]:%d*%d*%d X:%d Y:%d Path:%s", img.getError(), w, h, b, x, y, Path.c_str());
+		}
 	}
-
-	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
-	info_ptr = png_create_info_struct(png_ptr);
-
-	setjmp(png_jmpbuf(png_ptr));
-	temp = fread(buf, 1, PNG_BYTES_TO_CHECK, fp);
-	if (temp < PNG_BYTES_TO_CHECK) {
-		fclose(fp);
-		png_destroy_read_struct(&png_ptr, &info_ptr, 0);
-		return -2;
-	}
-	temp = png_sig_cmp((png_bytep)buf, (png_size_t)0, PNG_BYTES_TO_CHECK);
-	if (temp != 0) {
-		fclose(fp);
-		png_destroy_read_struct(&png_ptr, &info_ptr, 0);
-		return -3;
-	}
-	rewind(fp);
-	png_init_io(png_ptr, fp);
-	png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND, 0);
-	color_type = png_get_color_type(png_ptr, info_ptr);
-	w = png_get_image_width(png_ptr, info_ptr);
-	h = png_get_image_height(png_ptr, info_ptr);
-	IMAGE->B = png_get_bit_depth(png_ptr, info_ptr);
-	int channels = png_get_channels(png_ptr, info_ptr);
-	IMAGE->W = w;
-	IMAGE->H = h;
-	BYTE *IMG=IMAGE->DATA = new BYTE[w*h *channels];
-	if (IMG == NULL)return -4;
-	row_pointers = png_get_rows(png_ptr, info_ptr);
-
-	for (size_t y = 0, Xsize = 0, cw = channels*w; y<h; y++) {
-		memcpy(&IMG[Xsize], row_pointers[y], cw);
-		Xsize += cw;
-	}
-	switch (color_type) {
-	case PNG_COLOR_TYPE_RGB_ALPHA:
-		IMAGE->fmt = GL_RGBA;
-		break;
-	case PNG_COLOR_TYPE_RGB:
-		IMAGE->fmt = GL_RGB;
-		break;
-	case 0:
-		IMAGE->fmt = GL_ALPHA;
-		break;
-	}
-	fclose(fp);
-	png_destroy_read_struct(&png_ptr, &info_ptr, 0);
-	return 0;
 }
-int TIMES = 0;bool TMSO = true;
-bool ReTex = false;
-
-BYTE* CharAnalysis(BYTE* str) {
+size_t last(0);
+bool ReTex(false),Init(true), isOk(false);;
+BYTE* StringHook(BYTE* str) {
 
 	if(str){
 	if (ReTex) {
-		if (TMSO) {
-			TMSO = false;
-			TIMES = *start;
+		if (Init){
+			if (!StrMap.MainInit())ReTex = false;
+			else last = *start, Init = false;
 		}
-		if ((*start - TIMES) > 1) {
-			CharADD.MainInit();
+		else if ((*start - last)>1) {
 			DrawTexture();
+			//save_texture();
+			Init = true;
 			ReTex = false;
-			TMSO = true;
 		}
 	}
-	Charvec.clear();
+	StrVec.clear();
 	StrTemp.clear();
 	size_t i = 0;
-	while (str[i] != 0) {
+	for (; str[i] != 0; i++) {
 		StrTemp.push_back(str[i]);
-		if (CharADD.Page[str[i]].use)Charvec.push_back(str[++i]);
-		i++;
+		if (StrMap.Page[str[i]].use) { 
+			const BYTE T = str[++i];
+			StrVec.push_back(T); 
+			if (T==0) break;
+		}
+		
 	}
 	StrTemp.push_back(0);
 	return StrTemp.data();
@@ -223,39 +184,30 @@ BYTE* CharAnalysis(BYTE* str) {
 }
 
 float Old1 = 0.0f,Old2=0.0f;
-BYTE* CharAnalysis972(BYTE* str) {
+BYTE* StringHook972(BYTE* str) {
 	if(str){
 	if (ReTex) {
-		if (TMSO) {
-			TMSO = false;
-			TIMES = *start;
+		if (Init) {
+			isOk = StrMap.MainInit();
+			last = *start;
+			Init = false;
 		}
-		if ((*start - TIMES) > 1) {
-			CharADD.MainInit();
-			GLint Level = 0, Hight = 0, Width = 0;
- 
+		else if ((*start - last) > 1) {
+			GLint Level = 0, Height = 0, Width = 0;
 			glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, &Level);
 			glGetTexLevelParameteriv(GL_TEXTURE_2D, Level, GL_TEXTURE_WIDTH, &Width);
-			glGetTexLevelParameteriv(GL_TEXTURE_2D, Level, GL_TEXTURE_HEIGHT, &Hight);
-			if (Hight == Width&&Hight % 256 == 0&& Width>256) {
-				int Z = 0,F= Width / 256;
+			glGetTexLevelParameteriv(GL_TEXTURE_2D, Level, GL_TEXTURE_HEIGHT, &Height);
+			if (isOk&&Height == Width&&Height % 256 == 0&& Width>256) {
+				int F= Width / 256;
+				auto it = StrMap.PageList.begin(), end = StrMap.PageList.end();
 				for (int Y = 0;Y < F;Y++)
-				for (int X = 0;X < F;X++)
+				for (int X = 0;X < F&&it!=end;X++, it++)
 				 {
-						if (X == 0 && Y == 0) {
-							continue;
-						}
-						else if(Z<8){
-							while ((WID[Z]) == 0)Z++;
-
-						//	msgmgr(3, "ID:%X X:%d Y:%d F:%d W:%d", WID[Z], X, Y, F, Width);
-							CharADD.Page[WID[Z]].OffSetX = X * 16, CharADD.Page[WID[Z++]].OffSetY = Y * 16;
-							
-						}
+						StrMap.Page[*it].OffsetX = X * 16;
+						StrMap.Page[*it].OffsetY = Y * 16;
 					}
 				//0.03125f 0.0020f
 				float A = Old1/ F, A2 = Old2/ F;
-				
 				WriteAdd(FloatAdd[0], (BYTE*)&A, sizeof(A));
 				WriteAdd(FloatAdd[1], (BYTE*)&A2, sizeof(A2));
 			//	WriteAdd(0x39B180, (BYTE*)&A, sizeof(A));
@@ -267,24 +219,25 @@ BYTE* CharAnalysis972(BYTE* str) {
 			//	WriteAdd(0x39B098, (BYTE*)&Old2, sizeof(Old2));
 				WriteAdd(FloatAdd[0], (BYTE*)&Old1, sizeof(Old1));
 				WriteAdd(FloatAdd[1], (BYTE*)&Old2, sizeof(Old2));
-			//	msgmgr(3, "IO1:%f o2:%f", Old1,Old2);
 			}
 
-			
+			Init = true;
 			ReTex = false;
-			TMSO = true;
 		}
 	}
 
 
 
-	Charvec.clear();
-	int i = 0;
+	StrVec.clear();
 	StrTemp.clear();
-	while (str[i] != '\0') {
-		StrTemp.push_back(str[i]);
-		if (CharADD.Page[str[i]].use)Charvec.push_back(str[++i]);
-		i++;
+	for (int i = 0; str[i] != 0; i++) {
+		BYTE T = str[i];
+		StrTemp.push_back(T);
+		if (StrMap.Page[T].use) {
+			StrVec.push_back(T = str[++i]);
+			if (T == 0) break;
+		};
+		
 	}
 	StrTemp.push_back(0);
 	return StrTemp.data();
@@ -293,35 +246,31 @@ BYTE* CharAnalysis972(BYTE* str) {
 }
 
 double DOld1 = 0, DOld2 = 0;float DOld3 = 0;
-BYTE* CharAnalysis971(BYTE* str) {
+BYTE* StringHook971(BYTE* str) {
 	if (str) {
 	if (ReTex) {
-		if (TMSO) {
-			TMSO = false;
-			TIMES = *start;
+		
+		if (Init) {
+			isOk = StrMap.MainInit();
+			last = *start;
+			Init = false;
 		}
-		if ((*start - TIMES) > 1) {
-			CharADD.MainInit();
-			GLint Level = 0, Hight = 0, Width = 0;
-
+		else if (*start - last > 1) {
+			GLint Level = 0, Height = 0, Width = 0;
 			glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, &Level);
 			glGetTexLevelParameteriv(GL_TEXTURE_2D, Level, GL_TEXTURE_WIDTH, &Width);
-			glGetTexLevelParameteriv(GL_TEXTURE_2D, Level, GL_TEXTURE_HEIGHT, &Hight);
-			if (Hight == Width&&Hight % 256 == 0 && Width>256) {
-				int Z = 0, F = Width / 256;
+			glGetTexLevelParameteriv(GL_TEXTURE_2D, Level, GL_TEXTURE_HEIGHT, &Height);
+			if (isOk&&Height == Width&&Height % 256 == 0 && Width>256) {
+				int F = Width / 256;
+				auto it = StrMap.PageList.begin(), end = StrMap.PageList.end();
 				for (int Y = 0;Y < F;Y++)
-					for (int X = 0;X < F;X++)
+					for (int X = 0;X < F&&it != end; X++, it++)
 					{
-						if (X == 0 && Y == 0) {
-							continue;
-						}
-						else if (Z<8) {
-							while ((WID[Z]) == 0)Z++;
-
-							//	msgmgr(3, "ID:%X X:%d Y:%d F:%d W:%d", WID[Z], X, Y, F, Width);
-							CharADD.Page[WID[Z]].OffSetX = X * 16, CharADD.Page[WID[Z++]].OffSetY = Y * 16;
-
-						}
+						StrMap.Page[*it].OffsetX = X * 16;
+						StrMap.Page[*it].OffsetY = Y * 16;
+						/*if (Y == 0&&X == 0) continue;
+								(*it)->OffsetX = X * 16, (*it)->OffsetY = Y * 16;
+								it++;*/
 					}
 				//0.03125f 0.0020fSpaceEngine.exe+2B80B0
 				double A = DOld1 * F, A2 = double(Width);
@@ -341,68 +290,49 @@ BYTE* CharAnalysis971(BYTE* str) {
 				WriteAdd(DoubleAdd[0], (BYTE*)&DOld1, sizeof(DOld1));
 				WriteAdd(DoubleAdd[1], (BYTE*)&DOld2, sizeof(DOld2));
 				WriteAdd(DoubleAdd[2], (BYTE*)&DOld3, sizeof(DOld3));
-				//	msgmgr(3, "IO1:%f o2:%f", Old1,Old2);
 			}
 
-
+			Init = true;
 			ReTex = false;
-			TMSO = true;
 		}
 	}
 
 
-	Charvec.clear();
+	StrVec.clear();
 	StrTemp.clear();
-	int i = 0;
-	while (str[i] != '\0') {
-		StrTemp.push_back(str[i]);
-		if (CharADD.Page[str[i]].use)Charvec.push_back(str[++i]);
-		i++;
+	
+	for (int i = 0; str[i] != 0;i++) {
+		BYTE T = str[i];
+		StrTemp.push_back(T);
+		if (StrMap.Page[T].use) {
+			T = str[++i];
+			StrVec.push_back(T);
+			if (T == 0) break;
+		}
 	}
 	StrTemp.push_back(0);
 	return StrTemp.data();
 	}else return str;
 }
-void DrawTexture() {
-	for (int i = 0;i < 256;i++) {
-		if (CharADD.Page[i].use) {
-			BYTE PID = CharADD.Page[i].PID;
-			int x = CharADD.Page[PID].PX;
-			int y = CharADD.Page[PID].PY;
-			PNGDATA IMAGE;
-			std::string Path = SYSTEMPATH + "/" + localePath + "/" + CharADD.Page[PID].File;
-			int ERR = LoadPNG(Path.c_str(), &IMAGE);
-			if (ERR != 0 || IMAGE.W != IMAGE.H || IMAGE.W != 256) {
-				CharADD.Page[PID].use = false;
-				msgmgr(1, "纹理加载失败[%d]:%d*%d*%d X:%d Y:%d Path:%s", ERR, IMAGE.W, IMAGE.H, IMAGE.B, x, y, Path.c_str());
-				//continue;
-			}else{
-			glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, IMAGE.W, IMAGE.H, IMAGE.fmt, GL_UNSIGNED_BYTE, IMAGE.DATA);
-			}
-			if (IMAGE.DATA) delete[] IMAGE.DATA; 
-		}
 
-	}
-
-}
 
 float OneByte = 0.004f;
-float OFFSetA=0.0f,Width=0.0f;
+float OffsetA=0.0f,Width=0.0f;
 
 bool HasConfig =0;
-void GetWidth(int ch) {//宽1处设置所有值
-	if (CharADD.Page[ch].use&& !Charvec.empty()) {
-			BYTE ID = Charvec.front();
-			Charvec.pop_front();
-			//	Charvec.erase(Charvec.begin());
-			OffSet*PAGE = CharADD.Page[ch].Page;
+void GetWidth(BYTE ch) {//宽1处设置所有值
+	if (!StrVec.empty()&&StrMap.Page[ch].use) {
+			BYTE ID = StrVec.front();
+			StrVec.pop_front();
+			//	StrVec.erase(StrVec.begin());
+			Offset*PAGE = StrMap.Page[ch].getInfo();
 
-			if (PAGE != 0) {
+			if (PAGE != nullptr) {
 				//double OFF = PAGE[ch].Off;
-				strX = CharADD.Page[ch].OffSetX + (ID % 16);//strX = 16 + (ID % 16);
-				strY = CharADD.Page[ch].OffSetY + (ID / 16);//strY = ID / 16;
+				strX = StrMap.Page[ch].OffsetX + (ID % 16);//strX = 16 + (ID % 16);
+				strY = StrMap.Page[ch].OffsetY + (ID / 16);//strY = ID / 16;
 				Width = PAGE[ID].Width;
-				OFFSetA = PAGE[ID].Off;
+				OffsetA = PAGE[ID].Off;
 				HasConfig = 1;
 				return;
 			}
@@ -415,9 +345,13 @@ void GetWidth(int ch) {//宽1处设置所有值
 //JMP SpaceEngine.exe+201B6B RE SpaceEngine.exe+201BC9 9B
 void DEFASM SetAll973() {
 	__asm {
+		push ecx
+		push eax
 		push edx
 		call GetWidth
 		pop edx
+		pop eax
+		pop ecx
 		cmp HasConfig, 0
 		jz NOCONFIG
 		movss xmm1, Width//[esi + edx * 0x4 + 0x000000CC]
@@ -444,7 +378,7 @@ void DEFASM SetAll973() {
 		//movzx eax, cl
 		mov eax, strY
 		mulss xmm0, xmm2
-		addss xmm0, OFFSetA//[esi + edx * 0x4 + 0x000004CC]
+		addss xmm0, OffsetA//[esi + edx * 0x4 + 0x000004CC]
 		jmp RE2
 		NOCONFIG:
 		movss xmm1, [esi + edx * 0x4 + 0x000000CC]
@@ -477,10 +411,14 @@ void DEFASM SetAll973() {
 //SpaceEngine.exe+1633BD call 7
 void DEFASM SetAll971() {
 	__asm {
+		push eax
+		push edx
 		push ecx
 		call GetWidth
 		cmp HasConfig, 0
 		pop ecx
+		pop edx
+		pop eax
 		jz NOCONFIG
 		fmul dword ptr [Width]//[eax + ecx * 4 + 0x68]
 		fstp dword ptr[ebp - 0x2C]
@@ -502,7 +440,7 @@ void DEFASM SetAll971() {
 		fdiv qword ptr [edx]//[SpaceEngine.exe + 0x2B80B0]//{ [32.00] }
 		movzx edx, byte ptr[ebp - 0x35]
 		//mov eax, [ebp - 0x64]
-		fadd dword ptr [OFFSetA]//[eax + edx * 0x4 + 0x00000468]
+		fadd dword ptr [OffsetA]//[eax + edx * 0x4 + 0x00000468]
 		fstp dword ptr[ebp - 0x3C]
 		movzx ecx, byte ptr[ebp - 0x35]
 		mov ecx,strY//sar ecx, 0x04// { 4 }
@@ -541,10 +479,13 @@ void DEFASM SetAll971() {
 //JMP SpaceEngine.exe+14A144   RE SpaceEngine.exe+14A195 7
 void DEFASM SetAll970() {
 	__asm {
+		push eax
+		push edx
 		push ecx
 		call GetWidth
 		pop ecx
-		
+		pop edx
+		pop eax
 		cmp HasConfig, 0
 		jz NOCONFIG
 		
@@ -613,14 +554,15 @@ void DEFASM SetAll970() {
 }
 void DEFASM GetWidth980() {
 	__asm{
-	//	push ebx
+		push edx
 		push ecx
 		push eax
 		call GetWidth
+		cmp HasConfig, 0
 		pop eax
 		pop ecx
-	//	pop ebx
-		cmp HasConfig,0
+		pop edx
+		
 		jz NOCONFIG
 		mulss xmm4, Width
 		ret 0
@@ -685,7 +627,7 @@ void DEFASM GetWidthXYOFF972() {
 
 		movzx eax, strY
 		mulss xmm0, xmm2
-		addss xmm0, OFFSetA
+		addss xmm0, OffsetA
 		jmp RE2//SpaceEngine.exe+1F0CB9 - F3 0F11 44 24 2C      - movss [esp+2C],xmm0
 
 
@@ -746,7 +688,7 @@ void DEFASM GetCharXYOffAndWid() {//宽度 偏移 坐标 三合一
 			cvtdq2ps xmm6, xmm6
 			mulss xmm7, xmm0
 			mulss xmm6, xmm0
-			addss xmm7, OFFSetA
+			addss xmm7, OffsetA
 			
 			jmp RE0
 			NOCONFIG:
@@ -803,7 +745,7 @@ addss xmm7,[esi+edx*4+0000045C]
 		cvtdq2ps xmm6, xmm6
 		mulss xmm7, xmm0
 		mulss xmm6, xmm0
-		addss xmm7, OFFSetA//[esi + edx * 0x4 + 0x0000045C]
+		addss xmm7, OffsetA//[esi + edx * 0x4 + 0x0000045C]
 		jmp[RE0]
 		NOCONFIG:
 		movss xmm5, [esi + edx * 0x4 + 0x5C]
@@ -850,7 +792,7 @@ void DEFASM GetCharXYOW974() {
 		cvtdq2ps xmm6, xmm6
 		mulss xmm7, xmm0
 		mulss xmm6, xmm0
-		addss xmm7, OFFSetA
+		addss xmm7, OffsetA
 		jmp RE0
 
 		NOCONFIG:
@@ -876,8 +818,9 @@ void DEFASM GetCharXYOW974() {
 		jmp RE0
 	}
 }
+
 void DEFASM TexInit() {
-			
+	
 	__asm {
 		mov ReTex, 1
 		jmp TexEnd
@@ -885,13 +828,14 @@ void DEFASM TexInit() {
 	}
 }
 float Offset2 = 0;
-int ostr = 0, swi = 0;//lpage = 0;
-OffSet* LPage;
+//int ostr = 0, swi = 0;//lpage = 0;
+
+Offset* LPage;
 bool ohas = 0, OH2 = false;;//seted = 1;
-void GetOffset() {
+void GetOffset(BYTE ostr) {
 	if(!OH2){
-		if (CharADD.Page[ostr].use) {
-			LPage = CharADD.Page[ostr].Page;
+		if (StrMap.Page[ostr].use) {
+			LPage = StrMap.Page[ostr].getInfo();
 			ohas = 1;Offset2 = 0;
 			OH2 = true;
 			return;
@@ -899,7 +843,7 @@ void GetOffset() {
 	}else {
 	//	if(LPage)
 	//	msgmgr(1, "LPage:%p", LPage);
-		Offset2 = LPage[ostr].Width;
+		Offset2 = LPage?LPage[ostr].Width:10.0f;
 		
 		ohas = 1;
 		OH2 = false;
@@ -914,8 +858,10 @@ void DEFASM SetBackWid980() {//黄色背景宽度 位置SpaceEngine.exe+20705C  方式:cal
 	__asm {
 		push eax
 		push ecx
-		mov ostr, edx
+//		mov ostr, edx
+		push edx
 		call GetOffset
+		pop edx
 		cmp ohas,1
 		pop ecx
 		pop eax
@@ -933,13 +879,16 @@ void DEFASM SetBackWid980() {//黄色背景宽度 位置SpaceEngine.exe+20705C  方式:cal
 
 void DEFASM SetBack972() {
 	__asm {
+		push edx
 		push eax
 		push ecx
-		mov ostr, ecx
+		//mov ostr, ecx
+
 		call GetOffset
 		cmp ohas, 1
 		pop ecx
 		pop eax
+		pop edx
 		jz OHASC
 		movss xmm0, [esi + ecx * 0x4 + 0x000000CC]
 		ret 0
@@ -955,9 +904,10 @@ void DEFASM SetBack971() {
 	__asm {
 		push eax
 		//psuh ecx
-		mov ostr, ecx
+		//mov ostr, ecx
+		push ecx
 		call GetOffset
-		//pop ecx
+		pop ecx
 		pop eax
 		cmp ohas, 1
 		jz OHASC
@@ -976,8 +926,10 @@ void DEFASM SetBack971() {
 void DEFASM SetBack970() {
 	__asm {
 		push ecx
-		mov ostr, edx
+		//mov ostr, edx
+		push edx
 		call GetOffset
+		pop edx
 		pop ecx
 		pop eax
 		cmp ohas, 1
@@ -991,4 +943,361 @@ void DEFASM SetBack970() {
 		jmp eax
 	}
 
+}
+
+
+
+
+size_t Input(size_t UTF16,BYTE *str,size_t sp) {
+	BYTE*P=StrMap.GetCharCode(UTF16);
+	if (P!=0) {
+		if (P[0] != 0) { 
+			str[sp] = P[0];
+			size_t size = 0;
+			while (str[sp + size] != 0)size++;
+			while (size)str[sp + size + 1] = str[sp + size], size--;
+			str[sp + 1] = P[1];
+			return 2; }
+		else { str[sp] = P[1]; 
+			return 1;
+			}
+		
+	}
+	return 0;
+}
+void DEFASM Input980() {
+	__asm {
+		
+		mov ecx, [ebp + 0x10]
+		push eax
+		push edx
+		push ecx
+		call Input
+		cmp eax, 1
+		pop ecx
+		pop edx
+		
+		jz RET0
+		jg cpyw
+		pop eax
+		mov[eax + edx], cl
+		ret 0
+		cpyw:
+		mov eax, [esp+0x40]
+		inc dword ptr[eax+0X134]
+		inc dword ptr[ebp+0X28]
+		RET0:
+		pop eax
+		ret 0
+	}
+}
+VOID DEFASM InputFlag980() {
+	__asm {
+
+	}
+}
+DWORD MOVDP = 0;
+float PtrWidth = 0.0f;
+/*
+void DEFASM PtrRM() {//call SpaceEngine.exe+15B0CA - 89 81 34010000        - mov [ecx+00000134],eax { 指针右移}
+
+	__asm {
+		push eax
+		push ecx
+		push 0
+		push ecx
+		add dword ptr [esp], 0xFC
+		push edx
+		call PtrMove
+		cmp eax, 0
+		pop ecx
+		pop eax
+		jz NMV
+		inc eax
+		movss xmm1, PtrWidth//{ [1.00] }
+
+		NMV :
+		mov[ecx + 0x134], eax//{ 指针右移}
+		ret 0
+	}
+}
+
+void DEFASM PtrLM() {//call SpaceEngine.exe+15B12C - F3 0F10 0C 85 6C2E7900  - movss xmm1,[eax*4+SpaceEngine.exe+532E6C]
+
+	__asm {
+		push eax
+		push ecx
+		push 1
+		push ecx
+		add dword ptr [esp],0xFC
+		push edx
+		call PtrMove
+		cmp eax,1
+		pop ecx
+		pop eax
+		jz HMV
+		push ebx
+		mov ebx,[MOVDP]
+		movss xmm1, [eax * 4 + ebx]
+		pop ebx
+		ret 0
+		HMV:
+		movss xmm1, PtrWidth
+		cmp [ecx + 0X134], 0
+		jz RET0
+		dec[ecx + 0X134]
+		RET0:
+		ret 0
+	}
+}*/
+float TW = 0;
+float* WINAPI PtrMove(size_t p, BYTE*str,size_t *ptr, bool m) {
+	if(str[p])
+	if (StrMap.Page[str[p - m]].use) {
+		//PtrWidth = StrMap.Page[str[p - m]].Page[str[p + !m]].Width;
+		m ? (*ptr)-=2: (*ptr)+=2;
+		return &StrMap.Page[str[p - m]].getInfo()[str[p + !m]].Width;
+	}
+	else {
+		//PtrWidth = WidAdd[str[p]];
+		m ? (*ptr)-- : (*ptr)++;
+		return &WidAdd[str[p]];
+	}
+	return &TW;
+}
+void DEFASM PtrLMove() {//jmp SpaceEngine.exe+15B0F0 - 80 A1 54010000 FE     - and byte ptr [ecx+00000154],-02 { 254 } 7
+
+	__asm {
+		and byte ptr[ecx + 0x154], -0x02 //{ 254 }
+		mov eax, [ecx + 0x134]
+			test eax, eax
+		je RET0//je SpaceEngine.exe + 15B151
+			lea edx, [eax - 0x01]
+			lea eax, [ecx + 0xFC]
+			//mov[ecx + 0x134], edx//{ 指针左移}
+			cmp dword ptr[eax + 0x14], 0x10// { 16 }
+		jb J15B118 //jb SpaceEngine.exe + 15B118
+			mov eax, [eax]
+		J15B118:
+			push ebx
+			mov bl, [edx + eax]
+			cmp bl, 0x09 //{ 9 }
+		jne J15B129//SpaceEngine.exe + 15B129
+			mov ebx,[TABWid]
+			movss xmm1, [ebx]//[SpaceEngine.exe + 0x532E14]{ [150.00] }
+		jmp J15B135//SpaceEngine.exe + 15B135
+		J15B129:
+			push ecx
+			push 1
+			push ecx
+			add dword ptr[esp],0x134
+			push eax
+			push edx
+			call PtrMove
+			pop ecx
+		//	movzx eax, al
+		//	mov ebx,[WidAdd]
+			movss xmm1,[eax] //[eax * 4 + ebx]//[eax * 4 + SpaceEngine.exe + 532E6C]
+		J15B135:
+			mov ebx, [UWid]
+			mulss xmm1,[ebx]// [SpaceEngine.exe + 0x532E1C]{ [1.00] }
+			pop ebx
+			movss xmm0, [ecx + 0x138]
+			subss xmm0, xmm1
+			movss[ecx + 0x138], xmm0
+			RET0:
+			ret 0
+
+	}
+
+}
+void DEFASM PtrRMove() {//jmp SpaceEngine.exe+15B070 - 8B 91 34010000        - mov edx,[ecx+00000134] 6
+
+	__asm {
+		mov edx, [ecx + 0x134]
+		and byte ptr[ecx + 0x154], -0x02// { 254 }
+		movd xmm0, edx
+			cvtdq2ps xmm0, xmm0
+			ucomiss xmm0, [ecx + 0x13C]
+			lahf
+			test ah, 0x44// { 68 }
+		jnp RET0//SpaceEngine.exe + 0x15B0E4
+			cmp dword ptr[ecx + 0x110], 0x10// { 16 }
+		lea eax, [ecx + 0xFC]
+			jb J15B0A2//SpaceEngine.exe + 0x15B0A2
+			mov eax, [eax]
+		J15B0A2:
+			push ebx
+			
+			mov bl, [edx + eax]
+			cmp bl, 0x09// { 9 }
+		jne J15B0B3//SpaceEngine.exe + 0x15B0B3
+			mov ebx, [TABWid]
+			movss xmm1,[ebx]// [SpaceEngine.exe + 0x532E14]//{ [150.00] }
+			jmp J15B0BF//SpaceEngine.exe + 0x15B0BF
+		J15B0B3:
+			push ecx
+			push 0
+			push ecx
+			add  dword ptr[esp], 0x134
+			push eax
+			push edx
+			call PtrMove
+			//movzx eax, al
+			movss xmm1, [eax]//[eax * 0x4 + SpaceEngine.exe + 0x532E6C]
+			pop ecx
+		J15B0BF:
+			mov ebx, [UWid]
+			mulss xmm1, [ebx]//[SpaceEngine.exe + 0x532E1C]//{ [1.00] }
+			pop ebx
+			//lea eax, [edx + 0x01]
+		//	mov[ecx + 0x134], eax//{ 指针右移}
+			movss xmm0, [ecx + 0x138]
+			addss xmm0, xmm1
+			movss[ecx + 0x138], xmm0
+		RET0:
+			ret
+
+
+	}
+
+}
+void WINAPI NInput980(BYTE *pstr,size_t UTF16,size_t p,size_t *m,size_t *ptr) {
+	BYTE*P = StrMap.GetCharCode(UTF16);
+	if(P){
+		size_t size = 0;
+		while (pstr[p + (size++)]);
+		if(*m>p)while (size--)  pstr[p + size + (P[0] ? 1 : 0)] = pstr[p + size-1]; 
+		if (P[0]) {
+		pstr[p] = P[0],pstr[p+1] = P[1];
+		(*ptr)++,(*m)++;
+		}else 
+			pstr[p] = P[1];
+	}else {
+		pstr[p] = BYTE(UTF16);
+	}
+}
+void *IRETADD=0;
+void DEFASM InputASM980() {
+	__asm {
+		push ebp
+		mov ebp, esp
+		mov eax, [ebp + 0x0C]
+		mov edx, ecx
+		cmp eax, 0x01// { 1 }
+		jne J3F3B2//SpaceEngine.exe + 0x3F3B2
+			cmp dword ptr[edx + 0x14], 0x10 //{ 16 }
+		jb J3F3A5//SpaceEngine.exe + 0x3F3A5
+			mov edx, [edx]
+		J3F3A5:
+			//mov eax, [ebp + 0x08]
+			//mov cl, [ebp + 0x10]//<<<<<<<
+			//mov[eax + edx], cl
+			/*mov eax, [esp+0x18]
+			add eax,0x134//0x28
+			inc dword ptr [eax]
+			lea eax,[esp+0x28]
+			inc dword ptr [eax]*/
+			push [esp+0x18]
+			add  dword ptr[esp], 0x134
+			push esp
+			add [esp],0x28+4
+			push [ebp + 0x08]
+			push [ebp + 0x10]
+			push edx
+			call NInput980
+
+			
+			pop ebp
+			ret 0xC//{ 12 }
+		J3F3B2:
+			cmp dword ptr[edx + 0x14], 10 //{ 16 }
+		jb J3F3BA//SpaceEngine.exe + 0x3F3BA
+			mov edx, [edx]
+		J3F3BA:
+			JMP IRETADD
+			/*push eax
+			mov eax, [ebp + 0x10]
+			movsx eax, al
+			push eax
+			mov eax, [ebp + 0x08]
+			add eax, edx
+			push eax
+			call //SpaceEngine.exe + 7F010
+			add esp, 0x0C//{ 12 }
+			pop ebp
+			ret 0xC//{ 12 }*/
+
+	}
+}
+
+/*void DelStr(BYTE*wstr,BYTE*mstr,size_t s){//SpaceEngine.exe+3E091 - call SpaceEngine.exe+789F0 { 删除}
+
+	if (StrMap.Page[*(wstr - 1)].use)wstr--;
+	while (s--)*(wstr++) = *(mstr++);
+}*/
+void WINAPI DelStr2(float *F1,float *F2,BYTE *str,size_t m,size_t *p) {
+	float A = 0;
+	if (StrMap.Page[str[m - 1]].use) {
+		m--,(*p)--,A = StrMap.Page[str[m]].getInfo()[m+1].Width;
+		while (str[m+2] != 0) { str[m] = str[m + 2]; m++; }
+		
+	}else {
+		if (!StrMap.Page[str[m]].use)A = WidAdd[str[m]];
+		else if (str[m] == 0x9)A = *TABWid;
+		while (str[m + 1] != 0) { str[m] = str[m + 1]; m++; }
+	}
+	str[m] = 0;
+	*F1 -= A,*F2 -= A;
+
+}
+void DEFASM DelStr980() {//SpaceEngine.exe+15B29B - 72 04                 - jb SpaceEngine.exe+15B2A1 6
+	__asm {
+		jb J15B2A1//SpaceEngine.exe + 15B2A1
+			mov eax, [ecx]
+		jmp J15B2A3//SpaceEngine.exe + 15B2A3
+		J15B2A1:
+			mov eax, ecx
+		J15B2A3:
+			push esi//[esi + 00000134]
+			add [esp],0x134
+			push edx
+			push eax
+			lea eax,[esi + 0x00000138]
+			push eax
+			lea eax, [esi + 0x00000140]
+			push eax
+			call DelStr2
+			pop esi
+			ret 
+		/*	mov al, [edx + eax]
+			cmp al, 0x09 //{ 9 }
+		jne J15B2B4//SpaceEngine.exe + 15B2B4
+			mov ebx, [TABWid]
+			movss xmm1, [ebx]//[SpaceEngine.exe + 0x532E14]//{ [150.00] }
+		jmp J15B2C0//SpaceEngine.exe + 15B2C0
+		J15B2B4:
+			movzx eax, al
+			movss xmm1, [eax * 0x4 + SpaceEngine.exe + 0x532E6C]
+		J15B2C0:
+			mulss xmm1, [SpaceEngine.exe + 0x532E1C]//{ [1.00] }
+			push 0x01 //{ 1 }
+		movss xmm0, [esi + 0x00000138]
+			push edx
+			subss xmm0, xmm1
+			movss[esi + 0x00000138], xmm0
+			movss xmm0, [esi + 0x00000140]
+			subss xmm0, xmm1
+			movss[esi + 0x00000140], xmm0
+			call SpaceEngine.exe + 0x3E030
+			mov eax, [esi + 0x000000E0]
+			test eax, eax
+		je J15B305//SpaceEngine.exe + 15B305
+			pop esi
+			jmp eax
+		J15B305:
+			pop esi
+			ret*/
+
+	}
 }

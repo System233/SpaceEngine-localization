@@ -8,8 +8,6 @@
 #include <SDKDDKVer.h>
 
 
-//using namespace std;
-
 /*!
 * Manage MD5.
 */
@@ -240,6 +238,7 @@ typedef size_t uint32;
 		PUT_UINT32(ctx->state[2], digest, 8);
 		PUT_UINT32(ctx->state[3], digest, 12);
 	}
+	
 public:
 	//! construct a MD5 from any buffer
 	void GenerateMD5(BYTE* buffer, size_t bufferlen)
@@ -258,19 +257,16 @@ public:
 	//! construct a md5src from char *
 	MD5(const char* md5src)
 	{
-		if (strcmp(md5src, "") == 0)
+		if (!md5src||strcmp(md5src, "") == 0)
 		{
 			for (int i = 0;i<4;i++)
 				m_data[i] = 0;
 			return;
 		}
-		for (int j = 0; j < 16; j++)
-		{
-			char buf[10];
-			strncpy_s(buf, md5src, 2);
-			md5src += 2;
-			((unsigned char*)m_data)[j] = _httoi(buf);
-		}
+		auto hex=[](uint8_t ch)->uint8_t{
+			return ch - (ch<='9'?'0':((ch<='F'?'A':'a')-0xA));
+		};
+		for (int j = 0; j<16; j++)byte[j] =(hex(md5src[j * 2]) << 4) | (hex(md5src[j * 2 + 1]) & 0xF);
 	}
 	//! construct a MD5 from a 16 bytes md5
 	MD5(unsigned long* md5src)
@@ -343,6 +339,10 @@ public:
 	{
 		return (memcmp(cmper.m_data, m_data, 16) == 0);
 	}
+	bool operator ==(const char*cmper)
+	{
+		return *this== MD5(cmper);
+	}
 	//! give the value from equer
 	// void operator =(MD5 equer);
 
@@ -351,31 +351,27 @@ public:
 	{
 		char output[33];
 		for (int j = 0; j < 16; j++)
-		{
-			snprintf(output + j * 2, sizeof(output), "%02x", ((unsigned char*)m_data)[j]);
-		}
+			snprintf(output + j * 2, sizeof(output), "%02x", byte[j]);
 		return std::string(output);
 	};
 	std::string GetCapMd5()
 	{
 		char output[33];
 		for (int j = 0; j < 16; j++)
-		{
-			snprintf(output + j * 2, sizeof(output), "%02X", ((unsigned char*)m_data)[j]);
-		}
+			snprintf(output + j * 2, 3, "%02X", byte[j]);
 		return std::string(output);
 	};
-	bool compare(const char* str) {
-		return (GetCapMd5().compare(str)==0);
-	}
 	std::wstring GetCapMd5W() {
 		WCHAR O[33];
 		for (int j = 0; j < 16; j++)
-		{
-			wsprintfW(O + j * 2, L"%02X", ((unsigned char*)m_data)[j]);
-		}
-		//wstring(O)
+			swprintf_s(O + j * 2,3, L"%02X", ((unsigned char*)m_data)[j]);
+		
 		return std::wstring(O);
 	}
-	unsigned long m_data[4];
+	union 
+	{
+		uint8_t byte[32];
+		uint32_t m_data[4];
+	};
+
 };

@@ -4,869 +4,562 @@
 //
 
 #pragma once
-#define  PNG_BYTES_TO_CHECK 4
+
+#define ProjectVersion "1010"
 #define DEFASM __declspec(naked) 
 #define WIN32_LEAN_AND_MEAN             // 从 Windows 头中排除极少使用的资料
 // Windows 头文件: 
 #include <windows.h>
 #include <png.h>
 #include "resource.h"
-//#include <tchar.h>
+#include <map>
+#include<memory>
+#include "gl/gl.h"
+//#include "gl/glu.h"
 //#include <iostream>
 #include <vector>
 #include <sstream> 
 #include <fstream>
 #include "targetver.h"
-void TexInit();
-extern DWORD glTexAdd,*glTex2DAdd, Base;
+#include "json\json.h"
+#include<mutex>
+extern DWORD Base;
 extern HANDLE mProc;
 extern bool ReTex;
-extern std::string SYSTEMPATH,localePath;
+extern std::wstring SYSTEMROOT;
+extern LPCSTR Lang;
+extern LPCWSTR localePath;
 extern float Old1, Old2;
-BYTE* CharAnalysis972(BYTE* str);
-
-void msgmgr(int type, char* msg, ...),SetBack972(), GetWidthXYOFF972();
-BOOL WriteAdd(DWORD OffSet, BYTE *Code, size_t Size);
-BOOL ReadAdd(DWORD OffSet, BYTE *Code, size_t Size);
-//void CharXY();
-BYTE* CharAnalysis(BYTE* str);
-void CharAna();
-BOOL SEMain(int mode);
-extern HMODULE hModule2, DLL;
-typedef struct {
-	BYTE *DATA;
-	long fmt = 0;
-	long W;
-	long H;
-	long B;
-}PNGDATA;
-int LoadPNG(const char *filepath, PNGDATA *IMAGE);
-
-//extern DWORD *ReAdd;
-extern void *RV, *RV2 , *TexEnd;
-struct Version {
-	int HM = 0;
-	int LM = 0;
-	int HL = 0;
-	int LL = 0;
-
-};
-BOOL GetFileVersion(Version *Ver, HMODULE *hModle);
-
-extern BYTE STR[8192];
-struct OffSet {
-	float Off = 0.0;
-	float Width = 12;
-};
-BOOL GetFileVersion(Version *Ver, HMODULE *hModle);
-extern char *Pstr[8];
-extern bool INITED, Is980;
+extern size_t maxLogSize;
 extern SYSTEMTIME sys_time;
 extern MD5 md5;
-void DrawTexture();
-class PageInfo {
+enum class MsgType {Info,Error,Warning,Debug,Null};
+//0 Info 1 Error 2 Warning 3 Debug
+//void msgmgr(MsgType _Ty, const char* msg, ...);
+void msgmgr(MsgType _Ty, const std::wstring msg, ...);
+void openErr(const std::wstring&path);
+//void msgmgr(int _Ty, const std::wstring &msg, ...);
+BOOL WriteAdd(LPVOID lpAddress, uint8_t *Code, size_t Size);
+BOOL ReadAdd(LPVOID lpAddress, uint8_t *Code, size_t Size);
+BOOL WriteAdd(DWORD Offset, const uint8_t *Code, size_t Size);
+BOOL ReadAdd(DWORD Offset, uint8_t *Code, size_t Size);
+class UTF {
+	std::string utf8;
+	std::wstring utf16;
 public:
-
-	void Init() {
-		if (Page){delete[] Page;Page = 0;
+	UTF(std::string &str) {
+		Codec(str);
 	}
-		OffSetX = OffSetY = PX = PY = ID = PID = 0;
-		File.clear();
-		use = false;
+	UTF(std::wstring &str) {
+		Codec(str);
 	}
-	PageInfo() {
-		Init();
-	};
-	PageInfo(BYTE I,BYTE PI,int X,int Y,int OX,int OY,std::string F) {
-		OffSetX = OX, OffSetY = OY, PX = X, PY = Y, ID = I,PID=PI, File = F;
-	};
-	~PageInfo() {
-		Init();
+	size_t Codec(std::string &str) {
+		utf8 = str;
+		utf16 = Decode(str);
+		return utf16.size();
 	}
-	std::string File;
-	//BYTE PageId[1];
-	int OffSetX = 0;
-	int OffSetY = 0;
-	int PX = 0;
-	int PY = 0;
-	BYTE PID = 0;// 页映射ID
-	BYTE ID=0;//页序号ID 
-	OffSet* Page=0;
-	bool use = false;
-};
-
-
-class CharD {
-public:
-	std::wstring Name, Value;
-	CharD(std::wstring &N, std::wstring &V) {
-		Name = N;
-		Value = V;
-
+	size_t Codec(std::wstring &str) {
+		utf8 = Encode(str);
+		utf16 = str;
+		return utf8.size();
 	}
-
-
-};
-class wcscstr {
-private:
-	CHAR *str=0;
-	WCHAR *wstr = 0;
-public:
-	~wcscstr() {
-		if (str) { delete[] str;str = NULL; }
-		if (wstr) { delete[] wstr;wstr = 0; }
+	const std::string& getUTF8()const { return utf8; }
+	const std::wstring& getUTF16()const { return utf16; }
+	static std::string Encode(const std::wstring &str) {
+		std::string utf8;
+		for (auto ch : str)Encode(ch, utf8);
+		return utf8;
 	}
-	char* WcharToChar(const wchar_t *wc, size_t l)
-	{
-		if (str) { delete[] str;str = NULL; }
-		if (l == NULL)l = wcslen(wc);
-		int len = WideCharToMultiByte(CP_ACP, 0, wc, l, NULL, 0, NULL, NULL);
-		str = new char[len + 1];
-		WideCharToMultiByte(CP_ACP, 0, wc, l, str, len, NULL, NULL);
-		str[len] = '\0';
-		return str;
+	static std::string Encode(wchar_t ch) {
+		std::string utf8;
+		return Encode(ch, utf8);
 	}
-
-	wchar_t* CharToWchar(const char* c, size_t L)
-	{
-		if (wstr) { delete[] wstr;wstr = 0; }
-		if(L==NULL)L = strlen(c);
-		int len = MultiByteToWideChar(CP_ACP, 0, c, L, NULL, 0);
-		wstr = new wchar_t[len + 1];
-		MultiByteToWideChar(CP_ACP, 0, c, L, wstr, len);
-		wstr[len] = '\0';
-		return wstr;
-	}
-	wchar_t* AutoCharToWchar(const char* c)
-	{
-		if (wstr) { delete[] wstr;wstr = 0; }
-		size_t L=strlen(c);
-		int len = MultiByteToWideChar(CP_ACP, 0, c, L, NULL, 0);
-		wstr = new wchar_t[len + 1];
-		MultiByteToWideChar(CP_ACP, 0, c, L, wstr, len);
-		wstr[len] = '\0';
-		return wstr;
-	}
-};
-class CharDef {
-private:
+	static std::string& Encode(wchar_t ch,std::string &utf8) {
+		//std::string utf8;
 	
-	WCHAR *wstr = 0;
-	wchar_t* CharToWchar(const char* c, size_t L)
+			if (ch < 0x80)
+				utf8 += (char)ch;
+			else if (ch < 0x800)
+			{
+				utf8 += (char)(0xc0 | ((ch & 0x7c0) >> 6));
+				utf8 += (char)(0x80 | (ch & 0x3f));
+			}
+			else if (ch < 0x10000)
+			{
+				utf8 += (char)(0xe0 | ((ch & 0xf000) >> 12));
+				utf8 += (char)(0x80 | ((ch & 0x0fc0) >> 6));
+				utf8 += (char)(0x80 | ((ch & 0x003f)));
+			}
+			else if (ch < 0x200000)
+			{
+				utf8 += (char)(0xf0 | ((ch & 0x1c0000) >> 18));
+				utf8 += (char)(0x80 | ((ch & 0x03f000) >> 12));
+				utf8 += (char)(0x80 | ((ch & 0x000fc0) >> 6));
+				utf8 += (char)(0x80 | ((ch & 0x00003f)));
+			}
+			else if (ch < 0x4000000)
+			{
+				utf8 += (char)(0xf8 | ((ch & 0x3000000) >> 24));
+				utf8 += (char)(0x80 | ((ch & 0x0fc0000) >> 18));
+				utf8 += (char)(0x80 | ((ch & 0x003f000) >> 12));
+				utf8 += (char)(0x80 | ((ch & 0x0000fc0) >> 6));
+				utf8 += (char)(0x80 | ((ch & 0x000003f)));
+			}
+			else
+			{
+				utf8 += (char)(0xfc | ((ch & 0x40000000) >> 30));
+				utf8 += (char)(0x80 | ((ch & 0x3f000000) >> 24));
+				utf8 += (char)(0x80 | ((ch & 0x00fc0000) >> 18));
+				utf8 += (char)(0x80 | ((ch & 0x0003f000) >> 12));
+				utf8 += (char)(0x80 | ((ch & 0x00000fc0) >> 6));
+				utf8 += (char)(0x80 | ((ch & 0x0000003f)));
+			}
+		
+		return utf8;
+	}
+	static std::wstring Decode(const std::string &str) {
+		std::wstring utf16;
+		for (size_t i(0), sz(str.size()); i<sz;) {
+			wchar_t ch = str[i];
+			if (ch < 0x80)
+				ch = str[i], i++;
+			else if ((ch & 0xe0) == 0xc0)
+				ch = ((str[i] & 0x1f) << 6) |
+				((unsigned int)str[i + 1] & 0x3f), i += 2;
+			else if ((ch & 0xf0) == 0xe0)
+				ch = ((str[i] & 0x0f) << 12) |
+				(((unsigned int)str[i + 1] & 0x3f) << 6) |
+				((unsigned int)str[i + 2] & 0x3f), i += 3;
+			else if ((ch & 0xf8) == 0xf0)
+				ch = ((str[i] & 0x07) << 18) |
+				(((unsigned int)str[i + 1] & 0x3f) << 12) |
+				(((unsigned int)str[i + 2] & 0x3f) << 6) |
+				((unsigned int)str[i + 3] & 0x3f), i += 4;
+			else if ((ch & 0xfc) == 0xf8)
+				ch = ((str[i] & 0x03) << 24) |
+				(((unsigned int)str[i + 1] & 0x3f) << 18) |
+				(((unsigned int)str[i + 2] & 0x3f) << 12) |
+				(((unsigned int)str[i + 3] & 0x3f) << 6) |
+				((unsigned int)str[i + 4] & 0x3f), i += 5;
+			else if ((ch & 0xfe) == 0xfc)
+				ch = ((str[i] & 0x01) << 30) |
+				(((unsigned int)str[i + 1] & 0x3f) << 24) |
+				(((unsigned int)str[i + 2] & 0x3f) << 18) |
+				(((unsigned int)str[i + 3] & 0x3f) << 12) |
+				(((unsigned int)str[i + 4] & 0x3f) << 6) |
+				((unsigned int)str[i + 5] & 0x3f), i += 6;
+			utf16 += ch;
+		}
+		return utf16;
+	}
+
+};
+
+class PNG{
+#define PNG_BYTES_TO_CHECK 8
+//#define PNG_HEADER "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
+	BYTE *data;
+	size_t fmt = 0,w=0,h=0,b=0,Err=0;
+	
+public:
+	long getFormat()const { return fmt; }
+	long getWidth()const { return w; }
+	long getHeight()const { return h; }
+	long getBit()const { return b; }
+	long getError()const { return Err; }
+	BYTE*getData()const { return data; }
+	PNG(std::string &path):data(nullptr),w(0),h(0),b(0),Err(0)
 	{
-		if (wstr) { delete[] wstr;wstr = 0; }
-		int len = MultiByteToWideChar(CP_ACP, 0, c, L, NULL, 0);
-		wstr = new wchar_t[len + 1];
-		MultiByteToWideChar(CP_ACP, 0, c, L, wstr, len);
-		wstr[len] = '\0';
-		return wstr;
+		Err = open(path);
+	}
+	PNG(std::wstring &path) :data(nullptr), w(0), h(0), b(0), Err(0)
+	{
+		Err = LoadPNG(path);
+	}
+	PNG(const char*path) :data(nullptr), w(0), h(0), b(0), Err(0)
+	{
+		Err = LoadPNG(path);
+	}
+	PNG(const wchar_t*path) :data(nullptr), w(0), h(0), b(0), Err(0)
+	{
+		Err = LoadPNG(path);
+	}
+	operator bool()const { return(data != nullptr); }
+	~PNG() {
+		clear();
 	}
 	void clear() {
-		while (!str.empty()) {
-			CharD* P = str.back();
-			if(P)delete P;
-			str.pop_back();
-		};
-		if(wstr)delete[] wstr;
-		wstr = 0;
+		w = h = b = Err = 0;
+		if (*this)delete[]data;
+		data = nullptr;
 	}
-
-public:
-	std::vector<CharD*> str;
-	 void Initstr(char *Config) {
-		 clear();
-		 char *P1 = 0, *P2 = 0;
-		 size_t len = 0;
-		 if ((P1 = strstr(Config, "[STRDEF]")+8) != 0) {
-			 len = ((P2 = strstr(Config, "[ENDDEF]")) == 0) ? 0 : P2 - P1;
-			 if (len > 0) {
-				 CharToWchar(P1, len);
-				 Init();
-				
-				 return;
-			 }
-			 else {
-				 msgmgr(1, "字串定义未闭合");
-			 }
-		 };
-		
-
-	 }
-	void Init() {
-		DWORD i = 0,j=0,k=0;
-		WCHAR P = 0;
-		std::wstring TMPN, TMPV;
-		bool st = false;
-		wcscstr WA;
-		while ((P = wstr[i]) != 0 && P != ';') {
-			if (P == '=')j++;
-			if (j == 0) {
-				
-				if (P != ' '&& P != '	'&& !st)  st = true;
-				else if ((P == ' '|| P == '	') && st) st = false;
-				if (st&&P != '\r'&&P != '\n')TMPN.push_back(P);
-			}
-			else if (j==1) { 
-				
-				if (P == '"')k++;
-				else if (k == 1&& P != '\r'&&P != '\n')TMPV.push_back(P);
-				if (k == 2 || P == '\r' || P == '\n') {
-					Add(TMPN, TMPV);
-					TMPN.clear();TMPV.clear();
-					j = 0, k = 0;
-					st = false;
-				};
-			}
-			
-			i++;
-		}
-	}
-	~CharDef() {
+	bool open(const std::string&path){
 		clear();
-
+		Err = LoadPNG(path);
+		return *this;
 	}
+	int LoadPNG(const std::string &path) {
+		return LoadPNG(path.c_str());
+	}
+	int LoadPNG(const char*path) {
+		FILE *fp;
+		fopen_s(&fp, path, "rb");
+		return LoadPNG(fp);
+	}
+	int LoadPNG(const std::wstring path) {
+		return LoadPNG(path.c_str());
+	}
+	int LoadPNG(const wchar_t*path) {
+		FILE *fp;
+		_wfopen_s(&fp, path, L"rb");
+		return LoadPNG(fp);
+	}
+	int LoadPNG(FILE *fp)
+	{
+		int status(0);
+		png_structp png_ptr;
+		png_infop info_ptr;
+		png_bytepp row_pointers;
+		png_byte buf[PNG_BYTES_TO_CHECK];
+		if (fp != NULL) {
+			rewind(fp);
+			png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+			if (png_ptr != NULL)
+			{
+				info_ptr = png_create_info_struct(png_ptr);
+				if (info_ptr != NULL)
+				{
+					if (!setjmp(png_jmpbuf(png_ptr)))
+					{
+						if (fread(buf, sizeof(png_byte), PNG_BYTES_TO_CHECK, fp) == PNG_BYTES_TO_CHECK&&png_sig_cmp(buf, 0, PNG_BYTES_TO_CHECK) == 0) {
+							rewind(fp);
+							png_init_io(png_ptr, fp);
+							png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND, 0);
+							png_byte color_type = png_get_color_type(png_ptr, info_ptr);
+							if (data)clear();
+							w = png_get_image_width(png_ptr, info_ptr);
+							h = png_get_image_height(png_ptr, info_ptr);
+							b = png_get_bit_depth(png_ptr, info_ptr);
+							png_byte channels = png_get_channels(png_ptr, info_ptr);
+							
+							data = new png_byte[w*h *channels];
+							if (data != NULL) {
+							row_pointers = png_get_rows(png_ptr, info_ptr);
+							for (size_t y(0),cw = png_get_rowbytes(png_ptr, info_ptr); y < h; y++)
+								memcpy(data+cw*y, row_pointers[y], cw);
+							switch (color_type) {
+							case PNG_COLOR_TYPE_RGB_ALPHA:fmt = GL_RGBA; break;
+							case PNG_COLOR_TYPE_RGB:fmt = GL_RGB; break;
+							case PNG_COLOR_TYPE_GRAY_ALPHA:fmt = GL_ALPHA; break;
+							default:fmt = NULL;
+							}
+							}
+							else status = -6;
+						}
+						else status = -1;
+					}
+					else status = -2;
+					//png_read_end(png_ptr, info_ptr);
+				}
+				else status = -3;
+				png_destroy_read_struct(&png_ptr, &info_ptr, 0);
+			}
+			else status = -4;
+			fclose(fp);
+		}
+		else status = -5;
+		return status;
+	}
+	static int write_png(const char *file_name, BYTE* data, size_t Width, size_t Height) {
+		FILE *fp;
+		fopen_s(&fp, file_name, "wb");
+		return write_png(fp, data, Width, Height);
+	}
+	static int write_png(const wchar_t *file_name, BYTE* data, size_t Width, size_t Height) {
+		FILE *fp;
+		_wfopen_s(&fp, file_name, L"wb");
+		return write_png(fp, data, Width, Height);
+	}
+	static int write_png(FILE *fp, BYTE* data, size_t Width, size_t Height)
+	{
+		int status(0);
+		png_structp png_ptr;
+		png_infop info_ptr;
 	
-	bool Add(std::wstring &N, std::wstring &V) {
-		
-		if (Find(N)==NULL) {
-			str.push_back(new CharD(N, V));
-			return true;
+		if (fp != NULL) {
+			png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+			if (png_ptr != NULL)
+			{
+				info_ptr = png_create_info_struct(png_ptr);
+				if (info_ptr != NULL)
+				{
+					if (!setjmp(png_jmpbuf(png_ptr)))
+					{
+						png_init_io(png_ptr, fp);
+						png_set_IHDR(png_ptr, info_ptr, Width, Height, 8, PNG_COLOR_TYPE_GA,
+							PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+						png_write_info(png_ptr, info_ptr);
+						png_bytep* row_pointers = new png_bytep[Height];
+						if (Height > PNG_UINT_32_MAX / (sizeof(png_bytep)))
+							png_error(png_ptr, "Image is too tall to process in memory");
+						for (size_t k = 0; k < Height; k++)
+							row_pointers[k] = data + k*Width * 4;
+						png_write_image(png_ptr, row_pointers);
+						delete[]row_pointers;
+					}
+					else status = -2;
+					png_write_end(png_ptr, info_ptr);
+				}
+				else status = -3;
+				png_destroy_write_struct(&png_ptr, &info_ptr);
+			}
+			else status = -4;
+			fclose(fp);
 		}
-		wcscstr WA, WB;
-		msgmgr(2, "重定义:%s=%s", WA.WcharToChar(N.c_str(), N.size()), WB.WcharToChar(V.c_str(), V.size()));
-		return false;
-	}
-	CharD* Find(std::wstring &A) {//operator =
-		for (std::vector<CharD*>::const_iterator i = str.begin();i != str.end();i++){
-			
-			if ((*i)->Name.compare(A) == 0) { 
-				return *i; }
-		}
-		return NULL;
-	}
-
-
-};
-struct WChar {
-	bool use = false;
-	BYTE str[2] = { 0 };//页ID XY
-	BYTE ID = 0;//页ID
-	long Size = 0;
-	int UseSize = 0;
-};
-struct Addchar {
-	DWORD Add = 0;
-	BYTE *str = 0;
-	std::wstring wstr;
-	size_t size = 0;
-};
-extern BYTE WID[256];
-class MEMADD {
-	void GetCode() {
-		DWORD CODE = (DWORD)Fun - ((DWORD)hModule2 + Offset) - 5;
-		BYTE* P = (BYTE*)&CODE;
-		for (int i = 0;i < 4;i++) {
-			Code[i + 1] = P[i];
-		}
-	}
-public:
-	DWORD Offset = 0;
-	LPVOID Fun = 0;
-	BYTE *Code = 0, *CodeOld = 0;
-	size_t Size = 0;
-	BYTE Method = 0xE8;
-	bool sted = false;
-	MEMADD(LPVOID F, DWORD Of, BYTE Met, size_t s) {
-		Offset = Of, Fun = F, Method = Met, Size = s;
-		Code = new BYTE[s], CodeOld = new BYTE[s];
-		ReadAdd(Offset, CodeOld, Size);
-		GetCode();
-		for (size_t i = 5;i < Size;i++)Code[i] = 0x90;
-		Code[0] = Method;
-	}
-	~MEMADD() {
-		End();
-		if (Code)delete[] Code;
-		if (CodeOld)delete[] CodeOld;
-		Code = CodeOld = 0;
-
-	}
-	void Start() {
-		if (!sted) {
-			WriteAdd(Offset, Code, Size);
-
-			sted = true;
-		}
-	}
-	void End() {
-		if (sted) {
-
-			WriteAdd(Offset, CodeOld, Size);
-
-			sted = false;
-		}
+		else status = -5;
+		return status;
 	}
 };
-class RWMEM {
-	std::vector<MEMADD*> MA;
-public:
-	void Add(LPVOID Fun, DWORD Offset, BYTE Met, size_t s) {
-		MA.push_back(new MEMADD(Fun, Offset, Met, s));
+
+
+class Hook {
+	class Address {
+		void GetCode() {
+			DWORD CODE = (DWORD)Fun - (Base+ Offset) - 5;
+			BYTE* P = (BYTE*)&CODE;
+			for (int i = 0;i < 4;i++) {
+				Code[i + 1] = P[i];
+			}
+		}
+	public:
+		DWORD Offset = 0;
+		LPVOID Fun = 0;
+		BYTE *Code = 0, *CodeOld = 0;
+		size_t Size = 0;
+		BYTE Method = 0xE8;
+		bool sted = false;
+		Address(LPVOID F, DWORD Of, BYTE Met, size_t s) {
+			Offset = Of, Fun = F, Method = Met, Size = s;
+			Code = new BYTE[s], CodeOld = new BYTE[s];
+			ReadAdd(Offset, CodeOld, Size);
+			GetCode();
+			for (size_t i = 5;i < Size;i++)Code[i] = 0x90;
+			Code[0] = Method;
+		}
+		~Address() {
+		//	End();
+			if (Code)delete[] Code;
+			if (CodeOld)delete[] CodeOld;
+			Code = CodeOld = nullptr;
+		}
+		void Hook() {
+			if (!sted) {
+				WriteAdd(Offset, Code, Size);
+				sted = true;
+			}
+		}
+		void unHook() {
+			if (sted) {
+				WriteAdd(Offset, CodeOld, Size);
+				sted = false;
+			}
+		}
 	};
-	~RWMEM() {
-		while (!MA.empty()) {
-			MEMADD *P = MA.front();
-			P->End();
-			MA.erase(MA.begin());
-			if (P != 0)delete P;
-
-		}
-	}
-	void Start() {
-		for (std::vector<MEMADD*>::iterator i = MA.begin();i != MA.end();i++) {
-
-			(*i)->Start();
-			
-		}
-
-
-
-	}
-	void End() {
-		for (std::vector<MEMADD*>::iterator i = MA.begin();i != MA.end();i++) {
-			(*i)->End();
-			
-
-		}
-	}
-
-};
-
-class RES {
-
+	std::vector<std::unique_ptr<Address>> list;
 public:
-
-	std::string Name, Path;
-	std::wstring Type;
-	DWORD Id = 0;
-
-	RES(std::wstring TYPE, std::string NAME, std::string PATH, DWORD ID) {
-		Name = NAME, Type = TYPE, Id = ID, Path = SYSTEMPATH + "/" + PATH + "/" + Name;
-	}
+	void Add(LPVOID Fun, DWORD Offset, BYTE Met, size_t s) {list.push_back(std::unique_ptr<Address>(new Address(Fun, Offset, Met, s)));};
+	~Hook() {for(auto &p: list)p.reset(nullptr);list.clear();}
+	void HookAll() {for (auto &p : list)p->Hook();}
+	void unHookAll() {for (auto &p : list)p->unHook();}
 };
-extern std::vector<RES*> res;
-class SEL {
-	CharDef CD;
-	void Init(int ID, std::wstring &str) {
-		
-		int C = 0;
-		//std::wstring &str = *ws;
-		size_t size = str.size(),i = 0;
-		while (i<size) {
-			if (str[i] == '\r' || str[i] == '\n'|| str[i] == ' ') {//XD XA
-				i++;
-				continue;
-			}
-			if (str[i] == '?') {
-				//		alc = true;
-				i++;C++;continue;
-			};
-			if (str[i] == 0)break;
-			WChar* WT = &Wstr[str[i]];
-			if (WT->use&&str[i] != '?') {
-				msgmgr(2, "%X->%X:%X str:%d 重复 PID:%d size:%d", C, WT->ID, WT->str[1], str[i],ID, size);
-
-			}
-			else {
-				WT->use = true;
-				WT->ID = WID[ID];
-				WT->str[0] = ID? WID[ID] :0 ;
-				WT->str[1] = BYTE(C);
-			}
-
-			i++; C++;// C++;
-
-		}
-
-	}
-	wchar_t* WGetConfig(int ID, wchar_t* str) {
-		wchar_t TMP[32];
-		if(ID)swprintf(TMP, 256, L"PageChar%d", ID);//WPstr[ID]
-		else return wcsstr(str, L"PageCharDEF");
-		return wcsstr(str, TMP);
-	}
-
-	
-	WChar Wstr[65535];
-	WCHAR *wstr = 0;
-	
-	BOOL GetInfo(Addchar *AC) {
-		
-		TCHAR P = 0;
-		BYTE *&CON = AC->str;
-		wcscstr WA, WB;
-		size_t i = 0, T = 0, j = 0, Ti = 0,l=0, size = AC->size;;
-		
-		std::wstring &str = AC->wstr;
-		l = str.rfind('=');
-		AC->Add = wcstol(str.c_str(), 0, 16);
-		
-		if(AC->Add){
-		if (l!=std::wstring::npos&&CON != NULL) {
-			
-		while (i < size && (P = str[i++]) != ';')if (P == '"')Ti++;
-		i = l+1;
-		
-			
-		if (Ti == 2)
-			while (str[i] != 0 && (P = str[i]) != ';') {
-
-				if (P == '"') {
-					j++, i++;
-					continue;
-				}
-			
-				if (j == 1) {
-					CON[T] = BYTE(P);
-					if (Wstr[P].str[1] == 0) {
-						CON[T] = '#';
-						char *P2 = WA.WcharToChar(&P, 1);
-						if (nullstr.find(P2) == std::string::npos)nullstr += P2;
-
-					}
-					else
-						if (Wstr[P].str[0] == 0) {
-							CON[T] = Wstr[P].str[1];
-						}
-						else {
-							CON[T++] = Wstr[P].str[0];
-							CON[T] = Wstr[P].str[1];
-						}
-						T++;
-				}
-				if (j == 2)break;
-				i++;
-			}
-		
-		else if (Ti == 0) {
-			bool st = false;
-			std::wstring ws;
-			DWORD R = 0;
-			while ((P = str[i++]) != ';'&&P!=0) {
-					if ((P == ' ' || P == '	') && st)break;
-					else if (P != ' '&& P != '	'&& !st)st = true;
-					if (st&&P != '\r'&&P != '\n')ws.push_back(P);
-			}
-			CharD *CP;
-			if ((CP = CD.Find(ws)) != NULL) {
-				std::wstring &P2 = CP->Value;
-				
-				while ((P = P2[R++]) != 0) {
-					CON[T] = BYTE(P);
-					if (Wstr[P].str[1] == 0) {
-						CON[T] = '#';
-						char *P3 = WA.WcharToChar(&P, 1);
-						if (nullstr.find(P3) == std::string::npos)nullstr += P3;
-					}
-					else if (Wstr[P].str[0] == 0)CON[T] = Wstr[P].str[1];
-					else {
-						CON[T++] = Wstr[P].str[0];
-						CON[T] = Wstr[P].str[1];
-					}
-					T++;
-
-				}
-
-			}
-			else {
-				msgmgr(1, "翻译错误 字串[%s]未定义", WA.WcharToChar(ws.c_str(), ws.size()));
-				AC->Add = 0;
-			};
-
-		}
-		else if (Ti) {
-			msgmgr(1, "翻译错误 请检查引号是否成对出现 字串[%d]:%s ", size, WA.WcharToChar(str.c_str(), 0));
-			AC->Add = 0;
-		}
-		CON[T] = 0;
-		}
-		else {
-			msgmgr(1, "翻译错误 格式不正确或内存不足 字串[%d]:%s ", size, WA.WcharToChar(str.c_str(), 0));
-			AC->Add = 0;
-		}
-		}
-		
-		AC->size = T;
-		return TRUE;
-	}
-
-	std::string nullstr;
-	
-public:
-
-	BOOL WMainInit(CHAR *Conf) {
-		memset(Wstr, 0, sizeof(Wstr));
-		int wlen = MultiByteToWideChar(CP_ACP, 0, Conf, -1, NULL, 0);
-		wstr = new WCHAR[wlen];
-		MultiByteToWideChar(CP_ACP, 0, Conf, -1, wstr, wlen);
-		if (wstr == NULL)return FALSE;
-		
-		std::wstring str;
-		wchar_t *ps;//, *ps2;
-
-		for (int P = 0;P < 256;P++) {
-			ps = WGetConfig(P, wstr);
-			if (ps) {
-				int s = 0;// s2 = 0;
-				bool Incom = false, begin = false;
-				while (s < 10240) {
-					if (!Incom&&ps[s] == '/'&&ps[s + 1] == '/') {
-						Incom = true;
-						s += 2;
-						continue;
-					}
-					if (Incom) {
-						if (ps[s] == '\n' || ps[s] == '\r')Incom = false;
-						s++;
-						continue;
-
-					}
-					if (ps[s] == '{') {
-
-						begin = true;
-						s++;
-						continue;
-					}
-					if (ps[s] == '}') {
-						begin = false;
-						//str.push_back('\0');
-						Init(P, str);
-						str.clear();
-						break;
-					}
-					if (begin) {
-						str.push_back(ps[s]);
-					}
-					s++;
-				}
-			}
-		}
-		CD.Initstr(Conf);
-		WStart();
-		return TRUE;
-	}
-
-
-
-
-	BOOL WStart() {
-	
-		WCHAR *str = 0,Versum[128];
-		std::wstring wstrTMP;
-		size_t len = 0, i = 0;
-		//Version Ver;
-		//GetFileVersion(&Ver, &hModule2);
-	//	wcscstr WA;
-		//int l1=wsprintf(Versum, L"[Start:%d%d%d%d]", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
-		std::wstring Md5Str = md5.GetCapMd5W();
-		int l1 = wsprintf(Versum, L"[Start:%s]", Md5Str.c_str());
-		if ((str = wcsstr(wstr, Versum)) == 0)return FALSE;
-			str+= l1;
-		//wsprintf(Versum, L"[End:%d%d%d%d]", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
-		wsprintf(Versum, L"[End:%s]", Md5Str.c_str());
-		
-		if ((len = (wcsstr(wstr, Versum) - str)) <= 0)return FALSE;
-
-		while (i < len&&str[i]!=0) {
-			wstrTMP.push_back(str[i]);
-			if (str[i] == '\r' || str[i] == '\n' || str[i] == ';'|| str[i]==0) {
-			
-					Addchar AC;
-					AC.str = new BYTE[wstrTMP.size() * 2];
-					AC.wstr = wstrTMP;
-					AC.size = wstrTMP.size();
-					GetInfo(&AC);
-					if (AC.Add != 0) {
-						BYTE *P = (BYTE*)(Base + AC.Add);
-					//	msgmgr(1, "P[%X][%d]:%s",P, AC.size,AC.str);
-						if (!IsBadWritePtr(P, AC.size)) {
-							memcpy(P, AC.str, AC.size);
-							P[AC.size] = 0;
-						}
-					}
-					wstrTMP.clear();
-					delete[] AC.str;
-				
-				
-			}
-			i++;
-		}
-		if (nullstr.size()){msgmgr(2, "以下字符未配置:%s", nullstr.c_str());
-		nullstr.clear();
-	}
-		delete[] wstr;
-		return TRUE;
-
-	}
-};
-void GetError(int d);
-extern SEL WCharAdd;
-extern WCHAR *Type[2];
-extern char *ResName[7], ConfigFilePath[256] ;
-extern int ResId[8];//IDR_CONFIG
-class CharAdd {
+struct Offset { float Off = 0.0, Width = 12.0f; };
+class Localization{
 private:
-	void Err(int ID,int err) {
-		msgmgr(1, "读取块:Page%d->%X %d 时出现异常", ID, err / 2, err);
-
-	}
-
-	void InitChar(int ID, std::string &str) {
-			if (ID == 0) {
-				SetPage(str);return;
-			}
-			OffSet* TMP = GetPage(ID);
-			if (TMP == 0)return;
-			
-			//std::string str2 = str;
-			std::vector<std::string> str_list2;
-			std::string buf;
-			std::stringstream A(str);
-			size_t k = 0;
-			bool of = false;
-			while (A >> buf) {
-				of = !of;
-				if(of)
-				TMP[k].Off = float(atof(buf.c_str())) / 256.0f;//<<<<<<<<<<<<<<<<<<<<2017019
-				else
-				TMP[k++].Width = float(atof(buf.c_str()));
-				buf.clear();
-
-			
-			
-			}
-
+	struct WChar {
+		bool use;
+		uint8_t str[2]//页ID XY
+		,PID;//页ID
+		wchar_t ch;
+		WChar() :use(false), str{0},PID(0),ch(0) {
+		}
+		WChar(uint8_t pid, uint8_t fid, wchar_t ch):use(true),PID(pid),ch(ch) {
+			str[0] = pid, str[1] = fid;
+		}
 	};
-	void SetPage(std::string &str) {
-		unsigned int i = 0;
-		std::vector<std::string> str_list;
-		std::string str2;
-		bool st = false;
-		while (str[i] != '\0') {
-			if (str[i] == '{'|| str[i] == '\n' || str[i] == '\r' || str[i] == '	') {
-				i++;continue;
-			}
-			if (str[i] != ' ')st = true;
-			if (str[i] == ',' || str[i] == '}' || str[i + 1] == '\0') {
-				str_list.push_back(str2);
-				str2.clear();
-				st = false;
-			}
-			else if(st){
-				str2.push_back(str[i]);
-			}
-			i++;
+	WChar *Wstr;
+	class PageInfo {
+		Offset* Info;
+	public:
+		void Clear() {
+			if (Info != nullptr)delete[] Info;
+			Info = nullptr;
+			OffsetX = OffsetY = ID = PID = 0;
+			File.clear();
+			use = false;
 		}
-
-		str_list.push_back(str2);
-		unsigned int A = 0;
-		BYTE PID1 = 0;
-		int TMP = 1;
-		while (A < str_list.size()) {
-
-			if (A + 2 > str_list.size()) { Err(0, A);break; }//超界访问
-			PID1 = BYTE(strtol(str_list[A++].c_str(), NULL, 16));
-			if (TMP < 4) {
-				Page[PID1].OffSetX = 16 * TMP;
-				Page[PID1].PX = 256 * TMP;
-				Page[PID1].PY = 512;
-				Page[PID1].OffSetY = 0;
-			}
-			else {
-				Page[PID1].OffSetX = 16 * (TMP%4);
-				Page[PID1].OffSetY = 16*(TMP/4);
-				Page[PID1].PX = 256 * (TMP % 4);;
-				Page[PID1].PY = 512 + 256 * (TMP / 4) ;
-			}
-			if (PID1 != 0) {
-				Page[PID1].use = true;
-				Page[PID1].Page = new OffSet[256];//GetPage(TMP + 1);
-			}
-			
-			
-			Page[PID1].ID = BYTE(TMP);
-			Page[PID1].PID = PID1;
-			TMP++;
-			Page[PID1].File = str_list[A++];
+		Offset*getInfo(){return Info == nullptr? newPage():Info; };
+		Offset*newPage(size_t size=256){ 
+			if (Info != nullptr)delete[] Info, Info =nullptr;
+			return Info =new Offset[size];
+		};
+		size_t Init(size_t id, uint8_t pid,const std::wstring&font, const std::string&params) {
+			OffsetX = (id%4) * 16, OffsetY = (id/4) * 16;
+			ID = id,PID=pid;
+			File = font;
+			std::stringstream ss(params);
+			newPage();
+			size_t i = 0;
+			while (i<256&&ss >> Info[i].Off >> Info[i].Width)i++;
+			use = true;
+			return i;
 		}
-
-	}
-	
-	BOOL WriteRes(RES* R) {
-		HRSRC hRsrc = FindResource(DLL, MAKEINTRESOURCE(R->Id), R->Type.c_str());
-		if (hRsrc != NULL) {
-			HGLOBAL hGlobal = LoadResource(DLL, hRsrc);
-			if (hGlobal != NULL) {
-				LPVOID pBuffer = LockResource(hGlobal);
-				DWORD dwSize = SizeofResource(DLL, hRsrc);
-				FILE *fp;
-				fopen_s(&fp, R->Path.c_str(), "wb+");
-				
-				if (fp != 0) {
-					msgmgr(3, "写出资源 ID:%d Path:%s", R->Id, R->Path.c_str());
-					fwrite(pBuffer, sizeof(BYTE), dwSize, fp);
-					fclose(fp);
-					return TRUE;
-				}
-				
-			}
+		PageInfo():Info(nullptr) {
+			Clear();
+		};
+		~PageInfo() {
+			Clear();
 		}
-		msgmgr(1, "写出资源失败 ID:%d Path:%s", R->Id, R->Path.c_str());
-		GetError(16);
-		return FALSE;
-	}
-	char* GetConfig(int ID, char* str) {
-		char TMP[256];
-		if(ID)snprintf(TMP, 256, "Page%d", ID);
-		else return strstr(str, "PageFile");//, "PageFile");
-		return strstr(str, TMP);
-	}
+		std::wstring File;
+		size_t OffsetX = 0, OffsetY = 0,ID=0; //坐标起始位置 序号
+		BYTE PID = 0;// 页ID
+		bool use = false;
+	};
+	std::map<std::string, std::string>Map;
 public:
-	BOOL InitAll() {
-		msgmgr(3, "配置文件初始化");
-		RES R(Type[0], "Config.ini", "System", IDR_CONFIG);
-		if (!WriteRes(&R)) {
-			GetError(17);
-			return FALSE;
-		};//错误标记15;
-		InitFile();
-		return TRUE;
-	};
+	BYTE *GetCharCode(size_t UTF16) {
+		if (UTF16>0 && UTF16<0XFFFF && Wstr[UTF16].use)return Wstr[UTF16].str;
+		return 0;
+	}
+	static std::wstring sCfgErr, sFontMsg, sIdMsg, sParamsMsg, sMapMsg, sMapErr, sUnCfgErr, sWDefErr, sReDefErr, sTexErr, sFmtErr, sLoadErr, sPageMsg, sMapSzErr, sStr2lErr;
 	void Clear() {
-		for (int i = 0;i < 256;i++)Page[i].Init();
-
+		Map.clear();
+		PageList.clear();
+		for (auto &p:Page)p.Clear();}
+	std::string Config;
+	void InitMsg(const Json::Value&val) {
+		sCfgErr = val["sCfgErr"].isString()? UTF::Decode(val["sCfgErr"].asString()):L"%s.Pages[%d] %s 配置错误,目标类型为 %s,%s",
+			sFontMsg = val["sFontMsg"].isString() ? UTF::Decode(val["sFontMsg"].asString()) : L"指定一个字体纹理文件名",
+			sIdMsg = val["sIdMsg"].isString() ? UTF::Decode(val["sIdMsg"].asString()) : L"指定一个页映射Id",
+			sParamsMsg = val["sParamsMsg"].isString() ? UTF::Decode(val["sParamsMsg"].asString()) : L"指定字体偏移与宽度,不配置则使用默认值",
+			sMapMsg = val["sMapMsg"].isString() ? UTF::Decode(val["sMapMsg"].asString()) : L"指定字体在纹理上的位置,不配置则无法使用字符映射表";
+			sMapErr = val["sMapErr"].isString() ? UTF::Decode(val["sMapErr"].asString()) : L"%s.Pages[%d](%d,%d)->%c已存在于Pages[%d](%d,%d)->%c",
+			sUnCfgErr= val["sUnCfgErr"].isString() ? UTF::Decode(val["sUnCfgErr"].asString()) : L"未配置字符 %s->%s";
+			sWDefErr= val["sWDefErr"].isString() ? UTF::Decode(val["sWDefErr"].asString()) : L"写入失败 %s->%s";
+			sReDefErr = val["sReDefErr"].isString() ? UTF::Decode(val["sReDefErr"].asString()) : L"%s 重定义";
+			sTexErr = val["sTexErr"].isString() ? UTF::Decode(val["sTexErr"].asString()) : L"纹理%s[%d]:PID:%d %d*%d*%d X:%d Y:%d Path:%s";
+			sFmtErr = val["sFmtErr"].isString() ? UTF::Decode(val["sFmtErr"].asString()) : L"格式不规范";
+			sLoadErr = val["sLoadErr"].isString() ? UTF::Decode(val["sLoadErr"].asString()) : L"加载失败";
+			sPageMsg = val["sPageMsg"].isString() ? UTF::Decode(val["sPageMsg"].asString()) : L"指定字体纹理的显示参数,若不配置则不显示相关字符";
+			sMapSzErr= val["sMapSzErr"].isString() ? UTF::Decode(val["sMapSzErr"].asString()) : L"%s.Pages[%d].Maps 的字符数量(%d)超出了最大值256,超出部分将截断:%s";
+			sStr2lErr = val["sStr2lErr"].isString() ? UTF::Decode(val["sStr2lErr"].asString()) : L"字符串产生的结果超过了允许的最大长度15 %s->(len=%d)";
+	}
+	void InitDefine(const Json::Value&val) {
+	
+		const auto &def = val.getMemberNames();
+		for (auto &key : def) {
+			std::string str;
+			if (Map.find(key) != Map.end())msgmgr(MsgType::Error, sReDefErr, UTF::Decode(key).c_str());
+			else InitDefine(key, val[key].asString());
+	}
+	}
+	std::string InitDefine(const std::string&key, const std::string&val) {
+		std::wstring err;
+		const std::wstring &wval = UTF::Decode(val);
+		std::string str;
+		for (auto v : wval) {
+			if (!Wstr[v].use) err += v;
+			else for (uint8_t c : Wstr[v].str)if (c)str += c;
+		}
+		if (!err.empty())msgmgr(MsgType::Error, sUnCfgErr, wval.c_str(), err.c_str());
+		else if (!str.empty())Map[key] = str;
+		return str;
+	}
+	void ApplyDefine(const Json::Value&val) {
+		const auto &def = val.getMemberNames();
+		for (auto &key : def) {
+			auto it = Map.find(key);
+			std::string code;
+			if (it != Map.end())code = it->second;
+			else code = InitDefine(key, key);
+			const auto &str = UTF::Decode(val[key].asString());
+			DWORD off = std::wcstol(str.c_str(), 0, 1 << 4);
+			code += '\0';
+			if (code.size() > 15)msgmgr(MsgType::Error, sStr2lErr, UTF::Decode(key).c_str(), code.size());
+			else if (!WriteAdd(off, (uint8_t*)code.c_str(), code.size()))msgmgr(MsgType::Error, sWDefErr, str.c_str(), UTF::Decode(key).c_str());
+		}
 	}
 	BOOL MainInit() {
 		Clear();
-		FILE *fp;
-		std::string CPath= SYSTEMPATH+"/"+ConfigFilePath;
-		fopen_s(&fp, CPath.c_str(), "rb+");
-		if (fp == NULL) {
-			InitAll();
-			fopen_s(&fp, CPath.c_str(), "rb+");
-		}
-		if (fp == NULL) {
-			GetError(14);
-				return FALSE;
-		};//错误标记14
-		fseek(fp, 0L, SEEK_END);
-		DWORD FileSize = ftell(fp);
-		fseek(fp, 0L, SEEK_SET);
-		char *Config = new char[FileSize];
-		if (Config == 0)return FALSE;
-		fread(Config, sizeof(char), FileSize, fp);
-		char *pVer = 0, Verstr[] = "LocalVersion", Versum[20];
-		Version Ver;
-		GetFileVersion(&Ver, &DLL);
-		snprintf(Versum, 16, "%d%d%d%d", Ver.HM, Ver.LM, Ver.HL, Ver.LL);
-		int NeedInit = 0;
-		if ((pVer = strstr(Config, Verstr)) != 0) {
-			int i = 0;
-			while (pVer[0] != 0 && pVer[0] != '\n')if ((i = atoi(pVer++)) > 0)break;
-			char sum[16];
-			snprintf(sum, 16, "%d", i);
-			if (strcmp(sum, Versum) != 0) {
-				fseek(fp, strstr(Config, Verstr) - Config, SEEK_SET);
-				NeedInit = 1;
-			}
-		}
-		else {
-			fseek(fp, strrchr(Config, '}') - Config + 1, SEEK_SET);
-			NeedInit = 2;
-		}
-		if (NeedInit) {
-			char Tstr[256];
-			size_t Size = snprintf(Tstr, 256, NeedInit>1 ? "\n%s: %s\n" : "%s: %s\n", Verstr, Versum);
-			fwrite(Tstr, sizeof(char), Size, fp);
-			InitFile();
-		}
-		fclose(fp);
-		std::string str;
-		char *ps = 0;
-		for (int P = 0;P < 256;P++) {
-			ps = GetConfig(P, Config);
-			if (ps) {
-				bool Incom = false, begin = false;
-				int s = 0;
-				while (s < 10240) {
-					if (ps[s] == '/' || ps[s] == ';') {
-						Incom = true;
-						s++;
-						continue;
-
-					}
-					if (Incom) {
-						if (ps[s] == '\n' || ps[s] == '\r') {
-							Incom = false;
+		std::wstring cfgPath = SYSTEMROOT + L"System/localization.json";
+		std::ifstream Input(cfgPath, std::ios::binary);
+		if (Input) {
+			memset(Wstr, 0, sizeof(WChar) * 1 << 16);
+			size_t curPID = 1;
+			Json::Value val;
+			Json::Reader reader;
+			reader.parse(Input, val);
+			Input.close();
+			const Json::Value &lang = val["Language"][Lang],&logSz = val["maxLogSize"];
+			if (logSz.isInt())maxLogSize = logSz.asInt();
+			if (!lang.isNull()){
+				std::wstring wLang(UTF::Decode(Lang));
+				if (lang["String"].isObject())InitMsg(lang["String"]);
+				if (lang["Pages"].isArray()) {
+					for (auto page : lang["Pages"]) {
+						if (page["Id"].isInt()) {
+							uint8_t pid = uint8_t(page["Id"].asInt());
+							if (pid == 0 || page["Font"].isString()) {
+								std::string args;
+								const Json::Value &Params = page["Params"], &Maps = page["Maps"];;
+								if (Params.isString())args = Params.asString();
+								else if (Params.isArray())for (auto&arg : Params)args.append(arg.asString()) += ' ';
+								else  msgmgr(MsgType::Warning, sCfgErr, wLang.c_str(), curPID, L"Params", L"String or String[]", sParamsMsg.c_str());
+								Page[pid].Init(curPID, pid, UTF::Decode(page["Font"].asString()), args);
+								if (pid)curPID++;
+								PageList += pid;
+								args.clear();
+								if (Maps.isString())args = Maps.asString();
+								else if (Maps.isArray())for (auto&arg : Maps)args.append(arg.asString());
+								else msgmgr(MsgType::Warning, sCfgErr, wLang.c_str(), curPID, L"Maps", L"String or String[]", sMapMsg.c_str());
+								const std::wstring&wstr = UTF::Decode(args);
+								size_t fid(0), sz(wstr.size());
+								if (sz > 0x100)msgmgr(MsgType::Warning, sMapSzErr, wLang.c_str(), pid, wstr.size(), wstr.substr(0x100).c_str());
+								for (wchar_t ch; fid < 0x100 && fid < sz; fid++) {
+									ch = wstr[fid];
+									auto &WT = Wstr[ch];
+									if (!WT.use)WT = WChar(pid, uint8_t(fid), ch);
+									else if (ch != '?')msgmgr(MsgType::Warning, sMapErr, wLang.c_str(), pid, fid >> 4, fid & 0xF, ch, WT.PID, WT.str[1] >> 4, WT.str[1] & 0xF, WT.ch);
+								}
+							}
+							else msgmgr(MsgType::Error, sCfgErr, wLang.c_str(), curPID, L"Font", L"String", sFontMsg.c_str());
 						}
-						s++;
-						continue;
-
+						else msgmgr(MsgType::Error, sCfgErr, wLang.c_str(), curPID, L"Id", L"Int", sIdMsg.c_str());
 					}
-					if (ps[s] == '{') {
-						begin = true;
-						s++;
-						continue;
-					}
-					if (ps[s] == '}') {
-						;
-						begin = false;
-						InitChar(P, str);
-						str.clear();
-						break;
-					}
-					if (begin) {
-						str = str + ps[s];
-
-					}
-					s++;
+					if (lang["Define"].isObject())InitDefine(lang["Define"]);
+					const std::string &M = md5.GetCapMd5();
+					if (val["Address"][M].isObject())ApplyDefine(val["Address"][M]);
+					return TRUE;
 				}
+				else  msgmgr(MsgType::Error, sCfgErr, wLang.c_str(), curPID, L"Pages", L"{Id,Font,Maps,Params}", sPageMsg.c_str());
 			}
 		}
-		for (int i = 0;i < 256;i++) WID[Page[i].ID] = Page[i].PID;
-		WCharAdd.WMainInit(Config);
-		delete[] Config;
-		return TRUE;
+		else openErr(cfgPath);
+		return FALSE;
 	}
 
-	
-	OffSet* GetPage(int ID) {
-		
-		for (int i = 0;i < 256;i++)if (Page[i].ID == ID&&Page[i].use)return Page[i].Page;
-		return 0;
+	Offset* GetPage(uint8_t ID) {
+		for(auto &p:Page)if (p.PID == ID&&p.use)return p.getInfo();
+		return nullptr;
 	}
-
-	
-
-
-	void InitFile() {
-	for(std::vector<RES*>::iterator i=res.begin();i!=res.end();i++)
-			
-			WriteRes(*i);
-
+	Localization():Wstr(new WChar[1 << 16]){
 	}
-
+	~Localization() {
+		if (Wstr)delete[] Wstr;
+		Wstr = nullptr;
+	}
+	std::basic_string<uint8_t> PageList;
 	PageInfo Page[256];
 
 };
-class SEL;
-extern CharAdd CharADD;
-void GetCharXYOffAndWid(), GetWidth980();
-extern DWORD *FunAdd,Base;
-extern void* RE0, *RE1, *RE2;
-void GetCharXYOW974();
-void GetWidth974();
-extern int *start;
-void Start();
-void SetBackWid980();
+extern Localization StrMap;
 
