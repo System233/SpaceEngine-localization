@@ -71,16 +71,18 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);../LibPNG;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);../LibPNG;../LibJson;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);../LibPNG;../LibJson;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);../LibPNG;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);../LibPNG;../LibJson;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);../LibPNG;../LibJson;</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -91,13 +93,13 @@
       <SDLCheck>true</SDLCheck>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>Win32Project1.def</ModuleDefinitionFile>
-      <AdditionalDependencies>glu32.lib;libcmtd.lib;kernel32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glu32.lib;kernel32.lib;comdlg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -171,30 +173,10 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="json\allocator.h" />
-    <ClInclude Include="json\assertions.h" />
-    <ClInclude Include="json\autolink.h" />
-    <ClInclude Include="json\config.h" />
-    <ClInclude Include="json\features.h" />
-    <ClInclude Include="json\forwards.h" />
-    <ClInclude Include="json\json.h" />
-    <ClInclude Include="json\reader.h" />
-    <ClInclude Include="json\value.h" />
-    <ClInclude Include="json\version.h" />
-    <ClInclude Include="json\writer.h" />
-    <ClInclude Include="json_tool.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Define.h" />
-    <None Include="..\eng-menu.psd" />
-    <None Include="..\win1252-font.psd" />
-    <None Include="chs-gui-971.cfg" />
-    <None Include="chs-gui-972.cfg" />
-    <None Include="chs-gui-973.cfg" />
-    <None Include="chs-gui-974.cfg" />
-    <None Include="chs-gui-980.cfg" />
-    <None Include="chs-font.cfg" />
     <None Include="config3.bin" />
   </ItemGroup>
   <ItemGroup>
@@ -212,9 +194,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="json_reader.cpp" />
-    <ClCompile Include="json_value.cpp" />
-    <ClCompile Include="json_writer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -224,6 +203,9 @@
     <ClCompile Include="Win32Project1.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\LibJson\LibJson.vcxproj">
+      <Project>{6f1755d9-7108-4dc7-9e25-e7b146aa45b4}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\libogg-1.3.2\win32\VS2010\libogg_static.vcxproj">
       <Project>{15cbfeff-7965-41f5-b4e2-21e8795c9159}</Project>
     </ProjectReference>

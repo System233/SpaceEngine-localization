@@ -44,109 +44,8 @@ DWORD *FloatAdd = 0,
 	*DoubleAdd = 0, 
 	DoubleAdd971[3] = {0x2B80B0,0x2B82E0, 0x2B82F0}, 
 	DoubleAdd970[3] = {0x272440,0x272660,0x272670};
-void Start() {
 
-}
 
-const char *const Msg[] = { "Info" ,"Error" ,"Warning" ,"Debug" ,"Null" };
-std::mutex mtx;
-union MsgData{
-	wchar_t wstr[2048];
-	char str[sizeof(wchar_t)*2048];
-};
- static MsgData mData;
-std::ofstream& openLog(MsgType _Ty) {
-	static std::ofstream log;
-	
-	if (!log.is_open()) {
-		std::wstring Path(SYSTEMROOT+L"/System/localization.log");
-		size_t size(0);
-		HANDLE handle = CreateFileW(Path.c_str(), FILE_READ_EA, FILE_SHARE_READ, 0, OPEN_ALWAYS, 0, 0);
-		if (handle != INVALID_HANDLE_VALUE)
-		{
-			size=GetFileSize(handle, NULL);
-			CloseHandle(handle);
-		}
-		log.open(Path, (size > maxLogSize) ? std::ios::trunc : std::ios::app);//128k
-		if (size>maxLogSize ||!size)log.write("\xEF\xBB\xBF",3);
-		GetLocalTime(&sys_time);
-		snprintf(mData.str, sizeof(MsgData::wstr), "\n %04d-%02d-%02d %02d:%02d:%02d\n--------------------------\n", sys_time.wYear, sys_time.wMonth, sys_time.wDay, sys_time.wHour, sys_time.wMinute, sys_time.wSecond);
-		log << mData.str;
-	}
-	
-	return log;
-}
-void Exception(DWORD code, LPCWSTR Info, LPCWSTR fotmat) {
-	mtx.unlock();
-	msgmgr(MsgType::Error, L"Exception(0x%X) %s FormatError:%s", code, Info, fotmat);
-	mtx.lock();
-}/*
-//0 Info 1 Error 2 Warning 3 Debug
-void msgmgr(MsgType _Ty, const char* msg, ...) {
-	if (maxLogSize) {
-		std::lock_guard<std::mutex> mtx_locker(mtx);
-		__try {
-		std::ofstream &log = openLog(_Ty);
-			va_list vlArgs;
-			va_start(vlArgs, msg);
-			vsnprintf(mData.str, sizeof(MsgData::wstr), msg, vlArgs);
-			va_end(vlArgs);
-			log << mData.str << std::endl;
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-		/*	mtx_locker.~lock_guard();
-			LPWSTR Info(nullptr);
-			DWORD code(GetExceptionCode());
-			FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, NULL, code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&Info, NULL, NULL);
-		//	Exception(code, Info ? Info : L"Null", UTF::Decode(msg).c_str());
-			if (Info)LocalFree(Info);
-		}
-	}
-	//log.close();
-}*/
-int mwsprintf(wchar_t* const _Buffer,size_t  const _BufferCount,wchar_t const* const _Format,va_list   _ArgList) {
-	__try {
-		
-	return vswprintf(_Buffer, _BufferCount, _Format, _ArgList);
-	}
-	__except (EXCEPTION_EXECUTE_HANDLER) {
-	//	mtx_locker.~lock_guard();
-		
-		LPWSTR Info(nullptr);
-		DWORD code(GetExceptionCode());
-		FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER| FORMAT_MESSAGE_MAX_WIDTH_MASK, NULL, code&0x3FFFFFFF, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&Info, NULL, NULL);
-
-		Exception(code, Info ? Info : L"Null", _Format);
-		
-		if (Info)LocalFree(Info);
-	}
-	return -1;
-}
-void msgmgr(MsgType _Ty, const std::wstring msg, ...) {
-	if (maxLogSize) {
-		mtx.lock();
-		std::ofstream &log = openLog(_Ty);
-		va_list vlArgs;
-		va_start(vlArgs, msg);
-		//vswprintf(mData.wstr, 2048, msg.c_str(), vlArgs);
-		GetLocalTime(&sys_time);
-		char MsgId[32];
-		snprintf(MsgId, 32, "%02d:%02d:%02d.%03d [%s] ", sys_time.wHour, sys_time.wMinute, sys_time.wSecond, sys_time.wMilliseconds, Msg[int(_Ty)>3 ? 4 : int(_Ty)]);
-		if(mwsprintf(mData.wstr, 2048, msg.c_str(), vlArgs)!=-1)
-			log << MsgId<< UTF::Encode(std::wstring(mData.wstr)) << std::endl;
-		va_end(vlArgs);
-		mtx.unlock();
-	}
-//	log.close();
-
-};
-void openErr(const std::wstring&path) {
-	LPWSTR Info;
-	if (FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER| FORMAT_MESSAGE_MAX_WIDTH_MASK, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&Info, NULL, NULL)) {
-		msgmgr(MsgType::Error, L"%s %s", Info, path.c_str());
-		LocalFree(Info);
-	}
-}
 
 BOOL APIENTRY DllMain(HMODULE hModule,
 	DWORD  ul_reason_for_call,
@@ -159,11 +58,12 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 		DWORD  sStartAdd = 0, sTexAdd = 0, //sWidAdd=0,sTABWid=0,sUWid=NULL,
 			sLang(0);//Timer TexCheck WidStrcut
 		mProc = GetCurrentProcess();
-		HMODULE hModule = GetModuleHandle(NULL);
-		Base = DWORD(hModule);
+		HMODULE exeModule = GetModuleHandle(NULL);
+		Base = DWORD(exeModule);
 		//size_t len = GetModuleFileNameW(hModule, (LPWSTR)SYSTEMROOT.data(), NULL);
 		SYSTEMROOT.resize(MAX_PATH);
-		size_t len = GetModuleFileNameW(hModule, (LPWSTR)SYSTEMROOT.data(), MAX_PATH);
+		GetModuleFileNameW(exeModule, (LPWSTR)SYSTEMROOT.data(), MAX_PATH);
+		//CloseHandle(exeModule);
 		SYSTEMROOT.reserve();
 		std::ifstream sModule(SYSTEMROOT, std::ios::binary);
 		if (sModule) {
@@ -226,8 +126,6 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 				mHook.Add(GetCharXYOW974, 0x1FE61A, 0xE9, 6);//SpaceEngine.exe+1FE61A 
 				mHook.Add(TexInit, 0x1647B4, 0xE8, 5);
 				mHook.Add(SetBackWid980, 0x205CC8, 0xE8, 6);//SpaceEngine.exe+205CC8 
-
-
 			}
 			else if (md5 == "174EE0924E76036B7C177160E9752614") {//974 RC3
 																 //MD5£º174EE0924E76036B7C177160E9752614
@@ -300,7 +198,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 				DOld2 = *(double*)(Base + DoubleAdd970[1]);
 				DOld3 = *(float*)(Base + DoubleAdd970[2]);
 				sTexAdd = 0x4AC0;
-				sStartAdd = 0x2A4B00;//StartAdd[2];
+				sStartAdd = 0x2A4B00;;
 				localePath = L"locale";
 				mHook.Add(CharAna970, 0x149E50, 0xE8, 9);
 				mHook.Add(SetAll970, 0x14A144, 0xE9, 7);
@@ -330,6 +228,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	case DLL_THREAD_DETACH:break;
 	case DLL_PROCESS_DETACH:
 		if (runtime_check)mHook.unHookAll();
+		if (wngCnt || errCnt)msgmgr(MsgType::Info,L"Warning:%d Error:%d",wngCnt, errCnt);
 		break;
 	}
 	return TRUE;

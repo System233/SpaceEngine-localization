@@ -374,3 +374,82 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	return 0;
 }
+struct SE {
+	uint32_t header = 0x00FB2200;
+	float f1[32];
+	SE*next[3];
+	int i1[7];
+	float f2[5];
+	int i5[4];
+	uint8_t b1[4];
+	int i2[5];
+	std::string name;//6*int32
+	int i3[3];
+	uint8_t b[4];
+	float f3[12];
+	std::string text[16];//6*int32*16
+	int i4;
+	//float[13]
+};
+
+struct FullSE {
+	struct Subuct {
+		uint32_t flag;//00FC2200->00FC2128->00FC2400->00FC2490
+		float f1_20[32];
+		FullSE*se1, *parent, *sub,*se4;
+		
+		
+		float f2_6[6],
+			x, y, w, h, flg, f3_4[4];
+		uint32_t i1_6[6];
+		std::string name;//int[5]->char[12],size_t len,flag;
+		typedef struct { float w, h, x, y; } Pos;
+		uint32_t i2_5[5];
+		Pos p1, p2;
+		float f3_3[3];
+		std::string text[16];
+		uint32_t flagend;
+	};
+	struct SubData {
+		uint32_t flag;
+		float f1_32[32];
+		SubData *sub[4];
+		float f2_15[15];
+		uint32_t i2[4];
+		std::string text;
+		float f3_3[9];
+	};
+	Subuct sub1, sub2;
+	float f1_4[5];
+	uint32_t i1_5[5],flag2;
+	float f2_32[32];
+	SubData *sd_ptr[4];
+	float f3_15[15];
+	uint32_t i1_2[4];
+	SubData *sd_ptr2[2];
+	SubData sd[2];
+};/*
+#include <stdio.h>
+//std::string str[2] = {"DWADAW","FFFFFFFF"};
+char str[50];
+int main() {
+	char ch, i(50);
+	while (std::cin.get(ch), ch != '\n')
+		str[--i] = ch > 'Z' ? ch > 'x' ? 'A' + ch - 'x' + 29 : ch - 29 : ch > 'X' ? ch + 9 : ch + 35;
+	std::cout << &str[i];
+
+	/*std::string str2 = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	printf("%p %p \n", str, str2);
+	std::cout <<sizeof(FullSE::Subuct) << ':' << sizeof(FullSE) << ':' << (uint8_t*)&se.sub1.name - (uint8_t*)&se << ':' << (uint8_t*)&se.sub1.text - (uint8_t*)&se << ':' << (uint8_t*)&se.sub1.flagend - (uint8_t*)&se << std::endl;
+	std::cout << sizeof(FullSE::SubData) <<':'<< (uint8_t*)&se.sd - (uint8_t*)&se << std::endl;
+	//system("pause");
+	return 0;
+}
+*/
+#include<iostream>
+char str[51], ch, i = 51;
+int main() {
+	while (std::cin.get(ch), ch != '\n')str[--i] = ch>'Z' ? ch>'x' ? 'A' + ch - 'x' + 29 : ch - 29 : ch>'X' ? ch + 9 : ch + 35;
+	std::cout << &str[i];
+	return 0;
+}

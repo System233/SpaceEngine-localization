@@ -5,7 +5,6 @@
 
 #pragma once
 
-#define ProjectVersion "1010"
 #define DEFASM __declspec(naked) 
 #define WIN32_LEAN_AND_MEAN             // 从 Windows 头中排除极少使用的资料
 // Windows 头文件: 
@@ -20,6 +19,7 @@
 #include <vector>
 #include <sstream> 
 #include <fstream>
+#include <algorithm>
 #include "targetver.h"
 #include "json\json.h"
 #include<mutex>
@@ -30,7 +30,7 @@ extern std::wstring SYSTEMROOT;
 extern LPCSTR Lang;
 extern LPCWSTR localePath;
 extern float Old1, Old2;
-extern size_t maxLogSize;
+extern size_t maxLogSize, errCnt, wngCnt;;
 extern SYSTEMTIME sys_time;
 extern MD5 md5;
 enum class MsgType {Info,Error,Warning,Debug,Null};
@@ -239,9 +239,9 @@ public:
 							if (data)clear();
 							w = png_get_image_width(png_ptr, info_ptr);
 							h = png_get_image_height(png_ptr, info_ptr);
-							b = png_get_bit_depth(png_ptr, info_ptr);
-							png_byte channels = png_get_channels(png_ptr, info_ptr);
 							
+							png_byte channels = png_get_channels(png_ptr, info_ptr);
+							b = png_get_bit_depth(png_ptr, info_ptr)/8;
 							data = new png_byte[w*h *channels];
 							if (data != NULL) {
 							row_pointers = png_get_rows(png_ptr, info_ptr);
@@ -250,7 +250,8 @@ public:
 							switch (color_type) {
 							case PNG_COLOR_TYPE_RGB_ALPHA:fmt = GL_RGBA; break;
 							case PNG_COLOR_TYPE_RGB:fmt = GL_RGB; break;
-							case PNG_COLOR_TYPE_GRAY_ALPHA:fmt = GL_ALPHA; break;
+							case PNG_COLOR_TYPE_GRAY_ALPHA:fmt = GL_LUMINANCE_ALPHA; break;
+							case PNG_COLOR_TYPE_GRAY:fmt =GL_LUMINANCE; break;
 							default:fmt = NULL;
 							}
 							}
@@ -270,22 +271,32 @@ public:
 		else status = -5;
 		return status;
 	}
-	static int write_png(const char *file_name, BYTE* data, size_t Width, size_t Height) {
+	template<class _Ty>
+	int write(_Ty file) {
+		return write_png(file, data, w, h, b);
+	}
+	static int write_png(const std::string &file_name, uint8_t* data, size_t Width, size_t Height, size_t bit = 4) {
+		return write_png(file_name.c_str(), data, Width, Height, bit);
+	}
+	static int write_png(const std::wstring &file_name, uint8_t* data, size_t Width, size_t Height, size_t bit = 4) {
+		return write_png(file_name.c_str(), data, Width, Height, bit);
+	}
+	static int write_png(const char *file_name, uint8_t* data, size_t Width, size_t Height, size_t bit = 4) {
 		FILE *fp;
 		fopen_s(&fp, file_name, "wb");
-		return write_png(fp, data, Width, Height);
+		return write_png(fp, data, Width, Height, bit);
 	}
-	static int write_png(const wchar_t *file_name, BYTE* data, size_t Width, size_t Height) {
+	static int write_png(const wchar_t *file_name, uint8_t* data, size_t Width, size_t Height, size_t bit = 4) {
 		FILE *fp;
 		_wfopen_s(&fp, file_name, L"wb");
-		return write_png(fp, data, Width, Height);
+		return write_png(fp, data, Width, Height, bit);
 	}
-	static int write_png(FILE *fp, BYTE* data, size_t Width, size_t Height)
+	static int write_png(FILE *fp, uint8_t* data, size_t Width, size_t Height, size_t bit = 4)
 	{
 		int status(0);
 		png_structp png_ptr;
 		png_infop info_ptr;
-	
+
 		if (fp != NULL) {
 			png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 			if (png_ptr != NULL)
@@ -295,15 +306,22 @@ public:
 				{
 					if (!setjmp(png_jmpbuf(png_ptr)))
 					{
+						int color(0);
+						switch (bit) {
+						case 1:color = PNG_COLOR_TYPE_GRAY; break;
+						case 2:color = PNG_COLOR_TYPE_GA; break;
+						case 3:color = PNG_COLOR_TYPE_RGB; break;
+						case 4:color = PNG_COLOR_TYPE_RGBA; break;
+						}
 						png_init_io(png_ptr, fp);
-						png_set_IHDR(png_ptr, info_ptr, Width, Height, 8, PNG_COLOR_TYPE_GA,
+						png_set_IHDR(png_ptr, info_ptr, Width, Height, 8, color,
 							PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 						png_write_info(png_ptr, info_ptr);
 						png_bytep* row_pointers = new png_bytep[Height];
 						if (Height > PNG_UINT_32_MAX / (sizeof(png_bytep)))
 							png_error(png_ptr, "Image is too tall to process in memory");
 						for (size_t k = 0; k < Height; k++)
-							row_pointers[k] = data + k*Width * 4;
+							row_pointers[k] = data + k*Width * bit;
 						png_write_image(png_ptr, row_pointers);
 						delete[]row_pointers;
 					}
@@ -424,15 +442,17 @@ private:
 		BYTE PID = 0;// 页ID
 		bool use = false;
 	};
+	std::map<wchar_t, size_t>err;
 	std::map<std::string, std::string>Map;
 public:
 	BYTE *GetCharCode(size_t UTF16) {
 		if (UTF16>0 && UTF16<0XFFFF && Wstr[UTF16].use)return Wstr[UTF16].str;
 		return 0;
 	}
-	static std::wstring sCfgErr, sFontMsg, sIdMsg, sParamsMsg, sMapMsg, sMapErr, sUnCfgErr, sWDefErr, sReDefErr, sTexErr, sFmtErr, sLoadErr, sPageMsg, sMapSzErr, sStr2lErr;
+	static std::wstring sCfgErr, sFontMsg, sIdMsg, sParamsMsg, sMapMsg, sMapErr, sUnCfgErr, sWDefErr, sReDefErr, sTexErr, sFmtErr, sLoadErr, sPageMsg, sMapSzErr;
 	void Clear() {
 		Map.clear();
+		err.clear();
 		PageList.clear();
 		for (auto &p:Page)p.Clear();}
 	std::string Config;
@@ -443,15 +463,15 @@ public:
 			sParamsMsg = val["sParamsMsg"].isString() ? UTF::Decode(val["sParamsMsg"].asString()) : L"指定字体偏移与宽度,不配置则使用默认值",
 			sMapMsg = val["sMapMsg"].isString() ? UTF::Decode(val["sMapMsg"].asString()) : L"指定字体在纹理上的位置,不配置则无法使用字符映射表";
 			sMapErr = val["sMapErr"].isString() ? UTF::Decode(val["sMapErr"].asString()) : L"%s.Pages[%d](%d,%d)->%c已存在于Pages[%d](%d,%d)->%c",
-			sUnCfgErr= val["sUnCfgErr"].isString() ? UTF::Decode(val["sUnCfgErr"].asString()) : L"未配置字符 %s->%s";
-			sWDefErr= val["sWDefErr"].isString() ? UTF::Decode(val["sWDefErr"].asString()) : L"写入失败 %s->%s";
+			sUnCfgErr= val["sUnCfgErr"].isString() ? UTF::Decode(val["sUnCfgErr"].asString()) : L"未配置字符(按出现频率排序) %s";
+			sWDefErr= val["sWDefErr"].isString() ? UTF::Decode(val["sWDefErr"].asString()) : L"无法访问 %08X->%s";
 			sReDefErr = val["sReDefErr"].isString() ? UTF::Decode(val["sReDefErr"].asString()) : L"%s 重定义";
 			sTexErr = val["sTexErr"].isString() ? UTF::Decode(val["sTexErr"].asString()) : L"纹理%s[%d]:PID:%d %d*%d*%d X:%d Y:%d Path:%s";
 			sFmtErr = val["sFmtErr"].isString() ? UTF::Decode(val["sFmtErr"].asString()) : L"格式不规范";
 			sLoadErr = val["sLoadErr"].isString() ? UTF::Decode(val["sLoadErr"].asString()) : L"加载失败";
 			sPageMsg = val["sPageMsg"].isString() ? UTF::Decode(val["sPageMsg"].asString()) : L"指定字体纹理的显示参数,若不配置则不显示相关字符";
 			sMapSzErr= val["sMapSzErr"].isString() ? UTF::Decode(val["sMapSzErr"].asString()) : L"%s.Pages[%d].Maps 的字符数量(%d)超出了最大值256,超出部分将截断:%s";
-			sStr2lErr = val["sStr2lErr"].isString() ? UTF::Decode(val["sStr2lErr"].asString()) : L"字符串产生的结果超过了允许的最大长度15 %s->(len=%d)";
+			//sStr2lErr = val["sStr2lErr"].isString() ? UTF::Decode(val["sStr2lErr"].asString()) : L"字符串产生的结果超过了允许的最大长度15 %s->(len=%d)";
 	}
 	void InitDefine(const Json::Value&val) {
 	
@@ -463,33 +483,50 @@ public:
 	}
 	}
 	std::string InitDefine(const std::string&key, const std::string&val) {
-		std::wstring err;
 		const std::wstring &wval = UTF::Decode(val);
 		std::string str;
 		for (auto v : wval) {
-			if (!Wstr[v].use) err += v;
+			if (!Wstr[v].use) err[v]++;
 			else for (uint8_t c : Wstr[v].str)if (c)str += c;
 		}
-		if (!err.empty())msgmgr(MsgType::Error, sUnCfgErr, wval.c_str(), err.c_str());
-		else if (!str.empty())Map[key] = str;
+		//if (!err.empty())msgmgr(MsgType::Error, sUnCfgErr, wval.c_str(), err.c_str());
+		if (!str.empty())Map[key] = str;
 		return str;
+	}
+	std::map<DWORD, std::string>written;
+	void WriteDefine(const std::string&key, const Json::Value& sub) {
+		if (sub.isString())WriteDefine(key, std::strtol(sub.asString().c_str(), 0, 1 << 4));
+		else if (sub.isInt64())WriteDefine(key, sub.asInt64());
+	}
+	void WriteDefine(const std::string&key, DWORD off) {
+		std::string &ptr = *(std::string*)(Base + off);
+		if (!IsBadWritePtr((LPVOID)(Base + off), 20)) {
+			written.insert(std::pair<DWORD, std::string>(off, ptr));
+			auto it = Map.find(key);
+			ptr = it != Map.end() ? it->second : InitDefine(key, key);
+		}
+		else msgmgr(MsgType::Error, sWDefErr, off, UTF::Decode(key).c_str());
 	}
 	void ApplyDefine(const Json::Value&val) {
 		const auto &def = val.getMemberNames();
 		for (auto &key : def) {
-			auto it = Map.find(key);
-			std::string code;
-			if (it != Map.end())code = it->second;
-			else code = InitDefine(key, key);
-			const auto &str = UTF::Decode(val[key].asString());
-			DWORD off = std::wcstol(str.c_str(), 0, 1 << 4);
-			code += '\0';
-			if (code.size() > 15)msgmgr(MsgType::Error, sStr2lErr, UTF::Decode(key).c_str(), code.size());
-			else if (!WriteAdd(off, (uint8_t*)code.c_str(), code.size()))msgmgr(MsgType::Error, sWDefErr, str.c_str(), UTF::Decode(key).c_str());
+			auto &sub = val[key];
+			if (sub.isArray())for (auto arr : sub)WriteDefine(key, arr);
+			else WriteDefine(key, sub);
 		}
+	}
+	void UndoDefine() {
+		for (auto&val : written) {
+			if (!IsBadWritePtr((LPVOID)(Base + val.first), 20)){
+			*(std::string*)(Base + val.first) = val.second;
+			//if (!WriteAdd(val.first, (uint8_t*)val.second.c_str(), val.second.size()+1))
+			}else msgmgr(MsgType::Error, sWDefErr, val.first, UTF::Decode(val.second).c_str());
+		}
+		written.clear();
 	}
 	BOOL MainInit() {
 		Clear();
+		UndoDefine();
 		std::wstring cfgPath = SYSTEMROOT + L"System/localization.json";
 		std::ifstream Input(cfgPath, std::ios::binary);
 		if (Input) {
@@ -538,6 +575,16 @@ public:
 					if (lang["Define"].isObject())InitDefine(lang["Define"]);
 					const std::string &M = md5.GetCapMd5();
 					if (val["Address"][M].isObject())ApplyDefine(val["Address"][M]);
+					if (!err.empty()) {
+						std::wstring ws;
+						auto &refmap = err;
+						for (auto &ch : err)ws += ch.first;
+						auto sortA = [&refmap](wchar_t l, wchar_t r)->bool {
+							return refmap[l] > refmap[r];
+						};
+						std::sort(ws.begin(), ws.end(), sortA);
+						msgmgr(MsgType::Error, sUnCfgErr, ws.c_str());
+					}
 					return TRUE;
 				}
 				else  msgmgr(MsgType::Error, sCfgErr, wLang.c_str(), curPID, L"Pages", L"{Id,Font,Maps,Params}", sPageMsg.c_str());

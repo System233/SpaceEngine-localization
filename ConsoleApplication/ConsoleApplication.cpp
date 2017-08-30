@@ -2,45 +2,8 @@
 //
 
 #include "stdafx.h"
-#pragma comment (lib, "Version.lib")   
-void TEST(char* In, char*In2, char*Out,int mode);
-BOOL GetFileVersion()
-{
-	
-	DWORD dwVerSize;
-	DWORD dwHandle;
-	TCHAR szFullPath[MAX_PATH];
-
-	GetModuleFileName(NULL, szFullPath, MAX_PATH);
-	//printf("信息:");
-	dwVerSize = GetFileVersionInfoSize(szFullPath, &dwHandle);
-	if (dwVerSize == 0)
-		return FALSE;
-	TCHAR *szVersionBuffer=new TCHAR[dwVerSize];
-	if (GetFileVersionInfo(szFullPath, 0, dwVerSize, szVersionBuffer))
-	{
-		//printf("信息2");
-		VS_FIXEDFILEINFO * pInfo;
-		unsigned int nInfoLen;
-
-		if (VerQueryValue(szVersionBuffer, _T("\\"), (void**)&pInfo, &nInfoLen))
-		{
-
-			printf(("版本: %d.%d.%d.%d"),
-				HIWORD(pInfo->dwFileVersionMS), LOWORD(pInfo->dwFileVersionMS),
-				HIWORD(pInfo->dwFileVersionLS), LOWORD(pInfo->dwFileVersionLS));
-			return TRUE;
-		}
-	}
-
-	return FALSE;
-}
-
-SEL WCharAdd;
+#include "cmdline.h"
 HANDLE hHandle;
-void Color(WORD C) {
-	SetConsoleTextAttribute(hHandle,C);
-}
 class GetOff {
 
 public:
@@ -82,308 +45,416 @@ public:
 	};
 
 };
-bool stacmp(STA&a, STA &b) {
-	return WCharAdd.Wstr[a.ID[0]].Size > WCharAdd.Wstr[b.ID[0]].Size;
-}
+#include<set>
+Localization local;
+class Reader{
+	
+	enum Token
+	{
+		Escape,
+		Key,
+		Value,
+		Start,
+		End,
+		Escaping
+	};
+public:
+	typedef std::vector<std::pair<std::wstring, std::wstring>> RMap;
+	RMap Param,Map;
+	template<class _Ty>
+	bool Parse(_Ty &file) {
+		return Parse(std::ifstream(file, std::ios::binary));
+	};
+	auto begin() {
+		return Map.begin();
+	}
+	auto end() {
+		return Map.end();
+	}
+	bool Parse(std::ifstream &Input) {
+		if (Input) {
+		 Parse(Map, Param, Input);
+		 return true;
+		}
+		return (false);
+	}
+	static std::set<std::wstring> Parse(RMap&Map, RMap&Param,std::ifstream &Input,bool onKey=false) {
+		std::set<std::wstring>Set;
+		if(Input){
+			size_t id = 0;
+		std::stringstream ss;
+		ss << Input.rdbuf();
+		std::wstring &ws = UTF::Decode(ss.str());
+		Token state(Start),token(Start);
+		bool isParam(false);
+		std::wstring key, val,tmp;
+		wchar_t unicode(0),bits(0);
+		for (auto ch : ws) {
+			switch (state)
+			{
+			case Start: {
+				switch (ch)
+				{
+				case '\\':state = Escape; break;
+				case '"':
+					switch (token) {
+					case Start:token = Key; break;
+					case Key:key = std::move(tmp), token = End; if (onKey)Set.insert(key); break;
+					case Value:val = std::move(tmp), state=End; break;
+					case End:token = Value; break;
+					}
+					break;
+				case '\r':
+				case '\n':token = Start; isParam = 0, val.clear(), key.clear();
+					
+					break;
+				
+				default:
+					if (isParam&&token != End&&(ch == ' ' || ch == '\t'))key = std::move(tmp),token = End;
+					else if (token == Key || token == Value)tmp += ch;
+					else if(token == Start&&ch!=' '&&ch !='\t')token=Key,isParam = 1,tmp+=ch;
+					break;
+				}
+			}break;
+			case Escape:{
+				state = Start;
+				auto T = ch;
+				switch (T)
+				{
+				case 'a':T = '\a'; break;
+				case 'b':T = '\b'; break;
+				case 't':T = '\t'; break;
+				case 'n':T = '\n'; break;
+				case 'v':T = '\v'; break;
+				case 'f':T = '\f'; break;
+				case 'r':T = '\r'; break;
+				case '"':T = '\"'; break;
+				case '\\':T = '\\'; break;
+				case 'x': state = Escaping, bits = 2, unicode = 0; break;
+				case 'u':state = Escaping, bits=4,unicode = 0;break;
+				default:
+					msgmgr(MsgType::Error, L"无效转义:%c", ch);
+					break;
+				}
+				if (state != Escaping)tmp += T;
+			}break;
+			case Escaping: {
+				if(isxdigit(ch)){
+				wchar_t T(0);
+				if (ch >= 'a' && ch <= 'f')
+					T = ch - 'a' + 0xA;
+				else if (ch >= 'A' && ch <= 'F')
+					T = ch - 'A' + 0xA;
+				else T = ch - '0';
+				(unicode<<=4)+=T;
+				if(--bits<=0)tmp+= unicode,state = Start;
+				}
+				else { 
+					msgmgr(MsgType::Error, L"无效转义:%c", ch); 
+					state = Start;
+				}
+			}break;
+			case End: {
+				
+				if(!key.empty()&&!onKey){
+				if (!Set.insert(key).second) { msgmgr(MsgType::Warning, L"重复:%s", key.c_str()); }
+				else if(!onKey)(isParam?Param:Map).push_back(std::pair<std::wstring,std::wstring>(std::move(key), std::move(val)));
+				}
+				isParam = 0;
+				state = Start;
+			}break;
+			default:
+				break;
+			}
+
+		}
+		}
+		return Set;
+	}
+
+};
+const char*lang = "lang", *input="input",*output="output", *tex = "tex", *texSz = "texSz",*help="help",*rm="remove",*exclude="exclude",*add="add",
+*size="fontSz",*font="font",*outline="outline",*fontCol="fontCol",*outlineCol="lineCol",*base="base",*selcfg="cfg",*pageid="page";
+HMODULE hInst;
+char slang[100], sinput[100], sfcfg[100], soutput[100], stex[100], stexSz[100], shelp[100], srm[100], sexclude[100], sadd[100], sselcfg[100],
+ssize[100], sfont[100], sioerr[100], weout[100],soutline[100],sfontCol[100],soutlineCol[100],sbase[100], snewpage[100], srefid[100],spage[100];
+wchar_t uncfg[100], unused[100];
+#define LoadA(id,x)LoadStringA(hInst,id,x,100)
+#define LoadW(id,x)LoadStringW(hInst,id,x,100)
 int main(int argc, char *argv[])
 {
-	hHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	Color(0xB);
-	printf("\n [SpaceEngine 汉化生成器 1.0.0.7]\n\n");
-	Color(0x7);
-	if (argc == 3) {
-		printf("[翻译模式]\n");
-		WCharAdd.WMainInit();
-		TEST(argv[1], argv[2]);
-	}
-	else if (argc==5) {
-		
-		if(strcmp(argv[1],"-A")==0){
-			printf("[排除并翻译]\n");
-			WCharAdd.WMainInit();
-			TEST(argv[2], argv[3],argv[4],0);
-	}else{
-		printf("[读取内存模式]\n");
-		ReadAdd RA(argv[1], argv[2], argv[3],atoi(argv[4]));
-		}
-	
-	}
-	else if (argc==4) {
-		if(strstr(argv[3],"%")!=0){ printf("[读取CEXML模式]\n"); 
-		GetOff GF(argv[1], argv[2], argv[3]);
-		}
-		else { 
-			printf("[排除模式]\n");
-			TEST(argv[1], argv[2], argv[3],1); }
+	//setlocale(LC_ALL,"chs");
+	hInst = GetModuleHandle(0);
+	LoadA(IDS_IAOERR, sioerr);
+	LoadA(IDS_SLANG, slang);
+	LoadA(IDS_SINPUT, sinput);
+	LoadA(IDS_STEX, stex);
+	LoadA(IDS_SOUTPUT, soutput);
+	LoadA(IDS_SFONT, sfont);
+	LoadA(IDS_STEXWH, stexSz);
+	LoadA(IDS_SFONTWH, ssize);
+	LoadA(IDS_SADD, sadd);
+	LoadA(IDS_SREMOVE, srm);
+	LoadA(IDS_SEXC, sexclude);
+	LoadA(IDS_SHELP, shelp);
+	LoadW(IDS_SUNCFG, uncfg);
+	LoadW(IDS_SUNUSE, unused);
+	LoadA(IDS_SWEOUT, weout);
+	LoadA(IDS_SOUTLINE, soutline);
+	LoadA(IDS_SOUTLINECOL, soutlineCol);
+	LoadA(IDS_SFONTCOL, sfontCol);
+	LoadA(IDS_SBASE, sbase);
+	LoadA(IDS_SNEWPAGE, snewpage);
+	LoadA(IDS_SSELCFG, sselcfg);
+	LoadA(IDS_SREFID, srefid);
+	LoadA(IDS_SPAGE, spage);
+	cmdline::parser pser;
 
-	}
-	else {
-		
-		Color(0XA);
-		printf("\n用法:	自动翻译: %s [输入文件]  [输出文件]\n	排除翻译: %s [-A] [输入文件] [排除列表文件] [输出文件]\n	读取SE内存: %s [偏移列表文件] [输出文件] [输出格式] [PID] \n	CE XML格式地址析出 %s [输入文件] [输出文件] [输出格式]", argv[0], argv[0], argv[0], argv[0]);
-		Color(0xC);
-		printf("\n [翻译模式] 输入文件必须使用Unicode编码,现在存在FontConfig\\FontTexture字符的行会被忽略,请以空行结尾.\n");
-		Color(0x7);
-		printf("\n 程序目录下需要Config.ini字符配置文件 若不存在则自动创建\n 翻译一行一个\n 要复制的话最好用UE的[用户剪切板(ctrl+数字)]去复制,系统剪切板会破坏内容\n 即便如此，有时一些内容仍然会被破坏,请自行检查.重点检查换行是否正常(一般是被插入0A)\n 错误的字节用16进制编辑删除.\n \n示例");
-		Color(0xB);
-		printf("\n 命令:		%s gui.txt chs-gui.cfg\n", argv[0]);
-		Color(0xE);
-		printf(" 输入文件内容:	\"SYSTEM\" \"系统\"	\n");
+	pser.add<std::string>(lang, 'l', slang, true);
+	pser.add<std::string>(selcfg, 'm', sselcfg, false, "localization.json");
+	pser.add<std::string>(input, 'i', sinput, false);
+	pser.add<std::string>(output, 'o', soutput, false);
 
-		Color(0x7);
-		printf("\n [排除翻译] 排除列表文件内粘贴SE.log里提示的未知翻译 输出过滤后的翻译,过滤对于某版本无用的翻译可以增加加载速度\n	前置-A选项在排除的同时进行翻译\n示例");
-		Color(0xB);
-		printf("\n 命令:		 %s gui.txt exc.txt gui2.txt\n ", argv[0]);
-		Color(0x7);
+	pser.add<std::string>(tex, 't', stex, false);
+	pser.add<std::string>(pageid, 'p', spage, false);
+	pser.add<std::string>(font, 'f', sfont, false, "msyh.ttc");
+	pser.add<std::string>(texSz, 'z', stexSz, false, "256*256");
+	pser.add<std::string>(size, 's', ssize, false, "12*12");
+	pser.add<float>(outline, 'w', soutline, false, 0);
+	pser.add<std::string>(outlineCol, 'u', soutlineCol, false, "0x64646464");
+	pser.add<std::string>(fontCol, 'c', sfontCol, false, "0xFFFFFFFF");
+	pser.add<long>(base, 'b', sbase, false);
 
-		Color(0x7);
-		printf("\n [读取内存模式] 根据文件内偏移读取内存并输出到文件 格式化需要两个格式化参数 %%X或%%d 和%%s 详参printf函数输出格式,");
-		Color(0xC);
-		printf("\n 若仍不了解请使用示例格式	0x00 %%X = %%s\n 输入文件内必须是偏移值而不是内存地址 错误的偏移值可能会导致程序爆炸 ");
-		Color(0x7);
-		printf("\n 用CE搜个绿色基址然后点开看到后面的XXX.exe + ABCD... 的 + XXX部分就是偏移了\n PID是进程ID 打开任务管理器看 此功能用于汉化无法通过gui.cfg改变的字串\n示例");
-		Color(0xB);
-		printf("\n 命令:		%s offset.txt out.txt 0x00%%X=%%s [PID] \n ", argv[0]);
-		Color(0xE);
-		printf("输入文件内容:	0x0012345	\n");
-		Color(0x7);
-		printf("\n [CE XML地址析出] 从CE内复制的地址是XML格式的 无法直接进行读取,故添加此功能 用于配合[读取内存模式]\n 输出格式同上 %%s输出 程序+偏移 %%d或%%X 只输出偏移 \n示例");
-		Color(0xB);
-		printf("\n 命令:		%s ce.txt ceout.txt %%s\n 		%s ce.txt ceout.txt %%d\n 		%s ce.txt ceout.txt %%X\n ", argv[0], argv[0], argv[0]);
-		Color(0x7);
-		
+	pser.add<std::string>(add, 'a', sadd, false);
+	pser.add<std::string>(rm, 'r', srm, false);
+	pser.add<std::string>(exclude, 'e', sexclude, false);
+	pser.add(help, '?', shelp);
+	HRSRC help = FindResource(NULL, MAKEINTRESOURCE(IDR_CONFIG), L"HELP");
+	if (help) {
+		HGDIOBJ res = LoadResource(NULL, help);
+if (res) {
+	size_t sz = SizeofResource(NULL, help);
+	std::unique_ptr<char[]> data(new char[sz + 1024]);
+	std::string format(sz, '\0');
+	LPVOID lp = LockResource(res);
+	memcpy((LPVOID)format.data(), lp, sz);
+	snprintf(data.get(), sz + 1024, format.c_str(), argv[0], argv[0], argv[0], argv[0], argv[0], argv[0], argv[0], argv[0]);
+	pser.footer(data.get());
+	data.reset(nullptr);
+	UnlockResource(lp);
+	FreeResource(res);
+}
 	}
-	setlocale(LC_CTYPE, ".936");
 
-	std::vector<STA> &A = WCharAdd.No;
-	std::sort(A.begin(), A.end(), stacmp);
-	DWORD Err = 0;
-	for (WCHAR T = 0XFF; T < 0XFFFF; T++) {
-		WChar &wc = WCharAdd.Wstr[T];
-		if (wc.use&&wc.UseSize == 0) {
-			if (Err == 0)printf("未使用的字符(不包含内存修改部分):\n"), Err = 1;
-			//printf("%d:", T);
-			printf("%s", WCharAdd.WcharToCharOne(&T));
 
-		}
-	}
-/*	for (const WChar &wc : WCharAdd.Wstr) {
-		
-		if (wc.use&&wc.Size==0) {
-			if (Err == 0)printf("未使用的字符:\n"),Err=1;
-			WCHAR T = (&wc - WCharAdd.Wstr) / sizeof(WChar);
-			printf("%d:", T);
-			printf("%s ", WCharAdd.WcharToCharOne(&T)); 
-		
-		}
-	}*/
-	Err = 0;
-	printf("\n");
-	if (!A.empty()) {
-		Color(0xE);
-		printf("以下字符未配置 ");
-		Color(0x7);
-		printf("输出格式 [字符:频度]\n");
-		for (size_t i = 0;i < A.size();i++) {
-			printf("%s:%d ", A[i].str, WCharAdd.Wstr[A[i].ID[0]].Size);
-		}
-	}
-	else if ((Err = GetLastError()) != 0) {
-		char MsgBuf[256];
-		FormatMessageA( FORMAT_MESSAGE_FROM_SYSTEM , NULL, Err, 0,MsgBuf,256, NULL);
-		Color(0xC);
-		printf("过程中出现错误:%d", Err);
-		Color(0x7);
-		printf(" 描述:%s\n",  MsgBuf);
-	
-	}
-	
-	else { 
-		Color(0xA);
-		printf("\n完成");
-		Color(0x7);
+	pser.parse_check(argc, argv);
+	const std::string&Lang = pser.get<std::string>(lang),&cfgpath= pser.get<std::string>(selcfg);
+	std::ifstream Input(cfgpath, std::ios::binary);
+	auto getMap = [](Json::Value&maps)->std::string {
+		std::string map;
+		if (maps.isArray())for (auto &v : maps)map += v.asString();
+		else if (maps.isString())map += maps.asString();
+		return map;
 	};
-
-	printf("\n");
-	for (const STA &a : A) {
-		printf("%s", a.str);
-		delete[] a.str;
-	}
-	A.clear();
-	/*while (!A.empty()) {
-		printf("%s", A.back().str);
-		delete[] A.back().str;
-		A.pop_back();
-
-	}*/
-
-	Color(0x7);
-	CloseHandle(hHandle);
-    return 0;
-}
-std::vector<std::wstring> wstrv;
-#include <deque>
-void TEST(char* In, char*In2,char*Out,int mode) {
-	FILE*fp=0, *fp2=0,*fp3=0;
-	//bool mode = 0;
-	fopen_s(&fp, In, "rb");
-	if (!fp) { printf("无法打开%s\n",In);return;
-	}
-
-		//mode = 1;
-	fopen_s(&fp2, In2, "rb");
-	if (!fp2) { printf("无法打开%s\n", In2); return;
-	}
-	
-	fopen_s(&fp3, Out, "wb+");
-	if (!fp3) { printf("无法打开%s\n", Out); return;
-	}
-	std::vector<std::wstring> dew;
-	fseek(fp2, 0, SEEK_END);
-	size_t len = ftell(fp2) / 2;
-	wchar_t *buf2 = new WCHAR[len];
-	rewind(fp2);
-	fread(buf2, sizeof(wchar_t), len, fp2);
-	//std::wstring ws = buf2;
-	size_t l = 0,st=0;
-	WCHAR P = 0;
-	std::wstring ws;
-	printf("读取排除列表\n");
-
-	while (l < len) {
-		P = buf2[l++];
+	auto MBToWideChar = [](const std::string &src)->std::wstring {
+		std::wstring ws;
+		ws.resize(MultiByteToWideChar(CP_ACP, 0, src.c_str(), src.size(), 0, 0));
+		MultiByteToWideChar(CP_ACP, 0, src.c_str(), src.size(), (wchar_t*)ws.data(), ws.size());
+		return ws;
+	};
+	Json::Value val;
+	if (Input) {
+		size_t curPID = 1;
 		
-		if (P == '"') { st++; 
-		continue;
-		}
-		if (P == '\r'|| P == '\n')st = 0;
-		else if (st == 1&&P!='"') {
-			ws.push_back(P);
+		Json::Reader reader;
+		reader.parse(Input, val);
+		Input.close();
 
-		}
-		else if (st == 2) {
-			if(ws.size()>0){
-			wstrv.push_back(ws);
-		//	printf("PUSH:%ws\n", ws.c_str());
-			ws.clear();
+	}
+	else openErr(MBToWideChar(cfgpath));
+		auto&pages = val["Language"][Lang]["Pages"];
+		if (pser.exist(tex)) {
+			size_t w, h, fw, fh, i;
+			const std::string &tw = pser.get<std::string>(texSz);
+			const std::string &texN = pser.get<std::string>(tex);
+			i = tw.find('*');
+		
+			w = std::atoi(tw.c_str());
+			h = (i != std::string::npos&&i != tw.size() - 1) ? atoi(&tw[i + 1]) : w;
+			const std::string &fwh = pser.get<std::string>(size);
+			i = fwh.find('*');
+			fw = std::atoi(fwh.c_str());
+			fh = (i != std::string::npos&&i != fwh.size() - 1) ? atoi(&fwh[i + 1]) : fw;
+			float ow = pser.get<float>(outline);
+			auto hex = [](const std::string&str)->uint32_t {
+				uint32_t hex = 0;
+				size_t i = str.find_first_not_of("0x", 0), bit = 8, e(4);
+				while (bit--&&i < str.size())hex = (hex << 4) + (str[i] - (str[i] <= '9' ? '0' : ((str[i] <= 'F' ? 'A' : 'a') - 0xA))), i++;
+
+				return hex;
+			};
+
+			uint32_t oc = hex(pser.get<std::string>(outlineCol)), fc = hex(pser.get<std::string>(fontCol));
+			FreeType::Pixel32 poc(oc), pfc(fc);
+			std::swap(pfc.r, pfc.b);
+			FreeType ft(pser.get<std::string>(font), fw, fh, w, h, pser.exist(base) ? pser.get<long>(base) : h / 16 * .75);
+
+			std::string map;
+			size_t cid(0);
+			std::stringstream  ss,s2;
+			std::set<size_t>texid;
+			if (pser.exist(pageid)) {
+				;
+				s2.str(pser.get<std::string>(pageid));
+				size_t id(0);
+				while (s2 >> id)texid.insert(id);
 			}
-			//st = 0;
-			//st = 0;
+			for (Json::Value &sub : pages) {
+				ss.str("");
+				map = getMap(sub["Maps"]);
+				cid++;
+				size_t id = sub["Id"].isInt() ? sub["Id"].asInt() : cid;
+				ss << texN << id << ".png";
+				if (texid.empty() || texid.find(id) != texid.end()){
+				if(ow)ft.RenderOutline(UTF::Decode(std::move(map)), ss.str().c_str(), pfc, poc, ow);
+				else ft.Render(UTF::Decode(std::move(map)), ss.str().c_str());
+				}
+				map.clear();
+
+			};
+
+
+
 		}
-		
+		auto split = [](std::wstring&ws, std::wstring&map, Json::Value&val) {
+			size_t i = 256 - map.size(), lp(0);
+			i = i > ws.size() ? ws.size() : i;
+			if (i)
+			{
+				map += ws.substr(0, i);
+				ws.erase(0, i);
+			}
+			while (lp < map.size()) {
+				val.append(UTF::Encode(map.substr(lp, map.size() - lp < 16 ? map.size() - lp : 16)));
+				lp += 16;
+			}
+		};
+		local.MainInit(Lang, val);
+		bool badd = pser.exist(add), brm = pser.exist(rm), bin = pser.exist(input);
+		if (pser.exist(output)) {
+			std::ofstream out(pser.get<std::string>(output), std::ios::binary);
+			auto outfile = [&out, &val]() {
+				Json::StyledWriter sw;
+				out << sw.write(val);
+				out.close();
+			};
+			if (bin) {
+				std::vector<std::pair<std::string, std::string>>list;
+				Reader reader;
+				reader.Parse(pser.get<std::string>(input));
+				std::set<std::wstring>exclist;
+				if (pser.exist(exclude)) {
+					std::ifstream exc(pser.get<std::string>(exclude), std::ios::binary);
+					if(exc){
+					exclist = Reader::Parse(Reader::RMap(), Reader::RMap(), exc, true);
+				//	for (auto&ws : exclist)std::wcout << ws << '\n';
+					exc.close();
+					}
+				}
 
-	}
-	if(buf2)delete[] buf2;
-	fseek(fp, 0, SEEK_END);
-	len = ftell(fp) / 2;
-	rewind(fp);
-	wchar_t *buf = new WCHAR[len];
-	fread(buf, sizeof(wchar_t), len, fp);
-	buf[0] = ' ', buf[len - 1] = 0;
+				std::map<wchar_t, size_t>err;
+				for (auto &loc : reader) {
+					std::string str;
+					for (auto v : loc.second) {
+						auto &ws = local.GetCharCfg(v);
+						if (!ws.use) err[v]++;
+						else {
+							for (uint8_t c : ws.str)if (c)str += c;
+							ws.refCnt++;
+						}
+					}
+					if (!str.empty() && exclist.find(loc.first) == exclist.end())list.push_back(std::make_pair(UTF::Encode(loc.first), std::move(str)));
+				}
+				auto &refmap = err;
+				auto sortA = [&refmap](wchar_t l, wchar_t r)->bool {
+					return refmap[l] > refmap[r];
+				};
+				std::wstring ws;
+				if (!err.empty()) {
+					
+				
+					for (auto &ch : err)ws += ch.first;
+					std::sort(ws.begin(), ws.end(), sortA);
+					msgmgr(MsgType::Error, uncfg, ws.c_str());
+				}
+				ws.clear();
+				for (size_t i(0); i < 1 << 16; i++) {
+					auto &wcfg = local.GetCharCfg(i);
+					if (wcfg.use && !wcfg.refCnt)ws+=i;
+				}
+				if (!ws.empty())msgmgr(MsgType::Info, unused, ws.c_str());
+				for (auto &sub : reader.Param) out << UTF::Encode(sub.first) << "  \"" << UTF::Encode(sub.second) << "\"\n";
+				for (auto &sub : list) out << '"' << sub.first << "\"  \"" << sub.second << "\"\n";
+				out.close();
+			}
+			else if (badd || brm) {
+				std::set<wchar_t>mset;
+				if (brm) {
+					std::wstring &ws = MBToWideChar(pser.get<std::string>(rm));
 
-	l = 0;
-	st = 0;
-	ws.clear();
-	printf("开始排除\n");
-	int Y=0,Z=0,X=0;
-	std::wstring TMP;
-	while (l <len) {
-		P= buf[l++];
-		ws.push_back(P);
-		if (P == '"')st++;
-		if (st == 1 && P != '"')TMP.push_back(P);
-		if (P == '\r' || P == '\n'){
-			st = 0;
-		
-			if (ws.size()> 4) {
+					for (auto ch : ws)mset.insert(ch);
+					for (auto&sub : pages) {
+						auto &val = sub["Maps"];
+						//std::locale::global(std::locale("chs"));
+						std::wstring map = UTF::Decode(getMap(val));
+						//std::wcout << map.size() << L":" << map << std::endl;
+						for (size_t i(0); i < map.size();) {
+							if (mset.find(map[i]) != mset.end())map.erase(i, 1);
+							else i++;
+						}
+						val.clear();
+						split(map, std::wstring(), val);
 
-
-				Z++;
-				for (std::vector<std::wstring>::iterator i = dew.begin();i != dew.end();i++) {
-					if ((*i).compare(ws) == 0) {
-						printf("已检测到重复[%d]->%ws", Z, ws.c_str());
-						printf("\n");
-						goto NO;
 					}
 
 				}
-				for (std::vector < std::wstring>::iterator it = wstrv.begin();it != wstrv.end();it++){
-					
+				if (badd) {
+					std::wstring &ws = MBToWideChar(pser.get<std::string>(add));
+					for (auto ch : ws)if (!local.GetCharCfg(ch).use)mset.insert(ch);
+					ws.clear();
+					for (auto ch : mset)ws += ch;
+					for (auto&sub : pages) {
+						auto &sval = sub["Maps"];
+						std::wstring &map = UTF::Decode(getMap(sval));
 
-					
-					if ((*it).compare(TMP) == 0) { 
-						Y++;
-						TMP.clear(), ws.clear(); 
-						break;
+						if (map.size() < 256) {
+							sval.clear(); split(ws, map, sval);
+						}
 					}
+					std::stringstream ss;
+					for (size_t i(0); i < 256; i++)ss << 0 << ' ' << 12 << ' ';
+					while (!ws.empty()) {
+						Json::Value sval;
+						int id;
+						std::cout << snewpage << std::endl;
+						while (std::cout << "Id:", std::cin >> id, local.Page[id].use)std::cout << srefid << std::endl;
+						sval["Id"] = id;
+						std::cout << "Font:";
+						std::string str;
+						std::cin.ignore();
+						std::getline(std::cin, str);
+						sval["Font"] = str;
+						split(ws, std::wstring(L"???????????"), sval["Maps"]);
+						sval["Params"] = ss.str();
+						pages.append(sval);
+					}
+
+				}
+				outfile();
 			}
 
-				if(ws.size()>0){
-					X++;
-
-					dew.push_back(ws);
-			if (ws.find('\n') == std::wstring::npos)ws.push_back('\n');
-			if (mode)
-
-			fwrite(ws.c_str(), sizeof(WCHAR), ws.size(), fp3);
-			else {
-				std::string str;
-				WCharAdd.Start(ws, &str);
-				if (!str.empty()) {
-					fwrite(str.c_str(), sizeof(CHAR), str.size(), fp3);
-				}
-				else { printf("分配内存失败\n"); }
-			}//dew.push_back(ws);
-			
-				}
-			}
-			NO:
-			ws.clear();
-			TMP.clear();
-			//st = 0;
-			//st = 0;
 		}
-		
-	}
-	dew.clear();
-	printf("统计:[输出/排除/总数] %d/%d/%d 个\n", X, Y,Z);
-	if (X == Z)printf("=>>>>文件编码可能不是Unicode\n");
-	if(buf)delete[] buf;
-	if(fp)fclose(fp);
-	if (fp2)fclose(fp2);
-	if (fp3)(fp3);
-}
-
-void TEST(char* In, char*Out) {
-	FILE*fp, *fp2;
-	fopen_s(&fp, In, "rb");
-	fopen_s(&fp2, Out, "wb+");
-	if (fp == 0 || fp2 == 0) {
-		printf("打开文件失败");
-		return;
-	}
-	fseek(fp, 0, SEEK_END);
-	unsigned int len = ftell(fp) / 2;
-	rewind(fp);
-	wchar_t *buf = new WCHAR[len], TMP[1024];
-	fread(buf, sizeof(wchar_t), len, fp);
-	buf[0] = ' ',buf[len-1] = 0;
-	
-	unsigned int i = 0, j = 0;
-	char *p = 0;
-	while (i <len) {
-		TMP[j] = buf[i];
-		if (TMP[j] == '\r')buf[i] = ' ';
-		if (TMP[j] == '\n'|| i == len - 1) {
-			TMP[++j] = '\0';
-			p=WCharAdd.Start(TMP,j);
-			fwrite(p, sizeof(char), strlen(p), fp2);
-			delete[] p;
-			j = 0;
-		}
-		i++,j++;
-	}
-	delete[] buf;
-	fclose(fp);
-	fclose(fp2);
+		else if (badd || brm || bin)printf(sioerr);
+	if (wngCnt || errCnt)printf(weout, wngCnt, errCnt);
+    return (wngCnt<<sizeof(size_t)*4)|errCnt;
 }
