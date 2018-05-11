@@ -1,0 +1,3346 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="26">
+  <CheatEntries>
+    <CheatEntry>
+      <ID>5</ID>
+      <Description>"导出纹理"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>[ENABLE]
+//code from here to '[DISABLE]' will be used to enable the cheat
+alloc(newmem,2048)
+label(returnhere)
+label(originalcode)
+label(exit)
+
+newmem: //this is allocated memory, you have read,write,execute access
+//place your code here
+//SpaceEngine.exe+217B26
+originalcode:
+pushad
+//call zlib1.TestAPI
+  call HookMain
+//call zlib1.Hack
+popad
+mov cl,[esp+0F]
+movss xmm4,[edi+edx*4+00000CD8]
+
+exit:
+jmp returnhere
+
+"SpaceEngine.exe"+217B26:
+jmp newmem
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+returnhere:
+
+
+ 
+ 
+[DISABLE]
+//code from here till the end of the code will be used to disable the cheat
+dealloc(newmem)
+"SpaceEngine.exe"+217B26:
+mov cl,[esp+0F]
+movss xmm4,[edi+edx*4+00000CD8]
+//Alt: db 8A 4C 24 0F F3 0F 10 A4 97 D8 0C 00 00
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>33</ID>
+      <Description>"默认字符信息"</Description>
+      <ShowAsHex>1</ShowAsHex>
+      <VariableType>4 Bytes</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>18</ID>
+      <Description>"某全局对象"</Description>
+      <VariableType>4 Bytes</VariableType>
+      <Address>SpaceEngine.exe+4FCF18</Address>
+      <Offsets>
+        <Offset>10</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>15</ID>
+      <Description>"无描述"</Description>
+      <VariableType>4 Bytes</VariableType>
+      <Address>SpaceEngine.exe+4FCE2A</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>17</ID>
+      <Description>"无描述"</Description>
+      <VariableType>2 Bytes</VariableType>
+      <Address>SpaceEngine.exe+4FCE28</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>26</ID>
+      <Description>"纹理宽"</Description>
+      <VariableType>4 Bytes</VariableType>
+      <Address>SpaceEngine.exe+4F90E0+44+8</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>30</ID>
+      <Description>"纹理宽"</Description>
+      <VariableType>4 Bytes</VariableType>
+      <Address>SpaceEngine.exe+4F90E0+44+C</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>16</ID>
+      <Description>"高"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+4FCE24</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>14</ID>
+      <Description>"宽"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+4FCE20</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>6</ID>
+      <Description>"Version"</Description>
+      <VariableType>String</VariableType>
+      <Length>20</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>SpaceEngine.exe+3DC204</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>13</ID>
+      <Description>"无描述"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+3A7C14</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>19</ID>
+      <Description>"自动汇编脚本"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>[ENABLE]
+//code from here to '[DISABLE]' will be used to enable the cheat
+alloc(newmem,2048)
+label(returnhere)
+label(originalcode)
+label(exit)
+
+newmem: //this is allocated memory, you have read,write,execute access
+//place your code here
+
+originalcode:
+//测试EDI作用
+//预期：字体尺寸
+//结果：字体宽度倍数
+mov [edi+000000D0],2
+mov ecx,[edi+000000D0]
+
+exit:
+jmp returnhere
+
+"SpaceEngine.exe"+217B10:
+jmp newmem
+nop
+returnhere:
+
+
+ 
+ 
+[DISABLE]
+//code from here till the end of the code will be used to disable the cheat
+dealloc(newmem)
+"SpaceEngine.exe"+217B10:
+mov ecx,[edi+000000D0]
+//Alt: db 8B 8F D0 00 00 00
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>20</ID>
+      <Description>"自动汇编脚本"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-07
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+217B10)
+define(bytes,8B 8F D0 00 00 00 8B C1 C1 E0 08 03 D0 F3 0F 10 8C 8F D8 18 00 00 8A 4C 24 0F F3 0F 10 A4 97 D8 0C 00 00 8A C1 F3 0F 10 9C 97 D8 00 00 00 24 0F 8B 15 18 CF D2 00)
+
+[ENABLE]
+
+
+assert(address,bytes)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+
+code:
+  mov ecx,[edi+000000D0]
+mov eax,ecx
+//  mov ecx,1
+//  mov edx,65
+shl eax,08 { 8 }
+add edx,eax
+movss xmm1,[edi+ecx*4+000018D8]
+push BF800000
+movss xmm4,[esp]
+add esp,4
+mov cl,[esp+0F]
+//movss xmm4,[edi+edx*4+00000CD8]
+mov al,cl
+movss xmm3,[edi+edx*4+000000D8]
+and al,0F { 15 }
+mov edx,[SpaceEngine.exe+4FCF18] { [00D2CE40] }
+
+  jmp return
+
+address:
+  jmp newmem
+  nop
+SpaceEngine.exe+217B46:
+return:
+
+[DISABLE]
+
+address:
+  db bytes
+  // mov ecx,[edi+000000D0]
+
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217B10
+
+"SpaceEngine.exe"+217AE4: EB 2A                       -  jmp SpaceEngine.exe+217B10
+"SpaceEngine.exe"+217AE6: 0F 28 C1                    -  movaps xmm0,xmm1
+"SpaceEngine.exe"+217AE9: 0F 28 D1                    -  movaps xmm2,xmm1
+"SpaceEngine.exe"+217AEC: F3 0F 59 05 3C 7D BD 00     -  mulss xmm0,[SpaceEngine.exe+3A7D3C]
+"SpaceEngine.exe"+217AF4: F3 0F 58 D7                 -  addss xmm2,xmm7
+"SpaceEngine.exe"+217AF8: F3 0F 58 C7                 -  addss xmm0,xmm7
+"SpaceEngine.exe"+217AFC: F3 0F 11 54 24 20           -  movss [esp+20],xmm2
+"SpaceEngine.exe"+217B02: F3 0F 11 44 24 18           -  movss [esp+18],xmm0
+"SpaceEngine.exe"+217B08: EB 06                       -  jmp SpaceEngine.exe+217B10
+"SpaceEngine.exe"+217B0A: F3 0F 10 54 24 20           -  movss xmm2,[esp+20]
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217B10: 8B 8F D0 00 00 00           -  mov ecx,[edi+000000D0]
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+217B16: 8B C1                       -  mov eax,ecx
+"SpaceEngine.exe"+217B18: C1 E0 08                    -  shl eax,08
+"SpaceEngine.exe"+217B1B: 03 D0                       -  add edx,eax
+"SpaceEngine.exe"+217B1D: F3 0F 10 8C 8F D8 18 00 00  -  movss xmm1,[edi+ecx*4+000018D8]
+"SpaceEngine.exe"+217B26: 8A 4C 24 0F                 -  mov cl,[esp+0F]
+"SpaceEngine.exe"+217B2A: F3 0F 10 A4 97 D8 0C 00 00  -  movss xmm4,[edi+edx*4+00000CD8]
+"SpaceEngine.exe"+217B33: 8A C1                       -  mov al,cl
+"SpaceEngine.exe"+217B35: F3 0F 10 9C 97 D8 00 00 00  -  movss xmm3,[edi+edx*4+000000D8]
+"SpaceEngine.exe"+217B3E: 24 0F                       -  and al,0F
+"SpaceEngine.exe"+217B40: 8B 15 18 CF D2 00           -  mov edx,[SpaceEngine.exe+4FCF18]
+}
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>21</ID>
+      <Description>"起始地址"</Description>
+      <ShowAsHex>1</ShowAsHex>
+      <VariableType>4 Bytes</VariableType>
+      <Address>SpaceEngine.exe+217580 </Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>22</ID>
+      <Description>"函数替换"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-07
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+217580)
+
+[ENABLE]
+
+//assert(address,bytes)
+
+address:
+  push ebp
+  mov ebp,esp
+  and esp,-12
+
+[DISABLE]
+
+address:
+  push ebp { 函数起始}
+mov ebp,esp
+and esp,-10 { 240 }
+sub esp,48 { 72 }
+cmp byte ptr [ebp+0C],00 { 0 }
+push esi
+push edi
+movss [esp+28],xmm3
+mov edi,ecx
+movss [esp+24],xmm2
+je SpaceEngine.exe+2175C9
+mov eax,[edi+000000D0]
+movss [edi+000000BC],xmm1
+movd xmm0,[edi+eax*4+70]
+cvtdq2ps xmm0,xmm0
+mulss xmm0,[edi+14]
+subss xmm2,xmm0
+movss [edi+000000C0],xmm2
+jmp SpaceEngine.exe+217607
+movaps xmm0,xmm1
+call SpaceEngine.exe+34E20
+mov eax,[edi+000000D0]
+movss xmm1,[esp+24]
+movss [edi+000000BC],xmm0
+movd xmm0,[edi+eax*4+70]
+cvtdq2ps xmm0,xmm0
+mulss xmm0,[edi+14]
+subss xmm1,xmm0
+movaps xmm0,xmm1
+call SpaceEngine.exe+34E20
+movss [edi+000000C0],xmm0
+movups xmm0,[edi+000000A8]
+lea eax,[esp+30]
+mov esi,[ebp+08] { 取得参数
+ }
+movss xmm6,[edi+000000BC]
+mov ecx,SpaceEngine.exe+4F90E0 { [00000566] }
+movss xmm7,[edi+000000C0]
+push eax
+movss [esp+18],xmm6
+movss [esp+14],xmm7
+movups [esp+34],xmm0
+call SpaceEngine.exe+1AD420
+mov edx,esi
+mov al,[edx]
+mov [esp+0F],al
+test al,al
+je SpaceEngine.exe+217F48
+movss xmm1,[SpaceEngine.exe+3A7E44] { [0.50] }
+movss xmm3,[SpaceEngine.exe+3A7F08] { [0.75] }
+movss xmm4,[SpaceEngine.exe+3A8E34] { [255.00] }
+//nop [eax+00000000]
+db 0F 1F 80 00 00 00 00
+inc esi
+mov ecx,esi
+mov [esp+24],esi
+sub ecx,edx
+movzx edx,al
+mov [esp+2C],edx
+lea eax,[edx-01]
+cmp eax,0E { 14 }
+ja SpaceEngine.exe+2179C0
+//jmp dword ptr [eax*4+SpaceEngine.exe+217F50]
+db FF 24 85 50 7F 06 01
+mov eax,[edi+24]
+cmp eax,02 { 2 }
+jnl SpaceEngine.exe+21769F
+inc eax
+mov [edi+24],eax
+cmp byte ptr [ebp+0C],00 { 0 }
+jne SpaceEngine.exe+217F37
+addss xmm6,xmm1
+movaps xmm0,xmm6
+call SpaceEngine.exe+34E20
+movaps xmm6,xmm0
+jmp SpaceEngine.exe+217F13
+mov eax,[edi+24]
+test eax,eax
+jle SpaceEngine.exe+21769F
+dec eax
+jmp SpaceEngine.exe+21769C
+cmp byte ptr [edi+19],00 { 0 }
+mov [edi+000000CC],00000000 { 0 }
+mov [edi+20],FFFFFFFF { -1 }
+mov [edi+1C],FFFFFFFF { -1 }
+mov [edi+000000D0],00000000 { 0 }
+mov [edi+10],3F400000 { 0.75 }
+mov [edi+14],3F400000 { 0.75 }
+mov [edi+000000D4],41800000 { 16.00 }
+mov [edi],41580000 { 13.50 }
+je SpaceEngine.exe+217717
+mov [edi+000000D0],00000001 { 1 }
+mov eax,[edi+000000D0]
+shl eax,04 { 4 }
+movups xmm0,[eax+edi+000018E4]
+movups [edi+00000094],xmm0
+jmp SpaceEngine.exe+21769F
+cmp byte ptr [edi+18],00 { 0 }
+mov [edi+000000CC],00000001 { 1 }
+mov [edi+20],FFFFFFFF { -1 }
+mov [edi+1C],FFFFFFFF { -1 }
+mov [edi],41900000 { 18.00 }
+je SpaceEngine.exe+21777C
+mov [edi+000000D0],00000000 { 0 }
+mov [edi+10],3F800000 { 1.00 }
+mov [edi+14],3F800000 { 1.00 }
+mov [edi+000000D4],41800000 { 16.00 }
+jmp SpaceEngine.exe+21779E
+mov [edi+000000D0],00000002 { 2 }
+mov [edi+10],3F0CCCCD { 0.55 }
+mov [edi+14],3F0CCCCD { 0.55 }
+mov [edi+000000D4],42000000 { 32.00 }
+cmp byte ptr [edi+19],00 { 0 }
+je SpaceEngine.exe+217717
+cmp dword ptr [edi+000000D0],00 { 0 }
+jne SpaceEngine.exe+217717
+jmp SpaceEngine.exe+21770D
+mov [edi+000000CC],00000002 { 2 }
+mov [edi+10],3F400000 { 0.75 }
+mov [edi+14],3F400000 { 0.75 }
+mov [edi+000000D0],00000002 { 2 }
+mov [edi+1C],FFFFFFFF { -1 }
+mov [edi+20],FFFFFFFF { -1 }
+mov [edi+000000D4],42000000 { 32.00 }
+mov [edi],42100000 { 36.00 }
+movups xmm0,[edi+00001904]
+movups [edi+00000094],xmm0
+jmp SpaceEngine.exe+21769F
+mov [edi+000000CC],00000003 { 3 }
+mov [edi+10],3F800000 { 1.00 }
+mov [edi+14],3F800000 { 1.00 }
+jmp SpaceEngine.exe+2177D2
+mov ecx,[esp+24]
+lea edx,[edi+0000192C]
+call SpaceEngine.exe+2166F0
+movzx eax,byte ptr [edi+0000192C]
+mov ecx,SpaceEngine.exe+4F90E0 { [00000566] }
+mov [esp+3C],3F800000 { 1.00 }
+movd xmm2,eax
+movzx eax,byte ptr [edi+0000192D]
+cvtdq2ps xmm2,xmm2
+movd xmm1,eax
+movzx eax,byte ptr [edi+0000192E]
+cvtdq2ps xmm1,xmm1
+movd xmm0,eax
+lea eax,[esp+40]
+cvtdq2ps xmm0,xmm0
+push eax
+divss xmm1,xmm4
+divss xmm0,xmm4
+divss xmm2,xmm4
+movss [esp+38],xmm1
+movss xmm1,[edi+000000B8]
+movss [esp+3C],xmm0
+movss [esp+34],xmm2
+movaps xmm0,[esp+34]
+shufps xmm1,xmm1,00 { 0 }
+mulps xmm0,xmm1
+movups [esp+44],xmm0
+call SpaceEngine.exe+1AD420
+mov esi,[esp+24]
+add esi,06 { 6 }
+jmp SpaceEngine.exe+217F1F
+movups xmm1,[edi+000000A8]
+lea eax,[esp+40]
+mov ecx,SpaceEngine.exe+4F90E0 { [00000566] }
+movss xmm0,[edi+000000B8]
+shufps xmm0,xmm0,00 { 0 }
+movaps [esp+30],xmm1
+mulps xmm1,xmm0
+push eax
+movups [esp+44],xmm1
+call SpaceEngine.exe+1AD420
+jmp SpaceEngine.exe+217F1F
+movd xmm0,[edi+0C]
+addss xmm6,[SpaceEngine.exe+3A801C] { [1.00] }
+movd xmm1,[edi+08]
+cvtdq2ps xmm0,xmm0
+cvtdq2ps xmm1,xmm1
+subss xmm6,xmm0
+divss xmm6,xmm1
+movaps xmm0,xmm6
+call SpaceEngine.exe+4DBD0
+movaps xmm6,xmm0
+movd xmm0,[edi+08]
+cvtdq2ps xmm0,xmm0
+mulss xmm6,xmm0
+movd xmm0,[edi+0C]
+cvtdq2ps xmm0,xmm0
+addss xmm6,xmm0
+jmp SpaceEngine.exe+217F13
+push [edi+000000CC]
+mov ecx,edi
+mov byte ptr [edi+19],01 { 1 }
+call SpaceEngine.exe+21F330
+jmp SpaceEngine.exe+217F37
+push [edi+000000CC]
+mov ecx,edi
+mov byte ptr [edi+19],00 { 0 }
+call SpaceEngine.exe+21F330
+jmp SpaceEngine.exe+217F37
+mov al,[esi]
+cmp al,30 { 48 }
+jl SpaceEngine.exe+217F37
+cmp al,3A { 58 }
+jl SpaceEngine.exe+217978
+cmp al,3F { 63 }
+jng SpaceEngine.exe+217F37
+cmp al,5B { 91 }
+jl SpaceEngine.exe+217984
+cmp al,5F { 95 }
+jng SpaceEngine.exe+217F37
+cmp al,7B { 123 }
+jl SpaceEngine.exe+217990
+cmp al,7E { 126 }
+jng SpaceEngine.exe+217F37
+inc esi
+jmp SpaceEngine.exe+217962
+movss xmm7,[edi+000000C0]
+addss xmm7,[edi]
+movss xmm6,[edi+000000BC]
+movss [esp+14],xmm6
+movss [esp+10],xmm7
+movss [edi+000000C0],xmm7
+jmp SpaceEngine.exe+217F37
+mov eax,[edi+000000D0]
+movss xmm1,[edi+000000D4]
+mulss xmm1,[edi+14]
+shl eax,08 { 8 }
+add eax,edx
+movss [esp+24],xmm1
+movss xmm5,[edi+eax*4+000000D8]
+mov eax,[edi+24]
+mulss xmm5,[edi+10]
+sub eax,00 { 0 }
+je SpaceEngine.exe+2179FE
+sub eax,01 { 1 }
+je SpaceEngine.exe+217A02
+sub eax,01 { 1 }
+jne SpaceEngine.exe+217A0E
+mulss xmm5,xmm3
+addss xmm5,xmm6
+movss [esp+1C],xmm5
+jmp SpaceEngine.exe+217A14
+movss xmm5,[esp+1C]
+movaps xmm0,xmm5
+subss xmm0,[edi+000000BC]
+comiss xmm0,[esp+28]
+ja SpaceEngine.exe+217F48
+lea eax,[ecx-01]
+cmp eax,[edi+1C]
+jl SpaceEngine.exe+217AA6
+cmp eax,[edi+20]
+jg SpaceEngine.exe+217AA6
+movss [esp+18],xmm7
+mov ecx,SpaceEngine.exe+4F90E0 { [00000566] }
+movss xmm7,[edi]
+addss xmm7,[esp+10]
+push SpaceEngine.exe+4FAFA0 { [0.10] }
+movss [esp+24],xmm7
+call SpaceEngine.exe+1AD420
+movss xmm2,[esp+10]
+movaps xmm3,xmm5
+push ecx
+movaps xmm1,xmm6
+movss [esp],xmm7
+call SpaceEngine.exe+1ACFE0
+lea eax,[esp+30]
+mov ecx,SpaceEngine.exe+4F90E0 { [00000566] }
+push eax
+call SpaceEngine.exe+1AD420
+movss xmm5,[esp+1C]
+movss xmm6,[esp+14]
+movss xmm1,[esp+24]
+movss xmm7,[esp+10]
+movss xmm3,[SpaceEngine.exe+3A7F08] { [0.75] }
+mov edx,[esp+2C]
+mov eax,[edi+24]
+sub eax,00 { 0 }
+je SpaceEngine.exe+217AE6
+sub eax,01 { 1 }
+je SpaceEngine.exe+217AD1
+sub eax,01 { 1 }
+jne SpaceEngine.exe+217B0A
+movaps xmm2,xmm1
+movss [esp+18],xmm7
+mulss xmm2,xmm3
+addss xmm2,xmm7
+movss [esp+20],xmm2
+jmp SpaceEngine.exe+217B10
+movaps xmm2,xmm1
+movss [esp+18],xmm7
+addss xmm2,xmm7
+movss [esp+20],xmm2
+jmp SpaceEngine.exe+217B10
+movaps xmm0,xmm1
+movaps xmm2,xmm1
+mulss xmm0,[SpaceEngine.exe+3A7D3C] { [0.25] }
+addss xmm2,xmm7
+addss xmm0,xmm7
+movss [esp+20],xmm2
+movss [esp+18],xmm0
+jmp SpaceEngine.exe+217B10
+movss xmm2,[esp+20]
+mov ecx,[edi+000000D0]
+mov eax,ecx
+shl eax,08 { 8 }
+add edx,eax
+movss xmm1,[edi+ecx*4+000018D8]
+mov cl,[esp+0F]
+movss xmm4,[edi+edx*4+00000CD8]
+mov al,cl
+movss xmm3,[edi+edx*4+000000D8]
+and al,0F { 15 }
+mov edx,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+movzx eax,al
+shr cl,04 { 4 }
+mulss xmm4,xmm1
+movd xmm0,eax
+movzx eax,cl
+cvtdq2ps xmm0,xmm0
+movd xmm7,eax
+mulss xmm0,[SpaceEngine.exe+3A7C14] { [0.06] }
+mov eax,[edx+14]
+cvtdq2ps xmm7,xmm7
+addss xmm4,xmm0
+mulss xmm3,xmm1
+mulss xmm7,[SpaceEngine.exe+3A7C14] { [0.06] }
+addss xmm3,xmm4
+movaps xmm1,xmm7
+addss xmm1,[SpaceEngine.exe+3A7C14] { [0.06] }
+cmp eax,[edx+10]
+jnl SpaceEngine.exe+217C20
+movss xmm0,[esp+18]
+movss [SpaceEngine.exe+4FCE24],xmm0 { [538.00] }
+movss xmm0,[SpaceEngine.exe+5D4D7C] { [0.25] }
+mulss xmm0,xmm4
+movss [SpaceEngine.exe+4FCE20],xmm6 { [331.00] }
+addss xmm0,[SpaceEngine.exe+5D4D74] { [0.50] }
+mulss xmm0,[SpaceEngine.exe+3A9028] { [32767.00] }
+cvttss2si eax,xmm0
+movss xmm0,[SpaceEngine.exe+5D4D80] { [0.25] }
+mulss xmm0,xmm7
+mov [SpaceEngine.exe+4FCE28],ax { [77FF0FFF] }
+addss xmm0,[SpaceEngine.exe+5D4D78] { [0.50] }
+mulss xmm0,[SpaceEngine.exe+3A9028] { [32767.00] }
+cvttss2si eax,xmm0
+mov [SpaceEngine.exe+4FCE2A],ax { [255] }
+mov eax,[edx+14]
+movups xmm0,[SpaceEngine.exe+4FCE20] { [331.00] }
+lea ecx,[eax+eax*2]
+mov eax,[edx+1C]
+movups [eax+ecx*8],xmm0
+movq xmm0,[SpaceEngine.exe+4FCE30] { [02A10566] }
+movq [eax+ecx*8+10],xmm0
+mov eax,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+inc [eax+14]
+mov edx,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+mov eax,[edx+14]
+cmp eax,[edx+10]
+jnl SpaceEngine.exe+217CB8
+movss xmm0,[SpaceEngine.exe+5D4D7C] { [0.25] }
+mulss xmm0,xmm4
+movss [SpaceEngine.exe+4FCE20],xmm6 { [331.00] }
+movss [SpaceEngine.exe+4FCE24],xmm2 { [538.00] }
+addss xmm0,[SpaceEngine.exe+5D4D74] { [0.50] }
+mulss xmm0,[SpaceEngine.exe+3A9028] { [32767.00] }
+cvttss2si eax,xmm0
+movss xmm0,[SpaceEngine.exe+5D4D80] { [0.25] }
+mulss xmm0,xmm1
+mov [SpaceEngine.exe+4FCE28],ax { [77FF0FFF] }
+addss xmm0,[SpaceEngine.exe+5D4D78] { [0.50] }
+mulss xmm0,[SpaceEngine.exe+3A9028] { [32767.00] }
+cvttss2si eax,xmm0
+mov [SpaceEngine.exe+4FCE2A],ax { [255] }
+mov eax,[edx+14]
+movups xmm0,[SpaceEngine.exe+4FCE20] { [331.00] }
+lea ecx,[eax+eax*2]
+mov eax,[edx+1C]
+movups [eax+ecx*8],xmm0
+movq xmm0,[SpaceEngine.exe+4FCE30] { [02A10566] }
+movq [eax+ecx*8+10],xmm0
+mov eax,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+inc [eax+14]
+mov edx,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+mov eax,[edx+14]
+cmp eax,[edx+10]
+jnl SpaceEngine.exe+217D50
+movss xmm0,[SpaceEngine.exe+5D4D7C] { [0.25] }
+mulss xmm0,xmm3
+movss [SpaceEngine.exe+4FCE20],xmm5 { [331.00] }
+movss [SpaceEngine.exe+4FCE24],xmm2 { [538.00] }
+addss xmm0,[SpaceEngine.exe+5D4D74] { [0.50] }
+mulss xmm0,[SpaceEngine.exe+3A9028] { [32767.00] }
+cvttss2si eax,xmm0
+movss xmm0,[SpaceEngine.exe+5D4D80] { [0.25] }
+mulss xmm0,xmm1
+mov [SpaceEngine.exe+4FCE28],ax { [77FF0FFF] }
+addss xmm0,[SpaceEngine.exe+5D4D78] { [0.50] }
+mulss xmm0,[SpaceEngine.exe+3A9028] { [32767.00] }
+cvttss2si eax,xmm0
+mov [SpaceEngine.exe+4FCE2A],ax { [255] }
+mov eax,[edx+14]
+movups xmm0,[SpaceEngine.exe+4FCE20] { [331.00] }
+lea ecx,[eax+eax*2]
+mov eax,[edx+1C]
+movups [eax+ecx*8],xmm0
+movq xmm0,[SpaceEngine.exe+4FCE30] { [02A10566] }
+movq [eax+ecx*8+10],xmm0
+mov eax,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+inc [eax+14]
+mov edx,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+mov eax,[edx+14]
+cmp eax,[edx+10]
+jnl SpaceEngine.exe+217DEA
+movss xmm0,[SpaceEngine.exe+5D4D7C] { [0.25] }
+mulss xmm0,xmm3
+movss [SpaceEngine.exe+4FCE24],xmm2 { [538.00] }
+movss xmm2,[SpaceEngine.exe+3A9028] { [32767.00] }
+addss xmm0,[SpaceEngine.exe+5D4D74] { [0.50] }
+movss [SpaceEngine.exe+4FCE20],xmm5 { [331.00] }
+mulss xmm0,xmm2
+cvttss2si eax,xmm0
+movss xmm0,[SpaceEngine.exe+5D4D80] { [0.25] }
+mulss xmm0,xmm1
+mov [SpaceEngine.exe+4FCE28],ax { [77FF0FFF] }
+addss xmm0,[SpaceEngine.exe+5D4D78] { [0.50] }
+mulss xmm0,xmm2
+cvttss2si eax,xmm0
+mov [SpaceEngine.exe+4FCE2A],ax { [255] }
+mov eax,[edx+14]
+movups xmm0,[SpaceEngine.exe+4FCE20] { [331.00] }
+lea ecx,[eax+eax*2]
+mov eax,[edx+1C]
+movups [eax+ecx*8],xmm0
+movq xmm0,[SpaceEngine.exe+4FCE30] { [02A10566] }
+movq [eax+ecx*8+10],xmm0
+mov eax,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+inc [eax+14]
+jmp SpaceEngine.exe+217DF2
+movss xmm2,[SpaceEngine.exe+3A9028] { [32767.00] }
+mov edx,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+movss xmm1,[esp+18]
+mov eax,[edx+14]
+cmp eax,[edx+10]
+jnl SpaceEngine.exe+217E84
+movss xmm0,[SpaceEngine.exe+5D4D7C] { [0.25] }
+mulss xmm0,xmm3
+movss [SpaceEngine.exe+4FCE20],xmm5 { [331.00] }
+movss [SpaceEngine.exe+4FCE24],xmm1 { [538.00] }
+addss xmm0,[SpaceEngine.exe+5D4D74] { [0.50] }
+mulss xmm0,xmm2
+cvttss2si eax,xmm0
+movss xmm0,[SpaceEngine.exe+5D4D80] { [0.25] }
+mulss xmm0,xmm7
+mov [SpaceEngine.exe+4FCE28],ax { [77FF0FFF] }
+addss xmm0,[SpaceEngine.exe+5D4D78] { [0.50] }
+mulss xmm0,xmm2
+cvttss2si eax,xmm0
+mov [SpaceEngine.exe+4FCE2A],ax { [255] }
+mov eax,[edx+14]
+movups xmm0,[SpaceEngine.exe+4FCE20] { [331.00] }
+lea ecx,[eax+eax*2]
+mov eax,[edx+1C]
+movups [eax+ecx*8],xmm0
+movq xmm0,[SpaceEngine.exe+4FCE30] { [02A10566] }
+movq [eax+ecx*8+10],xmm0
+mov eax,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+inc [eax+14]
+mov edx,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+mov eax,[edx+14]
+cmp eax,[edx+10]
+jnl SpaceEngine.exe+217F10
+movss xmm0,[SpaceEngine.exe+5D4D7C] { [0.25] }
+mulss xmm0,xmm4
+movss [SpaceEngine.exe+4FCE20],xmm6 { [331.00] }
+movss [SpaceEngine.exe+4FCE24],xmm1 { [538.00] }
+addss xmm0,[SpaceEngine.exe+5D4D74] { [0.50] }
+mulss xmm0,xmm2
+cvttss2si eax,xmm0
+movss xmm0,[SpaceEngine.exe+5D4D80] { [0.25] }
+mulss xmm0,xmm7
+mov [SpaceEngine.exe+4FCE28],ax { [77FF0FFF] }
+addss xmm0,[SpaceEngine.exe+5D4D78] { [0.50] }
+mulss xmm0,xmm2
+cvttss2si eax,xmm0
+mov [SpaceEngine.exe+4FCE2A],ax { [255] }
+mov eax,[edx+14]
+movups xmm0,[SpaceEngine.exe+4FCE20] { [331.00] }
+lea ecx,[eax+eax*2]
+mov eax,[edx+1C]
+movups [eax+ecx*8],xmm0
+movq xmm0,[SpaceEngine.exe+4FCE30] { [02A10566] }
+movq [eax+ecx*8+10],xmm0
+mov eax,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+inc [eax+14]
+movaps xmm6,xmm5
+movss xmm7,[esp+10]
+movss [esp+14],xmm6
+movss xmm4,[SpaceEngine.exe+3A8E34] { [255.00] }
+movss xmm1,[SpaceEngine.exe+3A7E44] { [0.50] }
+movss xmm3,[SpaceEngine.exe+3A7F08] { [0.75] }
+mov al,[esi]
+mov edx,[ebp+08]
+mov [esp+0F],al
+test al,al
+jne SpaceEngine.exe+217670
+pop edi
+pop esi
+mov esp,ebp
+pop ebp
+ret 0008 { 8 }
+
+  // push ebp
+  // mov ebp,esp
+  // and esp,-10
+
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217580
+
+"SpaceEngine.exe"+21756F: F3 0F 5C C4              -  subss xmm0,xmm4
+"SpaceEngine.exe"+217573: F3 0F 11 06              -  movss [esi],xmm0
+"SpaceEngine.exe"+217577: 5E                       -  pop esi
+"SpaceEngine.exe"+217578: 8B E5                    -  mov esp,ebp
+"SpaceEngine.exe"+21757A: 5D                       -  pop ebp
+"SpaceEngine.exe"+21757B: C3                       -  ret 
+"SpaceEngine.exe"+21757C: CC                       -  int 3 
+"SpaceEngine.exe"+21757D: CC                       -  int 3 
+"SpaceEngine.exe"+21757E: CC                       -  int 3 
+"SpaceEngine.exe"+21757F: CC                       -  int 3 
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217580: 55                       -  push ebp
+"SpaceEngine.exe"+217581: 8B EC                    -  mov ebp,esp
+"SpaceEngine.exe"+217583: 83 E4 F0                 -  and esp,-10
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+217586: 83 EC 48                 -  sub esp,48
+"SpaceEngine.exe"+217589: 80 7D 0C 00              -  cmp byte ptr [ebp+0C],00
+"SpaceEngine.exe"+21758D: 56                       -  push esi
+"SpaceEngine.exe"+21758E: 57                       -  push edi
+"SpaceEngine.exe"+21758F: F3 0F 11 5C 24 28        -  movss [esp+28],xmm3
+"SpaceEngine.exe"+217595: 8B F9                    -  mov edi,ecx
+"SpaceEngine.exe"+217597: F3 0F 11 54 24 24        -  movss [esp+24],xmm2
+"SpaceEngine.exe"+21759D: 74 2A                    -  je SpaceEngine.exe+2175C9
+"SpaceEngine.exe"+21759F: 8B 87 D0 00 00 00        -  mov eax,[edi+000000D0]
+"SpaceEngine.exe"+2175A5: F3 0F 11 8F BC 00 00 00  -  movss [edi+000000BC],xmm1
+}
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>23</ID>
+      <Description>"循环头部分"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-08
+  Author : cdkey
+
+  This script does blah blah blah
+}
+//SpaceEngine.exe+1BAC10 切换语言
+//SpaceEngine.exe+217669 循环头
+//SpaceEngine.exe+1907C5 函数入口
+define(address,"SpaceEngine.exe"+217669)
+define(bytes,0F 1F 80 00 00 00 00 46 8B CE 89 74 24 24 2B CA 0F B6 D0 89 54 24 2C 8D 42 FF)
+//
+[ENABLE]
+//code from here to '[DISABLE]' will be used to enable the cheat
+//assert(address,bytes)
+address:
+label(loop)
+//nop
+nop
+nop
+//db 0F 1F 00
+loop:
+push esi
+call zlib1.Decode
+mov esi,eax
+mov ecx,esi
+mov [esp+24],esi
+sub ecx,[ebp+08]
+mov [esp+2C],edx
+"SpaceEngine.exe"+217F37:
+mov al,[esi]
+mov ebx,[ebp+08]
+mov [esp+0F],al
+test al,al
+jne loop
+pop edi
+
+[DISABLE]
+//code from here till the end of the code will be used to disable the cheat
+address:
+  db bytes
+  // nop [eax+00000000]
+"SpaceEngine.exe"+217F37:
+ db 8A 06 8B 55 08 88 44 24 0F 84 C0 0F 85 28 F7 FF FF 5F 5E 8B E5 5D C2 08 00
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217669
+
+"SpaceEngine.exe"+217637: 0F 11 44 24 34                 -  movups [esp+34],xmm0
+"SpaceEngine.exe"+21763C: E8 DF 5D F9 FF                 -  call SpaceEngine.exe+1AD420
+"SpaceEngine.exe"+217641: 8B D6                          -  mov edx,esi
+"SpaceEngine.exe"+217643: 8A 02                          -  mov al,[edx]
+"SpaceEngine.exe"+217645: 88 44 24 0F                    -  mov [esp+0F],al
+"SpaceEngine.exe"+217649: 84 C0                          -  test al,al
+"SpaceEngine.exe"+21764B: 0F 84 F7 08 00 00              -  je SpaceEngine.exe+217F48
+"SpaceEngine.exe"+217651: F3 0F 10 0D 44 7E BD 00        -  movss xmm1,[SpaceEngine.exe+3A7E44]
+"SpaceEngine.exe"+217659: F3 0F 10 1D 08 7F BD 00        -  movss xmm3,[SpaceEngine.exe+3A7F08]
+"SpaceEngine.exe"+217661: F3 0F 10 25 34 8E BD 00        -  movss xmm4,[SpaceEngine.exe+3A8E34]
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217669: 0F 1F 80 00 00 00 00           -  nop [eax+00000000]
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+217670: 46                             -  inc esi
+"SpaceEngine.exe"+217671: 8B CE                          -  mov ecx,esi
+"SpaceEngine.exe"+217673: 89 74 24 24                    -  mov [esp+24],esi
+"SpaceEngine.exe"+217677: 2B CA                          -  sub ecx,edx
+"SpaceEngine.exe"+217679: 0F B6 D0                       -  movzx edx,al
+"SpaceEngine.exe"+21767C: 89 54 24 2C                    -  mov [esp+2C],edx
+"SpaceEngine.exe"+217680: 8D 42 FF                       -  lea eax,[edx-01]
+"SpaceEngine.exe"+217683: 83 F8 0E                       -  cmp eax,0E
+"SpaceEngine.exe"+217686: 0F 87 34 03 00 00              -  ja SpaceEngine.exe+2179C0
+"SpaceEngine.exe"+21768C: FF 24 85 50 7F A4 00           -  jmp dword ptr [eax*4+SpaceEngine.exe+217F50]
+}
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>28</ID>
+      <Description>"测试修补"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-08
+  Author : cdkey
+
+  This script does blah blah blah
+}
+//SpaceEngine.exe+217B26
+define(address,"SpaceEngine.exe"+217B26)
+define(bytes,8A 4C 24 0F F3 0F 10 A4 97 D8 0C 00 00)
+
+[ENABLE]
+
+assert(address,bytes)
+
+
+address:
+  mov ecx,edx
+  nop
+  nop
+
+[DISABLE]
+
+address:
+  db bytes
+  // mov cl,[esp+0F]
+  // movss xmm4,[edi+edx*4+00000CD8]
+
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217B26
+
+"SpaceEngine.exe"+217AF8: F3 0F 58 C7                 -  addss xmm0,xmm7
+"SpaceEngine.exe"+217AFC: F3 0F 11 54 24 20           -  movss [esp+20],xmm2
+"SpaceEngine.exe"+217B02: F3 0F 11 44 24 18           -  movss [esp+18],xmm0
+"SpaceEngine.exe"+217B08: EB 06                       -  jmp SpaceEngine.exe+217B10
+"SpaceEngine.exe"+217B0A: F3 0F 10 54 24 20           -  movss xmm2,[esp+20]
+"SpaceEngine.exe"+217B10: 8B 8F D0 00 00 00           -  mov ecx,[edi+000000D0]
+"SpaceEngine.exe"+217B16: 8B C1                       -  mov eax,ecx
+"SpaceEngine.exe"+217B18: C1 E0 08                    -  shl eax,08
+"SpaceEngine.exe"+217B1B: 01 C2                       -  add edx,eax
+"SpaceEngine.exe"+217B1D: F3 0F 10 8C 8F D8 18 00 00  -  movss xmm1,[edi+ecx*4+000018D8]
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217B26: 8A 4C 24 0F                 -  mov cl,[esp+0F]
+"SpaceEngine.exe"+217B2A: F3 0F 10 A4 97 D8 0C 00 00  -  movss xmm4,[edi+edx*4+00000CD8]
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+217B33: 88 C8                       -  mov al,cl
+"SpaceEngine.exe"+217B35: F3 0F 10 9C 97 D8 00 00 00  -  movss xmm3,[edi+edx*4+000000D8]
+"SpaceEngine.exe"+217B3E: 24 0F                       -  and al,0F
+"SpaceEngine.exe"+217B40: 8B 15 18 CF 34 01           -  mov edx,[SpaceEngine.exe+4FCF18]
+"SpaceEngine.exe"+217B46: 0F B6 C0                    -  movzx eax,al
+"SpaceEngine.exe"+217B49: C0 E9 04                    -  shr cl,04
+"SpaceEngine.exe"+217B4C: F3 0F 59 E1                 -  mulss xmm4,xmm1
+"SpaceEngine.exe"+217B50: 66 0F 6E C0                 -  movd xmm0,eax
+"SpaceEngine.exe"+217B54: 0F B6 C1                    -  movzx eax,cl
+"SpaceEngine.exe"+217B57: 0F 5B C0                    -  cvtdq2ps xmm0,xmm0
+}
+</AssemblerScript>
+      <CheatEntries>
+        <CheatEntry>
+          <ID>27</ID>
+          <Description>"循环部分-方案3"</Description>
+          <LastState Activated="1"/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-08
+  Author : cdkey
+
+  This script does blah blah blah
+}
+//SpaceEngine.exe+1BAC10 切换语言
+//SpaceEngine.exe+217669 循环头
+//SpaceEngine.exe+217580 函数入口
+//SpaceEngine.exe+217F37 循环尾
+define(address,"SpaceEngine.exe"+217641)
+//
+[ENABLE]
+//code from here to '[DISABLE]' will be used to enable the cheat
+//assert(address,bytes)
+label(loop)
+address:
+  push esi
+  call zlib1.Decode
+  test dx,dx
+  je SpaceEngine.exe+217F48
+  movss xmm1,[SpaceEngine.exe+3A7E44] { [0.50] }
+  movss xmm3,[SpaceEngine.exe+3A7F08] { [0.75] }
+  movss xmm4,[SpaceEngine.exe+3A8E34] { [255.00] }
+  //nop
+//  nop
+//  nop
+//db 0F 1F 00
+  db  66 0f 1f 84 00 00 00 00 00
+  //mov [ebp+08],0
+loop:
+  mov esi,eax
+  mov ecx,esi
+  mov [esp+24],esi
+  sub ecx,[ebp+08]
+  //mov ecx,[ebp+08]
+  mov [esp+2C],edx
+
+
+
+"SpaceEngine.exe"+217F37:
+  push esi
+  call zlib1.Decode
+  //mov ebx,[ebp+08] 之后直接减
+  test dx,dx
+jne loop
+nop
+nop
+
+[DISABLE]
+//code from here till the end of the code will be used to disable the cheat
+address:
+  mov edx,esi
+  mov al,[edx]
+  mov [esp+0F],al
+  test al,al
+  je SpaceEngine.exe+217F48
+  movss xmm1,[SpaceEngine.exe+3A7E44] { [0.50] }
+  movss xmm3,[SpaceEngine.exe+3A7F08] { [0.75] }
+  movss xmm4,[SpaceEngine.exe+3A8E34] { [255.00] }
+  //nop [eax+00000000]
+  db 0f 1f 80 00 00 00 00
+  inc esi
+  mov ecx,esi
+  mov [esp+24],esi
+  sub ecx,edx
+  movzx edx,al
+  mov [esp+2C],edx
+  lea eax,[edx-01]
+  cmp eax,0E { 14 }
+  ja SpaceEngine.exe+2179C0
+
+  // nop [eax+00000000]
+"SpaceEngine.exe"+217F37:
+ db 8A 06 8B 55 08 88 44 24 0F 84 C0 0F 85 28 F7 FF FF 5F 5E 8B E5 5D C2 08 00
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217669
+
+"SpaceEngine.exe"+217637: 0F 11 44 24 34                 -  movups [esp+34],xmm0
+"SpaceEngine.exe"+21763C: E8 DF 5D F9 FF                 -  call SpaceEngine.exe+1AD420
+"SpaceEngine.exe"+217641: 8B D6                          -  mov edx,esi
+"SpaceEngine.exe"+217643: 8A 02                          -  mov al,[edx]
+"SpaceEngine.exe"+217645: 88 44 24 0F                    -  mov [esp+0F],al
+"SpaceEngine.exe"+217649: 84 C0                          -  test al,al
+"SpaceEngine.exe"+21764B: 0F 84 F7 08 00 00              -  je SpaceEngine.exe+217F48
+"SpaceEngine.exe"+217651: F3 0F 10 0D 44 7E BD 00        -  movss xmm1,[SpaceEngine.exe+3A7E44]
+"SpaceEngine.exe"+217659: F3 0F 10 1D 08 7F BD 00        -  movss xmm3,[SpaceEngine.exe+3A7F08]
+"SpaceEngine.exe"+217661: F3 0F 10 25 34 8E BD 00        -  movss xmm4,[SpaceEngine.exe+3A8E34]
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217669: 0F 1F 80 00 00 00 00           -  nop [eax+00000000]
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+217670: 46                             -  inc esi
+"SpaceEngine.exe"+217671: 8B CE                          -  mov ecx,esi
+"SpaceEngine.exe"+217673: 89 74 24 24                    -  mov [esp+24],esi
+"SpaceEngine.exe"+217677: 2B CA                          -  sub ecx,edx
+"SpaceEngine.exe"+217679: 0F B6 D0                       -  movzx edx,al
+"SpaceEngine.exe"+21767C: 89 54 24 2C                    -  mov [esp+2C],edx
+"SpaceEngine.exe"+217680: 8D 42 FF                       -  lea eax,[edx-01]
+"SpaceEngine.exe"+217683: 83 F8 0E                       -  cmp eax,0E
+"SpaceEngine.exe"+217686: 0F 87 34 03 00 00              -  ja SpaceEngine.exe+2179C0
+"SpaceEngine.exe"+21768C: FF 24 85 50 7F A4 00           -  jmp dword ptr [eax*4+SpaceEngine.exe+217F50]
+}
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>24</ID>
+          <Description>"比较部分"</Description>
+          <LastState Activated="1"/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-08
+  Author : cdkey
+
+  This script does blah blah blah
+}
+//SpaceEngine.exe+217962
+define(address,"SpaceEngine.exe"+217962)
+//define(bytes,8A 06 3C 30 0F 8C CB 05 00 00 3C 3A 7C 08 3C 3F 0F 8E BF 05 00 00 3C 5B 7C 08 3C 5F 0F 8E B3 05 00 00 3C 7B 7C 08 3C 7E 0F 8E A7 05 00 00 46 EB CF F3 0F 10 BF C0 00 00 00 F3 0F 58 3F F3 0F 10 B7 BC 00 00 00 F3 0F 11 74 24 14 F3 0F 11 7C 24 10 F3 0F 11 BF C0 00 00 00 )
+
+[ENABLE]
+//assert(address,bytes)
+label(extend)
+label(return)
+address:
+   push esi
+   call Decode
+   push edx
+   call chcmp_asm
+   jz SpaceEngine.exe+217F37
+   mov esi,eax
+   jmp address
+ extend:
+   shr eax,18
+   movsx eax,al
+   movd xmm5,eax
+   cvtdq2ps xmm5,xmm5
+   jmp return
+   db 0F 1F 40 00
+ SpaceEngine.exe+2179C0:
+   push ecx
+   push [edi+000000D0]
+   push edx
+   call GetCode
+   pop ecx
+   movss xmm1,[edi+000000D4]
+   mulss xmm1,[edi+14]
+   movss [esp+24],xmm1
+   mov edx,eax
+   jmp extend
+   nop
+   nop
+   //db 66 0f 1f 00
+   //db 66 0F 1F 44 00 00
+return:
+SpaceEngine.exe+217AA2:
+   db 66 0f 1f 00
+/*
+
+label(label217978)
+label(label217984)
+label(label217990)
+cmp dx,30
+ jl SpaceEngine.exe+217F37
+ cmp dx,3A
+ jl label217978
+ cmp dx,3F
+ jng SpaceEngine.exe+217F37
+label217978:
+ cmp dx,5B
+ jl label217984
+ cmp dx,5F
+ jng SpaceEngine.exe+217F37
+label217984:
+ cmp dx,7B
+ jl label217990
+ cmp dx,7E
+ jng SpaceEngine.exe+217F37
+label217990:
+ mov esi,eax
+ jmp address
+*/
+[DISABLE]
+
+address:
+  //db bytes
+  // mov al,[esi]
+  // cmp al,30
+  // jl SpaceEngine.exe+217F37
+  mov al,[esi]
+  cmp al,30 { 48 }
+  jl SpaceEngine.exe+217F37
+  cmp al,3A { 58 }
+  jl SpaceEngine.exe+217978
+  cmp al,3F { 63 }
+  jng SpaceEngine.exe+217F37
+  cmp al,5B { 91 }
+  jl SpaceEngine.exe+217984
+  cmp al,5F { 95 }
+  jng SpaceEngine.exe+217F37
+  cmp al,7B { 123 }
+  jl SpaceEngine.exe+217990
+  cmp al,7E { 126 }
+  jng SpaceEngine.exe+217F37
+  inc esi
+  jmp SpaceEngine.exe+217962
+  movss xmm7,[edi+000000C0]
+  addss xmm7,[edi]
+  movss xmm6,[edi+000000BC]
+  movss [esp+14],xmm6
+  movss [esp+10],xmm7
+  movss [edi+000000C0],xmm7
+  jmp SpaceEngine.exe+217F37
+  mov eax,[edi+000000D0]
+  movss xmm1,[edi+000000D4]
+  mulss xmm1,[edi+14]
+  shl eax,08 { 8 }
+  add eax,edx
+  movss [esp+24],xmm1
+  movss xmm5,[edi+eax*4+000000D8]
+  mov eax,[edi+24]
+  mulss xmm5,[edi+10]
+  sub eax,00 { 0 }
+  je SpaceEngine.exe+2179FE
+  sub eax,01 { 1 }
+  je SpaceEngine.exe+217A02
+  sub eax,01 { 1 }
+  jne SpaceEngine.exe+217A0E
+  mulss xmm5,xmm3
+  addss xmm5,xmm6
+  movss [esp+1C],xmm5
+  jmp SpaceEngine.exe+217A14
+  movss xmm5,[esp+1C]
+  movaps xmm0,xmm5
+
+SpaceEngine.exe+217AA2:
+ mov edx,[esp+2C]
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217962
+
+"SpaceEngine.exe"+217936: FF B7 CC 00 00 00           -  push [edi+000000CC]
+"SpaceEngine.exe"+21793C: 8B CF                       -  mov ecx,edi
+"SpaceEngine.exe"+21793E: C6 47 19 01                 -  mov byte ptr [edi+19],01
+"SpaceEngine.exe"+217942: E8 E9 79 00 00              -  call SpaceEngine.exe+21F330
+"SpaceEngine.exe"+217947: E9 EB 05 00 00              -  jmp SpaceEngine.exe+217F37
+"SpaceEngine.exe"+21794C: FF B7 CC 00 00 00           -  push [edi+000000CC]
+"SpaceEngine.exe"+217952: 8B CF                       -  mov ecx,edi
+"SpaceEngine.exe"+217954: C6 47 19 00                 -  mov byte ptr [edi+19],00
+"SpaceEngine.exe"+217958: E8 D3 79 00 00              -  call SpaceEngine.exe+21F330
+"SpaceEngine.exe"+21795D: E9 D5 05 00 00              -  jmp SpaceEngine.exe+217F37
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217962: 8A 06                       -  mov al,[esi]
+"SpaceEngine.exe"+217964: 3C 30                       -  cmp al,30
+"SpaceEngine.exe"+217966: 0F 8C CB 05 00 00           -  jl SpaceEngine.exe+217F37
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+21796C: 3C 3A                       -  cmp al,3A
+"SpaceEngine.exe"+21796E: 7C 08                       -  jl SpaceEngine.exe+217978
+"SpaceEngine.exe"+217970: 3C 3F                       -  cmp al,3F
+"SpaceEngine.exe"+217972: 0F 8E BF 05 00 00           -  jng SpaceEngine.exe+217F37
+"SpaceEngine.exe"+217978: 3C 5B                       -  cmp al,5B
+"SpaceEngine.exe"+21797A: 7C 08                       -  jl SpaceEngine.exe+217984
+"SpaceEngine.exe"+21797C: 3C 5F                       -  cmp al,5F
+"SpaceEngine.exe"+21797E: 0F 8E B3 05 00 00           -  jng SpaceEngine.exe+217F37
+"SpaceEngine.exe"+217984: 3C 7B                       -  cmp al,7B
+"SpaceEngine.exe"+217986: 7C 08                       -  jl SpaceEngine.exe+217990
+}
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>25</ID>
+          <Description>"定位部分"</Description>
+          <LastState Activated="1"/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-08
+  Author : cdkey
+
+  This script does blah blah blah
+}
+//SpaceEngine.exe+217B10
+define(address,"SpaceEngine.exe"+217B10)
+//define(bytes,8B 8F D0 00 00 00 8B C1 C1 E0 08 03 D0 F3 0F 10 8C 8F D8 18 00 00 8A 4C 24 0F F3 0F 10 A4 97 D8 0C 00 00 8A C1 F3 0F 10 9C 97 D8 00 00 00 24 0F 8B 15 18 CF D2 00 0F B6 C0 C0 E9 04 F3 0F 59 E1 66 0F 6E C0 0F B6 C1 0F 5B C0 66 0F 6E F8 F3 0F 59 05 14 7C BD 00 )
+
+[ENABLE]
+
+//assert(address,bytes)
+
+address:
+
+
+  movzx ecx,dl
+  movd xmm0,ecx
+  cvtdq2ps xmm0,xmm0
+  movzx ecx,dh
+  movd xmm7,ecx
+  shr edx,10
+  movsx ecx,dl
+  movd xmm4,ecx
+  cvtdq2ps xmm4,xmm4
+  movsx eax,dh//mov eax,10
+  movd xmm3,eax
+  cvtdq2ps xmm3,xmm3
+  push [edi+000000D0]
+  call zlib1.GetUWidth
+  movd xmm1,eax
+  mulss xmm4,xmm1
+  mov edx,[SpaceEngine.exe+4FCF18] { [00D2CE40] }
+  jmp SpaceEngine.exe+217B5E
+
+  db 66 0f 1f 84 00 00 00 00 00 66 90
+  //db 66 0F 1F 00
+  //nop
+  /*mov ecx,eax
+  movsx ebx,cl
+  movd xmm4,ebx
+  cvtdq2ps xmm4,xmm4
+  movsx ebx,ch
+  movd xmm3,ebx
+  cvtdq2ps xmm3,xmm3
+  movzx ebx,al
+  movd xmm0,ebx
+  movzx eax,ah
+  cvtdq2ps xmm0,xmm0*/
+
+
+[DISABLE]
+
+address:
+  //db bytes
+  // mov ecx,[edi+000000D0]
+  mov ecx,[edi+000000D0]
+  mov eax,ecx
+  shl eax,08 { 8 }
+  add edx,eax
+  movss xmm1,[edi+ecx*4+000018D8]
+  mov cl,[esp+0F]
+  movss xmm4,[edi+edx*4+00000CD8]
+  mov al,cl
+  movss xmm3,[edi+edx*4+000000D8]
+  and al,0F { 15 }
+  mov edx,[SpaceEngine.exe+4FCF18] { [0134CE40] }
+  movzx eax,al
+  shr cl,04 { 4 }
+  mulss xmm4,xmm1
+  movd xmm0,eax
+  movzx eax,cl
+  cvtdq2ps xmm0,xmm0
+  movd xmm7,eax
+  mulss xmm0,[SpaceEngine.exe+3A7C14] { [0.06] }
+
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217B10
+
+"SpaceEngine.exe"+217AE4: EB 2A                       -  jmp SpaceEngine.exe+217B10
+"SpaceEngine.exe"+217AE6: 0F 28 C1                    -  movaps xmm0,xmm1
+"SpaceEngine.exe"+217AE9: 0F 28 D1                    -  movaps xmm2,xmm1
+"SpaceEngine.exe"+217AEC: F3 0F 59 05 3C 7D BD 00     -  mulss xmm0,[SpaceEngine.exe+3A7D3C]
+"SpaceEngine.exe"+217AF4: F3 0F 58 D7                 -  addss xmm2,xmm7
+"SpaceEngine.exe"+217AF8: F3 0F 58 C7                 -  addss xmm0,xmm7
+"SpaceEngine.exe"+217AFC: F3 0F 11 54 24 20           -  movss [esp+20],xmm2
+"SpaceEngine.exe"+217B02: F3 0F 11 44 24 18           -  movss [esp+18],xmm0
+"SpaceEngine.exe"+217B08: EB 06                       -  jmp SpaceEngine.exe+217B10
+"SpaceEngine.exe"+217B0A: F3 0F 10 54 24 20           -  movss xmm2,[esp+20]
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217B10: 8B 8F D0 00 00 00           -  mov ecx,[edi+000000D0]
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+217B16: 8B C1                       -  mov eax,ecx
+"SpaceEngine.exe"+217B18: C1 E0 08                    -  shl eax,08
+"SpaceEngine.exe"+217B1B: 03 D0                       -  add edx,eax
+"SpaceEngine.exe"+217B1D: F3 0F 10 8C 8F D8 18 00 00  -  movss xmm1,[edi+ecx*4+000018D8]
+"SpaceEngine.exe"+217B26: 8A 4C 24 0F                 -  mov cl,[esp+0F]
+"SpaceEngine.exe"+217B2A: F3 0F 10 A4 97 D8 0C 00 00  -  movss xmm4,[edi+edx*4+00000CD8]
+"SpaceEngine.exe"+217B33: 8A C1                       -  mov al,cl
+"SpaceEngine.exe"+217B35: F3 0F 10 9C 97 D8 00 00 00  -  movss xmm3,[edi+edx*4+000000D8]
+"SpaceEngine.exe"+217B3E: 24 0F                       -  and al,0F
+"SpaceEngine.exe"+217B40: 8B 15 18 CF D2 00           -  mov edx,[SpaceEngine.exe+4FCF18]
+}
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>84</ID>
+          <Description>"显示预算"</Description>
+          <LastState Activated="1"/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-08
+  Author : cdkey
+
+  This script does blah blah blah
+}
+//SpaceEngine.exe+21CB30 函数头
+//SpaceEngine.exe+21CB59 循环头
+//SpaceEngine.exe+21CDB0 比较 压缩
+//SpaceEngine.exe+21CB73 循环尾
+define(address,"SpaceEngine.exe"+21CB59)
+define(bytes,8A 06 84 C0 0F 84 15 03 00 00)
+
+[ENABLE]
+label(loop)
+//label(extend)
+label(return)
+address:
+  call Decode_ASM
+  je SpaceEngine.exe+21CE78
+  movss xmm4,[SpaceEngine.exe+3A7F08] { [0.75] }
+  movss xmm5,[SpaceEngine.exe+3A7D3C] { [0.25] }
+  nop
+loop:
+  mov esi,eax
+  lea eax,[ebx-01]
+  cmp eax,0E { 14 }
+  ja SpaceEngine.exe+21CE0D
+
+
+SpaceEngine.exe+21CDB0:
+  call Decode_ASM
+  push bx
+  mov ebx,eax
+  call external_cmp
+  test al,al
+  jz SpaceEngine.exe+21CE6E
+  mov esi,ebx
+  jmp SpaceEngine.exe+21CDB0
+extend2:
+ call Decode_ASM
+ jne loop
+ jmp return
+ db 0F 1F 80 00 00 00 00
+SpaceEngine.exe+21CE6E:
+  jmp extend2
+  db 0F 1F 44 00 00//nop
+return:
+
+SpaceEngine.exe+21CE20:
+  call GetWidth_ASM
+  db 66 0F 1F 84 00 00 00 00 00
+
+
+
+[DISABLE]
+
+address:
+  // mov al,[esi]
+  // test al,al
+  // je SpaceEngine.exe+21CE78
+
+  mov al,[esi]
+  test al,al
+  je SpaceEngine.exe+21CE78
+  movss xmm4,[SpaceEngine.exe+3A7F08] { [0.75] }
+  movss xmm5,[SpaceEngine.exe+3A7D3C] { [0.25] }
+  movzx ebx,al
+  inc esi
+  lea eax,[ebx-01]
+  cmp eax,0E { 14 }
+  ja SpaceEngine.exe+21CE0D
+  db FF 24 85 88 CE 24 00
+    mov eax,[edi+24]
+  cmp eax,02 { 2 }
+SpaceEngine.exe+21CE6E:
+  mov al,[esi]
+  test al,al
+  jne SpaceEngine.exe+21CB73
+  maxss xmm2,[edx]
+  pop edi
+  pop esi
+  pop ebx
+  movss [edx],xmm2
+SpaceEngine.exe+21CDA7:
+  db 66 0F 1F 84 00 00 00 00 00
+  mov al,[esi]
+  cmp al,30 { 48 }
+  jl SpaceEngine.exe+21CE6E
+  cmp al,3A { 58 }
+  jl SpaceEngine.exe+21CDC6
+  cmp al,3F { 63 }
+  jng SpaceEngine.exe+21CE6E
+  cmp al,5B { 91 }
+  jl SpaceEngine.exe+21CDD2
+  cmp al,5F { 95 }
+  jng SpaceEngine.exe+21CE6E
+  cmp al,7B { 123 }
+  jl SpaceEngine.exe+21CDDE
+  cmp al,7E { 126 }
+  jng SpaceEngine.exe+21CE6E
+  inc esi
+  jmp SpaceEngine.exe+21CDB0
+  test byte ptr [ebp+14],01 { 1 }
+  je SpaceEngine.exe+21CDFA
+  push 0A { 10 }
+  mov ecx,edi
+  call SpaceEngine.exe+21F610
+  mov ecx,[ebp+10]
+  addss xmm2,xmm0
+  mov edx,[ebp+0C]
+  maxss xmm2,[edx]
+ SpaceEngine.exe+21CE20:
+shl eax,08 { 8 }
+add eax,ebx
+movss xmm0,[edi+eax*4+000000D8]
+mov eax,[edi+24]
+mulss xmm0,[edi+10]
+sub eax,00 { 0 }
+je SpaceEngine.exe+21CE4B
+sub eax,01 { 1 }
+je SpaceEngine.exe+21CE53
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+21CB59
+
+"SpaceEngine.exe"+21CB3A: 53                             -  push ebx
+"SpaceEngine.exe"+21CB3B: 56                             -  push esi
+"SpaceEngine.exe"+21CB3C: 8B 75 08                       -  mov esi,[ebp+08]
+"SpaceEngine.exe"+21CB3F: 0F 57 D2                       -  xorps xmm2,xmm2
+"SpaceEngine.exe"+21CB42: 57                             -  push edi
+"SpaceEngine.exe"+21CB43: 8B F9                          -  mov edi,ecx
+"SpaceEngine.exe"+21CB45: C7 02 00 00 00 00              -  mov [edx],00000000
+"SpaceEngine.exe"+21CB4B: 8B 4D 10                       -  mov ecx,[ebp+10]
+"SpaceEngine.exe"+21CB4E: F3 0F 11 5D 08                 -  movss [ebp+08],xmm3
+"SpaceEngine.exe"+21CB53: C7 01 00 00 00 00              -  mov [ecx],00000000
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+21CB59: 8A 06                          -  mov al,[esi]
+"SpaceEngine.exe"+21CB5B: 84 C0                          -  test al,al
+"SpaceEngine.exe"+21CB5D: 0F 84 15 03 00 00              -  je SpaceEngine.exe+21CE78
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+21CB63: F3 0F 10 25 08 7F 3D 00        -  movss xmm4,[SpaceEngine.exe+3A7F08]
+"SpaceEngine.exe"+21CB6B: F3 0F 10 2D 3C 7D 3D 00        -  movss xmm5,[SpaceEngine.exe+3A7D3C]
+"SpaceEngine.exe"+21CB73: 0F B6 D8                       -  movzx ebx,al
+"SpaceEngine.exe"+21CB76: 46                             -  inc esi
+"SpaceEngine.exe"+21CB77: 8D 43 FF                       -  lea eax,[ebx-01]
+"SpaceEngine.exe"+21CB7A: 83 F8 0E                       -  cmp eax,0E
+"SpaceEngine.exe"+21CB7D: 0F 87 8A 02 00 00              -  ja SpaceEngine.exe+21CE0D
+"SpaceEngine.exe"+21CB83: FF 24 85 88 CE 24 00           -  jmp dword ptr [eax*4+SpaceEngine.exe+21CE88]
+"SpaceEngine.exe"+21CB8A: 8B 47 24                       -  mov eax,[edi+24]
+"SpaceEngine.exe"+21CB8D: 83 F8 02                       -  cmp eax,02
+}
+</AssemblerScript>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>85</ID>
+              <Description>"函数恢复"</Description>
+              <LastState/>
+              <VariableType>Auto Assembler Script</VariableType>
+              <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-10
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+21CB30)
+
+[ENABLE]
+
+address:
+  push ebp
+  mov ebp,esp
+  push ecx
+  mov edx,[ebp+0D]
+
+
+[DISABLE]
+
+address:
+  //db bytes
+  // push ebp
+  // mov ebp,esp
+  // push ecx
+  // mov edx,[ebp+0C]
+ push ebp { 字符显示-预算}
+
+ mov ebp,esp
+ push ecx
+ mov edx,[ebp+0C]
+ xorps xmm3,xmm3
+ push ebx
+ push esi
+ mov esi,[ebp+08] { 取得参数}
+
+ xorps xmm2,xmm2
+ push edi
+ mov edi,ecx
+ mov [edx],00000000 { 0 }
+ mov ecx,[ebp+10]
+ movss [ebp+08],xmm3
+ mov [ecx],00000000 { 0 }
+ mov al,[esi]
+ test al,al
+ je SpaceEngine.exe+21CE78
+ movss xmm4,[SpaceEngine.exe+3A7F08] { [0.75] }
+ movss xmm5,[SpaceEngine.exe+3A7D3C] { [0.25] }
+ movzx ebx,al
+ inc esi
+ lea eax,[ebx-01]
+ cmp eax,0E { 14 }
+ ja SpaceEngine.exe+21CE0D
+ db FF 24 85 88 CE 24 00//jmp dword ptr [eax*4+SpaceEngine.exe+21CE88]
+ mov eax,[edi+24]
+ cmp eax,02 { 2 }
+ jnl SpaceEngine.exe+21CE6E
+ inc eax
+ mov [edi+24],eax
+ jmp SpaceEngine.exe+21CE6E
+ mov eax,[edi+24]
+ test eax,eax
+ jng SpaceEngine.exe+21CE6E
+ dec eax
+ mov [edi+24],eax
+ jmp SpaceEngine.exe+21CE6E
+ cmp byte ptr [edi+19],00 { 0 }
+ mov [edi+000000CC],00000000 { 0 }
+ mov [edi+20],FFFFFFFF { -1 }
+ mov [edi+1C],FFFFFFFF { -1 }
+ mov [edi+000000D0],00000000 { 0 }
+ mov [edi+10],3F400000 { 0.75 }
+ mov [edi+14],3F400000 { 0.75 }
+  mov [edi+000000D4],41800000 { 16.00 }
+ mov [edi],41580000 { 13.50 }
+ je SpaceEngine.exe+21CC82
+ jmp SpaceEngine.exe+21CC78
+ cmp byte ptr [edi+18],00 { 0 }
+ mov [edi+000000CC],00000001 { 1 }
+ mov [edi+20],FFFFFFFF { -1 }
+ mov [edi+1C],FFFFFFFF { -1 }
+ mov [edi],41900000 { 18.00 }
+ je SpaceEngine.exe+21CC47
+  mov [edi+000000D0],00000000 { 0 }
+ mov [edi+10],3F800000 { 1.00 }
+ mov [edi+14],3F800000 { 1.00 }
+ mov [edi+000000D4],41800000 { 16.00 }
+ jmp SpaceEngine.exe+21CC69
+  mov [edi+000000D0],00000002 { 2 }
+ mov [edi+10],3F0CCCCD { 0.55 }
+ mov [edi+14],3F0CCCCD { 0.55 }
+ mov [edi+000000D4],42000000 { 32.00 }
+ cmp byte ptr [edi+19],00 { 0 }
+ je SpaceEngine.exe+21CC82
+ cmp dword ptr [edi+000000D0],00 { 0 }
+ jne SpaceEngine.exe+21CC82
+ mov [edi+000000D0],00000001 { 1 }
+ mov eax,[edi+000000D0]
+ shl eax,04 { 4 }
+ movups xmm0,[eax+edi+000018E4]
+ movups [edi+00000094],xmm0
+ jmp SpaceEngine.exe+21CE6E
+  mov [edi+000000CC],00000002 { 2 }
+ mov [edi+10],3F400000 { 0.75 }
+ mov [edi+14],3F400000 { 0.75 }
+ jmp SpaceEngine.exe+21CCD1
+  mov [edi+000000CC],00000003 { 3 }
+ mov [edi+10],3F800000 { 1.00 }
+ mov [edi+14],3F800000 { 1.00 }
+  mov [edi+000000D0],00000002 { 2 }
+ mov [edi+1C],FFFFFFFF { -1 }
+ mov [edi+20],FFFFFFFF { -1 }
+  mov [edi+000000D4],42000000 { 32.00 }
+ mov [edi],42100000 { 36.00 }
+ movups xmm0,[edi+00001904]
+ movups [edi+00000094],xmm0
+ jmp SpaceEngine.exe+21CE6E
+ xor eax,eax
+ db 66 90
+ cmp byte ptr [esi],00 { 0 }
+ je SpaceEngine.exe+21CE6E
+ inc eax
+ inc esi
+ cmp eax,06 { 6 }
+ jl SpaceEngine.exe+21CD10
+ jmp SpaceEngine.exe+21CE6E
+ movd xmm0,[edi+0C]
+ addss xmm2,[SpaceEngine.exe+3A801C] { [1.00] }
+ movd xmm1,[edi+08]
+ cvtdq2ps xmm0,xmm0
+ cvtdq2ps xmm1,xmm1
+ subss xmm2,xmm0
+ divss xmm2,xmm1
+ movaps xmm0,xmm2
+ call SpaceEngine.exe+4DBD0
+ movd xmm1,[edi+08]
+ movaps xmm2,xmm0
+ movss xmm3,[ebp+08]
+ movss xmm4,[SpaceEngine.exe+3A7F08] { [0.75] }
+ movss xmm5,[SpaceEngine.exe+3A7D3C] { [0.25] }
+ mov ecx,[ebp+10]
+ mov edx,[ebp+0C]
+ cvtdq2ps xmm1,xmm1
+ mulss xmm2,xmm1
+ movd xmm1,[edi+0C]
+ cvtdq2ps xmm1,xmm1
+ addss xmm2,xmm1
+ jmp SpaceEngine.exe+21CE6E
+ mov byte ptr [edi+19],01 { 1 }
+ jmp SpaceEngine.exe+21CD92
+ mov byte ptr [edi+19],00 { 0 }
+ push [edi+000000CC]
+ mov ecx,edi
+ call SpaceEngine.exe+21F330
+ mov ecx,[ebp+10]
+ jmp SpaceEngine.exe+21CE6E
+    db 66 0F 1F 84 00 00 00 00 00//  - nop [eax+eax+00000000]
+ mov al,[esi]
+ cmp al,30 { 48 }
+ jl SpaceEngine.exe+21CE6E
+ cmp al,3A { 58 }
+ jl SpaceEngine.exe+21CDC6
+ cmp al,3F { 63 }
+ jng SpaceEngine.exe+21CE6E
+ cmp al,5B { 91 }
+ jl SpaceEngine.exe+21CDD2
+ cmp al,5F { 95 }
+ jng SpaceEngine.exe+21CE6E
+ cmp al,7B { 123 }
+ jl SpaceEngine.exe+21CDDE
+ cmp al,7E { 126 }
+ jng SpaceEngine.exe+21CE6E
+ inc esi
+ jmp SpaceEngine.exe+21CDB0
+ test byte ptr [ebp+14],01 { 1 }
+ je SpaceEngine.exe+21CDFA
+ push 0A { 10 }
+ mov ecx,edi
+ call SpaceEngine.exe+21F610
+ mov ecx,[ebp+10]
+ addss xmm2,xmm0
+ mov edx,[ebp+0C]
+ maxss xmm2,[edx]
+ xorps xmm3,xmm3
+ movss [ebp+08],xmm3
+ movss [edx],xmm2
+ xorps xmm2,xmm2
+ mov eax,[edi+000000D0]
+ movss xmm1,[edi+000000D4]
+ mulss xmm1,[edi+14]
+ shl eax,08 { 8 }
+ add eax,ebx
+  movss xmm0,[edi+eax*4+000000D8];取宽
+ mov eax,[edi+24]
+ mulss xmm0,[edi+10]
+ sub eax,00 { 0 }
+ je SpaceEngine.exe+21CE4B
+ sub eax,01 { 1 }
+ je SpaceEngine.exe+21CE53
+ sub eax,01 { 1 }
+ jne SpaceEngine.exe+21CE63
+ mulss xmm1,xmm4
+ jmp SpaceEngine.exe+21CE4F
+ mulss xmm1,xmm5
+ mulss xmm0,xmm4
+ maxss xmm1,xmm3
+ addss xmm2,xmm0
+ movaps xmm3,xmm1
+ movss [ebp+08],xmm3
+ movaps xmm0,xmm3
+ maxss xmm0,[ecx]
+ movss [ecx],xmm0
+ mov al,[esi]
+ test al,al
+ jne SpaceEngine.exe+21CB73
+ maxss xmm2,[edx]
+ pop edi
+ pop esi
+ pop ebx
+ movss [edx],xmm2
+ pop ecx
+ pop ebp
+ ret 0010 { 16 }
+    //;switch table
+ db SpaceEngine.exe+21CB8A
+ db SpaceEngine.exe+21CB9F
+ db SpaceEngine.exe+21CBB3
+ db SpaceEngine.exe+21CBFF
+ db SpaceEngine.exe+21CC9F
+ db SpaceEngine.exe+21CCB9
+ db SpaceEngine.exe+21CD0C
+ db SpaceEngine.exe+21CED0
+ db SpaceEngine.exe+21CD25
+ db SpaceEngine.exe+21CDE1
+ db SpaceEngine.exe+21CD88
+ db SpaceEngine.exe+21CD8E
+ db SpaceEngine.exe+21CE0D
+ db SpaceEngine.exe+21CE0D
+ db SpaceEngine.exe+21CDB0//;DEF-&gt;21CDA7
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+21CB30
+
+"SpaceEngine.exe"+21CB26: CC                       -  int 3 
+"SpaceEngine.exe"+21CB27: CC                       -  int 3 
+"SpaceEngine.exe"+21CB28: CC                       -  int 3 
+"SpaceEngine.exe"+21CB29: CC                       -  int 3 
+"SpaceEngine.exe"+21CB2A: CC                       -  int 3 
+"SpaceEngine.exe"+21CB2B: CC                       -  int 3 
+"SpaceEngine.exe"+21CB2C: CC                       -  int 3 
+"SpaceEngine.exe"+21CB2D: CC                       -  int 3 
+"SpaceEngine.exe"+21CB2E: CC                       -  int 3 
+"SpaceEngine.exe"+21CB2F: CC                       -  int 3 
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+21CB30: 55                       -  push ebp
+"SpaceEngine.exe"+21CB31: 8B EC                    -  mov ebp,esp
+"SpaceEngine.exe"+21CB33: 51                       -  push ecx
+"SpaceEngine.exe"+21CB34: 8B 55 0C                 -  mov edx,[ebp+0C]
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+21CB37: 0F 57 DB                 -  xorps xmm3,xmm3
+"SpaceEngine.exe"+21CB3A: 53                       -  push ebx
+"SpaceEngine.exe"+21CB3B: 56                       -  push esi
+"SpaceEngine.exe"+21CB3C: 8B 75 08                 -  mov esi,[ebp+08]
+"SpaceEngine.exe"+21CB3F: 0F 57 D2                 -  xorps xmm2,xmm2
+"SpaceEngine.exe"+21CB42: 57                       -  push edi
+"SpaceEngine.exe"+21CB43: 8B F9                    -  mov edi,ecx
+"SpaceEngine.exe"+21CB45: C7 02 00 00 00 00        -  mov [edx],00000000
+"SpaceEngine.exe"+21CB4B: 8B 4D 10                 -  mov ecx,[ebp+10]
+"SpaceEngine.exe"+21CB4E: F3 0F 11 5D 08           -  movss [ebp+08],xmm3
+}
+</AssemblerScript>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>124</ID>
+          <Description>"显示2?"</Description>
+          <LastState Activated="1"/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-11
+  Author : cdkey
+
+  This script does blah blah blah
+}
+//SpaceEngine.exe+21EEED
+define(address,"SpaceEngine.exe"+21EEED)
+
+[ENABLE]
+address:
+  call Decode_ASM_AC
+  je SpaceEngine.exe+21F202
+  movss xmm4,[SpaceEngine.exe+3A7F08] { [0.75] }
+  movss xmm5,[SpaceEngine.exe+3A7D3C] { [0.25] }
+  db 0F 1F 40 00
+loop:
+  inc ebx
+  mov esi,eax
+  lea eax,[ecx-01]
+  cmp eax,0E { 14 }
+  ja SpaceEngine.exe+21F19F
+SpaceEngine.exe+21F1F5:
+  db 66 90
+loopend:
+  call Decode_ASM_AC
+  jne loop
+  mov eax,[ebp+0C]
+  maxss xmm2,[eax]
+  movss [eax],xmm2
+  cmp ebx,02 { 2 }
+SpaceEngine.exe+21F1B2:
+  call GetWidth_ASM
+  mov eax,[edi+24]
+  mulss xmm0,[edi+10]
+  sub eax,00 { 0 }
+  je SpaceEngine.exe+21F1DD
+  db 66 0F 1F 84 00 00 00 00 00 0F 1F 00
+SpaceEngine.exe+21F150:
+cmpp:
+  call Decode_ASM_AC
+  push ecx
+  call chcmp_asm
+  je loopend
+  mov esi,eax
+  jmp cmpp
+endcmp:
+  mov ecx,[ebp+8]
+  cmp byte ptr [ebx+ecx-02],0A
+  jmp return
+  nop
+SpaceEngine.exe+21F212:
+  jmp endcmp
+return:
+
+[DISABLE]
+
+address:
+  //db bytes
+  // mov al,[ecx]
+  // test al,al
+  // je SpaceEngine.exe+21F202
+  mov al,[ecx]
+  test al,al
+  je SpaceEngine.exe+21F202
+  movss xmm4,[SpaceEngine.exe+3A7F08] { [0.75] }
+  movss xmm5,[SpaceEngine.exe+3A7D3C] { [0.25] }
+  inc esi
+  mov ebx,esi
+  sub ebx,ecx
+  movzx ecx,al
+  lea eax,[ecx-01]
+  cmp eax,0E { 14 }
+  ja SpaceEngine.exe+21F19F
+SpaceEngine.exe+21F1F5:
+  mov al,[esi]
+  mov ecx,[ebp+08]
+  test al,al
+  jne SpaceEngine.exe+21EF07
+  mov eax,[ebp+0C]
+  maxss xmm2,[eax]
+  movss [eax],xmm2
+  cmp ebx,02 { 2 }
+SpaceEngine.exe+21F1B2:
+  shl eax,08 { 8 }
+  add eax,ecx
+  movss xmm0,[edi+eax*4+000000D8]
+  mov eax,[edi+24]
+  mulss xmm0,[edi+10]
+  sub eax,00 { 0 }
+  je SpaceEngine.exe+21F1DD
+SpaceEngine.exe+21F150:
+  mov al,[esi]
+  cmp al,30 { 48 }
+  jl SpaceEngine.exe+21F1F5
+  cmp al,3A { 58 }
+  jl SpaceEngine.exe+21F166
+  cmp al,3F { 63 }
+  jng SpaceEngine.exe+21F1F5
+  cmp al,5B { 91 }
+  jl SpaceEngine.exe+21F172
+  cmp al,5F { 95 }
+  jng SpaceEngine.exe+21F1F5
+  cmp al,7B { 123 }
+  jl SpaceEngine.exe+21F17A
+  cmp al,7E { 126 }
+  jle SpaceEngine.exe+21F1F5
+  inc esi
+  jmp SpaceEngine.exe+21F150
+SpaceEngine.exe+21F212:
+  cmp byte ptr [ebx+ecx-02],0A
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+21EEED
+
+"SpaceEngine.exe"+21EED0: 53                             -  push ebx
+"SpaceEngine.exe"+21EED1: 56                             -  push esi
+"SpaceEngine.exe"+21EED2: 57                             -  push edi
+"SpaceEngine.exe"+21EED3: 8B F9                          -  mov edi,ecx
+"SpaceEngine.exe"+21EED5: C7 00 00 00 00 00              -  mov [eax],00000000
+"SpaceEngine.exe"+21EEDB: 8B 4D 08                       -  mov ecx,[ebp+08]
+"SpaceEngine.exe"+21EEDE: 33 DB                          -  xor ebx,ebx
+"SpaceEngine.exe"+21EEE0: C7 02 00 00 00 00              -  mov [edx],00000000
+"SpaceEngine.exe"+21EEE6: 8B F1                          -  mov esi,ecx
+"SpaceEngine.exe"+21EEE8: F3 0F 11 5D FC                 -  movss [ebp-04],xmm3
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+21EEED: 8A 01                          -  mov al,[ecx]
+"SpaceEngine.exe"+21EEEF: 84 C0                          -  test al,al
+"SpaceEngine.exe"+21EEF1: 0F 84 0B 03 00 00              -  je SpaceEngine.exe+21F202
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+21EEF7: F3 0F 10 25 08 7F 11 01        -  movss xmm4,[SpaceEngine.exe+3A7F08]
+"SpaceEngine.exe"+21EEFF: F3 0F 10 2D 3C 7D 11 01        -  movss xmm5,[SpaceEngine.exe+3A7D3C]
+"SpaceEngine.exe"+21EF07: 46                             -  inc esi
+"SpaceEngine.exe"+21EF08: 8B DE                          -  mov ebx,esi
+"SpaceEngine.exe"+21EF0A: 2B D9                          -  sub ebx,ecx
+"SpaceEngine.exe"+21EF0C: 0F B6 C8                       -  movzx ecx,al
+"SpaceEngine.exe"+21EF0F: 8D 41 FF                       -  lea eax,[ecx-01]
+"SpaceEngine.exe"+21EF12: 83 F8 0E                       -  cmp eax,0E
+"SpaceEngine.exe"+21EF15: 0F 87 84 02 00 00              -  ja SpaceEngine.exe+21F19F
+"SpaceEngine.exe"+21EF1B: FF 24 85 30 F2 F8 00           -  jmp dword ptr [eax*4+SpaceEngine.exe+21F230]
+}
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>66</ID>
+          <Description>"HookMain"</Description>
+          <LastState Activated="1"/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-09
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+1B0A57)
+define(bytes,C2 04 00 CC CC)
+
+[ENABLE]
+
+assert(address,bytes)
+
+
+address:
+  //pushad
+  //call HookMain
+  //popad
+  mov byte ptr [zlib1.ZN4Hook6mappedE],00 { [1] }
+
+  ret 0004
+  int 3
+  int 3
+
+[DISABLE]
+
+address:
+ret 0004 { 4 }
+int 3
+int 3
+int 3
+int 3
+int 3
+int 3
+int 3
+int 3
+int 3
+int 3
+
+
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+1B0A57
+
+"SpaceEngine.exe"+1B0A3F: 64 89 0D 00 00 00 00           -  mov fs:[00000000],ecx
+"SpaceEngine.exe"+1B0A46: 59                             -  pop ecx
+"SpaceEngine.exe"+1B0A47: 5F                             -  pop edi
+"SpaceEngine.exe"+1B0A48: 5E                             -  pop esi
+"SpaceEngine.exe"+1B0A49: 5B                             -  pop ebx
+"SpaceEngine.exe"+1B0A4A: 8B 4D EC                       -  mov ecx,[ebp-14]
+"SpaceEngine.exe"+1B0A4D: 33 CD                          -  xor ecx,ebp
+"SpaceEngine.exe"+1B0A4F: E8 88 7A ED FF                 -  call SpaceEngine.exe+884DC
+"SpaceEngine.exe"+1B0A54: 8B E5                          -  mov esp,ebp
+"SpaceEngine.exe"+1B0A56: 5D                             -  pop ebp
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+1B0A57: C2 04 00                       -  ret 0004
+"SpaceEngine.exe"+1B0A5A: CC                             -  int 3 
+"SpaceEngine.exe"+1B0A5B: CC                             -  int 3 
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+1B0A5C: CC                             -  int 3 
+"SpaceEngine.exe"+1B0A5D: CC                             -  int 3 
+"SpaceEngine.exe"+1B0A5E: CC                             -  int 3 
+"SpaceEngine.exe"+1B0A5F: CC                             -  int 3 
+"SpaceEngine.exe"+1B0A60: CC                             -  int 3 
+"SpaceEngine.exe"+1B0A61: CC                             -  int 3 
+"SpaceEngine.exe"+1B0A62: CC                             -  int 3 
+"SpaceEngine.exe"+1B0A63: CC                             -  int 3 
+"SpaceEngine.exe"+1B0A64: CC                             -  int 3 
+"SpaceEngine.exe"+1B0A65: CC                             -  int 3 
+}
+</AssemblerScript>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>72</ID>
+              <Description>"无描述"</Description>
+              <VariableType>Byte</VariableType>
+              <Address>zlib1.ZN4Hook6mappedE</Address>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>44</ID>
+          <Description>"自动汇编脚本"</Description>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-09
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+217B10)
+define(bytes,8B 8F D0 00 00 00)
+
+[ENABLE]
+
+assert(address,bytes)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+
+code:
+mov ecx,[edi+000000D0]
+movss xmm1,[edi+ecx*4+000018D8]
+push ecx
+push edx
+call zlib1.GetCode
+mov ecx,[edi+000000D0]
+movzx edx,ax
+xor dl,dl
+shr dx,04 { 8 }
+or dl,al
+shl ecx,08
+or dx,cx
+movss xmm4,[edi+edx*4+00000CD8]
+movss xmm3,[edi+edx*4+000000D8]
+mov ax,100c
+movzx edx,ah
+movd xmm0,edx
+cvtdq2ps xmm0,xmm0
+movzx eax,al
+movd xmm7,eax
+mulss xmm4,xmm1
+mov edx,[SpaceEngine.exe+4FCF18] { [0169CE40] }
+mulss xmm0,[SpaceEngine.exe+3A7C14] { [0.06] }
+mov eax,[edx+14]
+cvtdq2ps xmm7,xmm7
+addss xmm4,xmm0
+mulss xmm3,xmm1
+mulss xmm7,[SpaceEngine.exe+3A7C14] { [0.06] }
+jmp SpaceEngine.exe+217B7C
+
+address:
+  jmp newmem
+  nop
+return:
+
+[DISABLE]
+
+address:
+  db bytes
+  // mov ecx,[edi+000000D0]
+
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217B10
+
+"SpaceEngine.exe"+217AE4: EB 2A                       -  jmp SpaceEngine.exe+217B10
+"SpaceEngine.exe"+217AE6: 0F 28 C1                    -  movaps xmm0,xmm1
+"SpaceEngine.exe"+217AE9: 0F 28 D1                    -  movaps xmm2,xmm1
+"SpaceEngine.exe"+217AEC: F3 0F 59 05 3C 7D 54 01     -  mulss xmm0,[SpaceEngine.exe+3A7D3C]
+"SpaceEngine.exe"+217AF4: F3 0F 58 D7                 -  addss xmm2,xmm7
+"SpaceEngine.exe"+217AF8: F3 0F 58 C7                 -  addss xmm0,xmm7
+"SpaceEngine.exe"+217AFC: F3 0F 11 54 24 20           -  movss [esp+20],xmm2
+"SpaceEngine.exe"+217B02: F3 0F 11 44 24 18           -  movss [esp+18],xmm0
+"SpaceEngine.exe"+217B08: EB 06                       -  jmp SpaceEngine.exe+217B10
+"SpaceEngine.exe"+217B0A: F3 0F 10 54 24 20           -  movss xmm2,[esp+20]
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217B10: 8B 8F D0 00 00 00           -  mov ecx,[edi+000000D0]
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+217B16: 8B C1                       -  mov eax,ecx
+"SpaceEngine.exe"+217B18: C1 E0 08                    -  shl eax,08
+"SpaceEngine.exe"+217B1B: 01 C2                       -  add edx,eax
+"SpaceEngine.exe"+217B1D: F3 0F 10 8C 8F D8 18 00 00  -  movss xmm1,[edi+ecx*4+000018D8]
+"SpaceEngine.exe"+217B26: 8A 4C 24 0F                 -  mov cl,[esp+0F]
+"SpaceEngine.exe"+217B2A: F3 0F 10 A4 97 D8 0C 00 00  -  movss xmm4,[edi+edx*4+00000CD8]
+"SpaceEngine.exe"+217B33: 88 C8                       -  mov al,cl
+"SpaceEngine.exe"+217B35: F3 0F 10 9C 97 D8 00 00 00  -  movss xmm3,[edi+edx*4+000000D8]
+"SpaceEngine.exe"+217B3E: 24 0F                       -  and al,0F
+"SpaceEngine.exe"+217B40: 8B 15 18 CF 69 01           -  mov edx,[SpaceEngine.exe+4FCF18]
+}
+</AssemblerScript>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>48</ID>
+          <Description>"自动汇编脚本"</Description>
+          <LastState/>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-09
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+217B10)
+define(bytes,8B 8F D0 00 00 00)
+
+[ENABLE]
+
+assert(address,bytes)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+
+code:
+mov ecx,[edi+000000D0]
+mov eax,ecx
+mov edx,41
+shl eax,08 { 8 }
+add edx,eax
+movss xmm1,[edi+ecx*4+000018D8]
+mov cl,dl
+movss xmm4,[edi+edx*4+00000CD8]
+mov al,cl
+movss xmm3,[edi+edx*4+000000D8]
+and al,0F { 15 }
+mov edx,[SpaceEngine.exe+4FCF18] { [0169CE40] }
+//movzx eax,al
+mov eax,C
+shr cl,04 { 4 }
+mulss xmm4,xmm1
+movd xmm0,eax
+//movzx eax,cl
+mov eax,C
+cvtdq2ps xmm0,xmm0
+movd xmm7,eax
+mulss xmm0,[SpaceEngine.exe+3A7C14] { [0.06] }
+mov eax,[edx+14]
+cvtdq2ps xmm7,xmm7
+addss xmm4,xmm0
+mulss xmm3,xmm1
+mulss xmm7,[SpaceEngine.exe+3A7C14] { [0.06] }
+
+/*mov ecx,[edi+000000D0]
+movss xmm1,[edi+ecx*4+000018D8]
+push ecx
+push edx
+call zlib1.GetCode
+mov ecx,[edi+000000D0]
+movzx edx,ax
+xor dl,dl
+shr dx,04 { 8 }
+or dl,al
+shl ecx,08
+or dx,cx
+movss xmm4,[edi+edx*4+00000CD8]
+movss xmm3,[edi+edx*4+000000D8]
+mov ax,000c
+movzx edx,ah
+movd xmm0,edx
+cvtdq2ps xmm0,xmm0
+movzx eax,al
+movd xmm7,eax
+mulss xmm4,xmm1
+mov edx,[SpaceEngine.exe+4FCF18] { [0169CE40] }
+mulss xmm0,[SpaceEngine.exe+3A7C14] { [0.06] }
+mov eax,[edx+14]
+cvtdq2ps xmm7,xmm7
+addss xmm4,xmm0
+mulss xmm3,xmm1
+mulss xmm7,[SpaceEngine.exe+3A7C14] { [0.06] }*/
+jmp SpaceEngine.exe+217B7C
+
+address:
+  jmp newmem
+  nop
+return:
+
+[DISABLE]
+
+address:
+  db bytes
+  // mov ecx,[edi+000000D0]
+
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217B10
+
+"SpaceEngine.exe"+217AE4: EB 2A                       -  jmp SpaceEngine.exe+217B10
+"SpaceEngine.exe"+217AE6: 0F 28 C1                    -  movaps xmm0,xmm1
+"SpaceEngine.exe"+217AE9: 0F 28 D1                    -  movaps xmm2,xmm1
+"SpaceEngine.exe"+217AEC: F3 0F 59 05 3C 7D 54 01     -  mulss xmm0,[SpaceEngine.exe+3A7D3C]
+"SpaceEngine.exe"+217AF4: F3 0F 58 D7                 -  addss xmm2,xmm7
+"SpaceEngine.exe"+217AF8: F3 0F 58 C7                 -  addss xmm0,xmm7
+"SpaceEngine.exe"+217AFC: F3 0F 11 54 24 20           -  movss [esp+20],xmm2
+"SpaceEngine.exe"+217B02: F3 0F 11 44 24 18           -  movss [esp+18],xmm0
+"SpaceEngine.exe"+217B08: EB 06                       -  jmp SpaceEngine.exe+217B10
+"SpaceEngine.exe"+217B0A: F3 0F 10 54 24 20           -  movss xmm2,[esp+20]
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217B10: 8B 8F D0 00 00 00           -  mov ecx,[edi+000000D0]
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+217B16: 8B C1                       -  mov eax,ecx
+"SpaceEngine.exe"+217B18: C1 E0 08                    -  shl eax,08
+"SpaceEngine.exe"+217B1B: 01 C2                       -  add edx,eax
+"SpaceEngine.exe"+217B1D: F3 0F 10 8C 8F D8 18 00 00  -  movss xmm1,[edi+ecx*4+000018D8]
+"SpaceEngine.exe"+217B26: 8A 4C 24 0F                 -  mov cl,[esp+0F]
+"SpaceEngine.exe"+217B2A: F3 0F 10 A4 97 D8 0C 00 00  -  movss xmm4,[edi+edx*4+00000CD8]
+"SpaceEngine.exe"+217B33: 88 C8                       -  mov al,cl
+"SpaceEngine.exe"+217B35: F3 0F 10 9C 97 D8 00 00 00  -  movss xmm3,[edi+edx*4+000000D8]
+"SpaceEngine.exe"+217B3E: 24 0F                       -  and al,0F
+"SpaceEngine.exe"+217B40: 8B 15 18 CF 69 01           -  mov edx,[SpaceEngine.exe+4FCF18]
+}
+</AssemblerScript>
+        </CheatEntry>
+      </CheatEntries>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>31</ID>
+      <Description>"自动汇编脚本"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-08
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+154559)
+define(bytes,89 46 08 8B 45 0C)
+
+[ENABLE]
+
+
+assert(address,bytes)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+
+code:
+  mov [esi+08],800
+  mov eax,[ebp+0C]
+  jmp return
+
+address:
+  jmp newmem
+  nop
+return:
+
+[DISABLE]
+
+address:
+  db bytes
+  // mov [esi+08],eax
+  // mov eax,[ebp+0C]
+
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+154559
+
+"SpaceEngine.exe"+15454B: CC                    -  int 3 
+"SpaceEngine.exe"+15454C: CC                    -  int 3 
+"SpaceEngine.exe"+15454D: CC                    -  int 3 
+"SpaceEngine.exe"+15454E: CC                    -  int 3 
+"SpaceEngine.exe"+15454F: CC                    -  int 3 
+"SpaceEngine.exe"+154550: 55                    -  push ebp
+"SpaceEngine.exe"+154551: 8B EC                 -  mov ebp,esp
+"SpaceEngine.exe"+154553: 8B 45 08              -  mov eax,[ebp+08]
+"SpaceEngine.exe"+154556: 56                    -  push esi
+"SpaceEngine.exe"+154557: 8B F1                 -  mov esi,ecx
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+154559: 89 46 08              -  mov [esi+08],eax
+"SpaceEngine.exe"+15455C: 8B 45 0C              -  mov eax,[ebp+0C]
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+15455F: 89 46 0C              -  mov [esi+0C],eax
+"SpaceEngine.exe"+154562: 8B 45 10              -  mov eax,[ebp+10]
+"SpaceEngine.exe"+154565: C7 46 10 01 00 00 00  -  mov [esi+10],00000001
+"SpaceEngine.exe"+15456C: 89 06                 -  mov [esi],eax
+"SpaceEngine.exe"+15456E: E8 7D F6 FF FF        -  call SpaceEngine.exe+153BF0
+"SpaceEngine.exe"+154573: 0F B6 4E 15           -  movzx ecx,byte ptr [esi+15]
+"SpaceEngine.exe"+154577: 0F B6 46 14           -  movzx eax,byte ptr [esi+14]
+"SpaceEngine.exe"+15457B: 0F AF C8              -  imul ecx,eax
+"SpaceEngine.exe"+15457E: C6 46 17 00           -  mov byte ptr [esi+17],00
+"SpaceEngine.exe"+154582: 0F AF 4E 0C           -  imul ecx,[esi+0C]
+}
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>32</ID>
+      <Description>"无描述"</Description>
+      <VariableType>String</VariableType>
+      <Length>3</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>SpaceEngine.exe+500054</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>37</ID>
+      <Description>"纹理"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+94</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>38</ID>
+      <Description>"纹理"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>50</ID>
+      <Description>"纹理"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+D8+41*4</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>41</ID>
+      <Description>"纹理"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+000018D8+4*0</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>77</ID>
+      <Description>"纹理"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+000018D8+4*1</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>76</ID>
+      <Description>"纹理"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+000018D8+4*2</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>34</ID>
+      <Description>"自动汇编脚本"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-08
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+217670)
+define(bytes,46 8B CE 89 74 24 24)
+
+[ENABLE]
+
+assert(address,bytes)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+
+code:
+  mov [edi+000000D0],2
+  inc esi
+  mov ecx,esi
+  mov [esp+24],esi
+  jmp return
+
+address:
+  jmp newmem
+  nop
+  nop
+return:
+
+[DISABLE]
+
+address:
+  db bytes
+  // inc esi
+  // mov ecx,esi
+  // mov [esp+24],esi
+
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217670
+
+"SpaceEngine.exe"+21763C: E8 DF 5D F9 FF                 -  call SpaceEngine.exe+1AD420
+"SpaceEngine.exe"+217641: 8B D6                          -  mov edx,esi
+"SpaceEngine.exe"+217643: 8A 02                          -  mov al,[edx]
+"SpaceEngine.exe"+217645: 88 44 24 0F                    -  mov [esp+0F],al
+"SpaceEngine.exe"+217649: 84 C0                          -  test al,al
+"SpaceEngine.exe"+21764B: 0F 84 F7 08 00 00              -  je SpaceEngine.exe+217F48
+"SpaceEngine.exe"+217651: F3 0F 10 0D 44 7E 1F 01        -  movss xmm1,[SpaceEngine.exe+3A7E44]
+"SpaceEngine.exe"+217659: F3 0F 10 1D 08 7F 1F 01        -  movss xmm3,[SpaceEngine.exe+3A7F08]
+"SpaceEngine.exe"+217661: F3 0F 10 25 34 8E 1F 01        -  movss xmm4,[SpaceEngine.exe+3A8E34]
+"SpaceEngine.exe"+217669: 0F 1F 80 00 00 00 00           -  nop [eax+00000000]
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217670: 46                             -  inc esi
+"SpaceEngine.exe"+217671: 8B CE                          -  mov ecx,esi
+"SpaceEngine.exe"+217673: 89 74 24 24                    -  mov [esp+24],esi
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+217677: 29 D1                          -  sub ecx,edx
+"SpaceEngine.exe"+217679: 0F B6 D0                       -  movzx edx,al
+"SpaceEngine.exe"+21767C: 89 54 24 2C                    -  mov [esp+2C],edx
+"SpaceEngine.exe"+217680: 8D 42 FF                       -  lea eax,[edx-01]
+"SpaceEngine.exe"+217683: 83 F8 0E                       -  cmp eax,0E
+"SpaceEngine.exe"+217686: 0F 87 34 03 00 00              -  ja SpaceEngine.exe+2179C0
+"SpaceEngine.exe"+21768C: FF 24 85 50 7F 06 01           -  jmp dword ptr [eax*4+SpaceEngine.exe+217F50]
+"SpaceEngine.exe"+217693: 8B 47 24                       -  mov eax,[edi+24]
+"SpaceEngine.exe"+217696: 83 F8 02                       -  cmp eax,02
+"SpaceEngine.exe"+217699: 7D 04                          -  jnl SpaceEngine.exe+21769F
+}
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>35</ID>
+      <Description>"Settings"</Description>
+      <VariableType>String</VariableType>
+      <Length>8</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>SpaceEngine.exe+408F34</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>36</ID>
+      <Description>"纹理切换测试"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-08
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+2179C0)
+define(bytes,8B 87 D0 00 00 00)
+
+[ENABLE]
+//code from here to '[DISABLE]' will be used to enable the cheat
+
+ 
+ 
+assert(address,bytes)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+
+code:
+jmp SpaceEngine.exe+2177BA
+  mov [edi+000000D0],2
+
+//movups xmm0,[edi+000018E4]
+//movups [edi+00000094],xmm0
+
+
+  mov eax,[edi+000000D0]
+  jmp return
+
+address:
+  jmp newmem
+  nop
+return:
+
+[DISABLE]
+//code from here till the end of the code will be used to disable the cheat
+address:
+  db bytes
+  // mov eax,[edi+000000D0]
+
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+2179C0
+
+"SpaceEngine.exe"+21798A: 0F 8E A7 05 00 00           -  jng SpaceEngine.exe+217F37
+"SpaceEngine.exe"+217990: 46                          -  inc esi
+"SpaceEngine.exe"+217991: EB CF                       -  jmp SpaceEngine.exe+217962
+"SpaceEngine.exe"+217993: F3 0F 10 BF C0 00 00 00     -  movss xmm7,[edi+000000C0]
+"SpaceEngine.exe"+21799B: F3 0F 58 3F                 -  addss xmm7,[edi]
+"SpaceEngine.exe"+21799F: F3 0F 10 B7 BC 00 00 00     -  movss xmm6,[edi+000000BC]
+"SpaceEngine.exe"+2179A7: F3 0F 11 74 24 14           -  movss [esp+14],xmm6
+"SpaceEngine.exe"+2179AD: F3 0F 11 7C 24 10           -  movss [esp+10],xmm7
+"SpaceEngine.exe"+2179B3: F3 0F 11 BF C0 00 00 00     -  movss [edi+000000C0],xmm7
+"SpaceEngine.exe"+2179BB: E9 77 05 00 00              -  jmp SpaceEngine.exe+217F37
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+2179C0: 8B 87 D0 00 00 00           -  mov eax,[edi+000000D0]
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+2179C6: F3 0F 10 8F D4 00 00 00     -  movss xmm1,[edi+000000D4]
+"SpaceEngine.exe"+2179CE: F3 0F 59 4F 14              -  mulss xmm1,[edi+14]
+"SpaceEngine.exe"+2179D3: C1 E0 08                    -  shl eax,08
+"SpaceEngine.exe"+2179D6: 01 D0                       -  add eax,edx
+"SpaceEngine.exe"+2179D8: F3 0F 11 4C 24 24           -  movss [esp+24],xmm1
+"SpaceEngine.exe"+2179DE: F3 0F 10 AC 87 D8 00 00 00  -  movss xmm5,[edi+eax*4+000000D8]
+"SpaceEngine.exe"+2179E7: 8B 47 24                    -  mov eax,[edi+24]
+"SpaceEngine.exe"+2179EA: F3 0F 59 6F 10              -  mulss xmm5,[edi+10]
+"SpaceEngine.exe"+2179EF: 83 E8 00                    -  sub eax,00
+"SpaceEngine.exe"+2179F2: 74 0A                       -  je SpaceEngine.exe+2179FE
+}
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>39</ID>
+      <Description>"自动汇编脚本"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-09
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+217734)
+define(bytes,80 7F 18 00 C7 87 CC 00 00 00 01 00 00 00)
+
+[ENABLE]
+
+assert(address,bytes)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+
+code:
+cmp byte ptr [edi+19],00 { 0 }
+mov [edi+000000CC],00000000 { 0 }
+mov [edi+20],FFFFFFFF { -1 }
+mov [edi+1C],FFFFFFFF { -1 }
+mov [edi+10],3F800000 { 0.75 }
+mov [edi+14],3F800000 { 0.75 }
+mov [edi+000000D4],42100000 { 16.00 }
+mov [edi],42100000 { 13.50 }
+
+mov [edi+000000D0],00000002 { 1 }
+mov eax,[edi+000000D0]
+shl eax,04 { 4 }
+movups xmm0,[eax+edi+000018E4]
+movups [edi+00000094],xmm0
+jmp SpaceEngine.exe+21769F
+
+/*cmp byte ptr [edi+18],00 { 0 }
+mov [edi+000000CC],00000002 { 1 }
+mov [edi+20],FFFFFFFF { -1 }
+mov [edi+1C],FFFFFFFF { -1 }
+mov [edi],42000000 { 18.00 }
+mov [edi+10],3F800000 { 1.00 }
+mov [edi+14],3F800000 { 1.00 }
+mov [edi+000000D4],42000000 { 16.00 }
+*/
+jmp SpaceEngine.exe+21779E
+
+/*cmp byte ptr [edi+19],00 { 0 }
+mov [edi+000000CC],00000000 { 0 }
+mov [edi+20],FFFFFFFF { -1 }
+mov [edi+1C],FFFFFFFF { -1 }
+mov [edi+000000D0],00000000 { 0 }
+mov [edi+10],3F400000 { 0.75 }
+mov [edi+14],3F400000 { 0.75 }
+mov [edi+000000D4],41800000 { 16.00 }
+mov [edi],41580000 { 13.50 }
+je SpaceEngine.exe+217717
+mov [edi+000000D0],00000001 { 1 }
+mov eax,[edi+000000D0]
+shl eax,04 { 4 }
+movups xmm0,[eax+edi+000018E4]
+movups [edi+00000094],xmm0
+jmp SpaceEngine.exe+21769F*/
+
+/*mov [edi+000000CC],00000002 { 2 }
+//mov [edi+10],3F400000 { 0.75 }
+//mov [edi+14],3F400000 { 0.75 }
+//mov [edi+000000D0],00000002 { 2 }
+mov [edi+1C],FFFFFFFF { -1 }
+mov [edi+20],FFFFFFFF { -1 }
+mov [edi+000000D4],42000000 { 32.00 }
+mov [edi],42100000 { 36.00 }
+movups xmm0,[edi+00001904]
+movups [edi+00000094],xmm0
+cmp byte ptr [edi+18],00 { 0 }
+mov [edi+000000CC],00000001 { 1 }
+mov [edi+20],FFFFFFFF { -1 }
+mov [edi+1C],FFFFFFFF { -1 }
+mov [edi],41900000 { 18.00 }
+mov [edi+000000D0],00000000 { 0 }
+mov [edi+10],3F800000 { 1.00 }
+mov [edi+14],3F800000 { 1.00 }
+mov [edi+000000D4],41800000 { 16.00 }*/
+//jmp SpaceEngine.exe+217717
+
+
+  cmp byte ptr [edi+18],00
+  mov [edi+000000CC],00000001
+  jmp return
+
+address:
+  jmp newmem
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+return:
+
+[DISABLE]
+
+address:
+  db bytes
+  // cmp byte ptr [edi+18],00
+  // mov [edi+000000CC],00000001
+
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217734
+
+"SpaceEngine.exe"+2176F4: C7 47 14 00 00 40 3F           -  mov [edi+14],3F400000
+"SpaceEngine.exe"+2176FB: C7 87 D4 00 00 00 00 00 80 41  -  mov [edi+000000D4],41800000
+"SpaceEngine.exe"+217705: C7 07 00 00 58 41              -  mov [edi],41580000
+"SpaceEngine.exe"+21770B: 74 0A                          -  je SpaceEngine.exe+217717
+"SpaceEngine.exe"+21770D: C7 87 D0 00 00 00 01 00 00 00  -  mov [edi+000000D0],00000001
+"SpaceEngine.exe"+217717: 8B 87 D0 00 00 00              -  mov eax,[edi+000000D0]
+"SpaceEngine.exe"+21771D: C1 E0 04                       -  shl eax,04
+"SpaceEngine.exe"+217720: 0F 10 84 38 E4 18 00 00        -  movups xmm0,[eax+edi+000018E4]
+"SpaceEngine.exe"+217728: 0F 11 87 94 00 00 00           -  movups [edi+00000094],xmm0
+"SpaceEngine.exe"+21772F: E9 6B FF FF FF                 -  jmp SpaceEngine.exe+21769F
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217734: 80 7F 18 00                    -  cmp byte ptr [edi+18],00
+"SpaceEngine.exe"+217738: C7 87 CC 00 00 00 01 00 00 00  -  mov [edi+000000CC],00000001
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+217742: C7 47 20 FF FF FF FF           -  mov [edi+20],FFFFFFFF
+"SpaceEngine.exe"+217749: C7 47 1C FF FF FF FF           -  mov [edi+1C],FFFFFFFF
+"SpaceEngine.exe"+217750: C7 07 00 00 90 41              -  mov [edi],41900000
+"SpaceEngine.exe"+217756: 74 24                          -  je SpaceEngine.exe+21777C
+"SpaceEngine.exe"+217758: C7 87 D0 00 00 00 00 00 00 00  -  mov [edi+000000D0],00000000
+"SpaceEngine.exe"+217762: C7 47 10 00 00 80 3F           -  mov [edi+10],3F800000
+"SpaceEngine.exe"+217769: C7 47 14 00 00 80 3F           -  mov [edi+14],3F800000
+"SpaceEngine.exe"+217770: C7 87 D4 00 00 00 00 00 80 41  -  mov [edi+000000D4],41800000
+"SpaceEngine.exe"+21777A: EB 22                          -  jmp SpaceEngine.exe+21779E
+"SpaceEngine.exe"+21777C: C7 87 D0 00 00 00 02 00 00 00  -  mov [edi+000000D0],00000002
+}
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>42</ID>
+      <Description>"纹理单位测试"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-09
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+217B1D)
+define(bytes,F3 0F 10 8C 8F D8 18 00 00)
+
+[ENABLE]
+
+assert(address,bytes)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+
+code:
+  PUSH ebx
+  mov ebx,3A800000
+  movd xmm1,ebx
+  pop ebx
+  //movss xmm1,[edi+ecx*4+000018D8]
+  jmp return
+
+address:
+  jmp newmem
+  nop
+  nop
+  nop
+  nop
+return:
+
+[DISABLE]
+
+address:
+  db bytes
+  // movss xmm1,[edi+ecx*4+000018D8]
+
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217B1D
+
+"SpaceEngine.exe"+217AF4: F3 0F 58 D7                 -  addss xmm2,xmm7
+"SpaceEngine.exe"+217AF8: F3 0F 58 C7                 -  addss xmm0,xmm7
+"SpaceEngine.exe"+217AFC: F3 0F 11 54 24 20           -  movss [esp+20],xmm2
+"SpaceEngine.exe"+217B02: F3 0F 11 44 24 18           -  movss [esp+18],xmm0
+"SpaceEngine.exe"+217B08: EB 06                       -  jmp SpaceEngine.exe+217B10
+"SpaceEngine.exe"+217B0A: F3 0F 10 54 24 20           -  movss xmm2,[esp+20]
+"SpaceEngine.exe"+217B10: 8B 8F D0 00 00 00           -  mov ecx,[edi+000000D0]
+"SpaceEngine.exe"+217B16: 8B C1                       -  mov eax,ecx
+"SpaceEngine.exe"+217B18: C1 E0 08                    -  shl eax,08
+"SpaceEngine.exe"+217B1B: 03 D0                       -  add edx,eax
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217B1D: F3 0F 10 8C 8F D8 18 00 00  -  movss xmm1,[edi+ecx*4+000018D8]
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+217B26: 8A 4C 24 0F                 -  mov cl,[esp+0F]
+"SpaceEngine.exe"+217B2A: F3 0F 10 A4 97 D8 0C 00 00  -  movss xmm4,[edi+edx*4+00000CD8]
+"SpaceEngine.exe"+217B33: 8A C1                       -  mov al,cl
+"SpaceEngine.exe"+217B35: F3 0F 10 9C 97 D8 00 00 00  -  movss xmm3,[edi+edx*4+000000D8]
+"SpaceEngine.exe"+217B3E: 24 0F                       -  and al,0F
+"SpaceEngine.exe"+217B40: 8B 15 18 CF 34 01           -  mov edx,[SpaceEngine.exe+4FCF18]
+"SpaceEngine.exe"+217B46: 0F B6 C0                    -  movzx eax,al
+"SpaceEngine.exe"+217B49: C0 E9 04                    -  shr cl,04
+"SpaceEngine.exe"+217B4C: F3 0F 59 E1                 -  mulss xmm4,xmm1
+"SpaceEngine.exe"+217B50: 66 0F 6E C0                 -  movd xmm0,eax
+}
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>52</ID>
+      <Description>"自动汇编脚本"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-09
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+217B27)
+define(bytes,0F B6 C8 66 0F 6E C1)
+
+[ENABLE]
+
+assert(address,bytes)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+
+code:
+  mov eax,0D000401
+  movzx ecx,al
+  movd xmm0,ecx
+  jmp return
+
+address:
+  jmp newmem
+  nop
+  nop
+return:
+
+[DISABLE]
+
+address:
+  db bytes
+  // movzx ecx,al
+  // movd xmm0,ecx
+
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+217B27
+
+"SpaceEngine.exe"+217B02: F3 0F 11 44 24 18        -  movss [esp+18],xmm0
+"SpaceEngine.exe"+217B08: EB 06                    -  jmp SpaceEngine.exe+217B10
+"SpaceEngine.exe"+217B0A: F3 0F 10 54 24 20        -  movss xmm2,[esp+20]
+"SpaceEngine.exe"+217B10: 8B 8F D0 00 00 00        -  mov ecx,[edi+000000D0]
+"SpaceEngine.exe"+217B16: 51                       -  push ecx
+"SpaceEngine.exe"+217B17: 52                       -  push edx
+"SpaceEngine.exe"+217B18: 51                       -  push ecx
+"SpaceEngine.exe"+217B19: E8 22 23 08 6D           -  call zlib1.dll+39E40
+"SpaceEngine.exe"+217B1E: 66 0F 6E C8              -  movd xmm1,eax
+"SpaceEngine.exe"+217B22: E8 E9 02 08 6D           -  call zlib1.dll+37E10
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+217B27: 0F B6 C8                 -  movzx ecx,al
+"SpaceEngine.exe"+217B2A: 66 0F 6E C1              -  movd xmm0,ecx
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+217B2E: 0F 5B C0                 -  cvtdq2ps xmm0,xmm0
+"SpaceEngine.exe"+217B31: 0F B6 CC                 -  movzx ecx,ah
+"SpaceEngine.exe"+217B34: 66 0F 6E F9              -  movd xmm7,ecx
+"SpaceEngine.exe"+217B38: C1 E8 10                 -  shr eax,10
+"SpaceEngine.exe"+217B3B: 0F BE C8                 -  movsx ecx,al
+"SpaceEngine.exe"+217B3E: 66 0F 6E E1              -  movd xmm4,ecx
+"SpaceEngine.exe"+217B42: 0F 5B E4                 -  cvtdq2ps xmm4,xmm4
+"SpaceEngine.exe"+217B45: 0F BE C4                 -  movsx eax,ah
+"SpaceEngine.exe"+217B48: 66 0F 6E D8              -  movd xmm3,eax
+"SpaceEngine.exe"+217B4C: 0F 5B DB                 -  cvtdq2ps xmm3,xmm3
+}
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>54</ID>
+      <Description>"无描述"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+3A7F08</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>55</ID>
+      <Description>"无描述"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+3A7E44</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>56</ID>
+      <Description>"无描述"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+3A7C14</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>57</ID>
+      <Description>"无描述"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4D74</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>58</ID>
+      <Description>"normal-x"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4+4*0</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>65</ID>
+      <Description>"normal-y"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4+4*1</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>64</ID>
+      <Description>"normal-sx"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4+4*2</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>59</ID>
+      <Description>"normal-sy"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4+4*3</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>62</ID>
+      <Description>"shadow-x"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4+4*4</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>63</ID>
+      <Description>"shadow-y"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4+4*5</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>60</ID>
+      <Description>"shadow-sx"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4+4*6</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>61</ID>
+      <Description>"shadow-sy"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4+4*7</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>67</ID>
+      <Description>"large-x"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4+4*8</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>68</ID>
+      <Description>"large-y"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4+4*9</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>69</ID>
+      <Description>"large-sx"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4+4*a</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>70</ID>
+      <Description>"large-sy"</Description>
+      <VariableType>Float</VariableType>
+      <Address>SpaceEngine.exe+5D4CE0+18E4+4*b</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>79</ID>
+      <Description>"无描述"</Description>
+      <VariableType>Float</VariableType>
+      <Address>01774CE0+10</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>82</ID>
+      <Description>"BASE"</Description>
+      <VariableType>4 Bytes</VariableType>
+      <Address>SpaceEngine.exe</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>83</ID>
+      <Description>"无描述"</Description>
+      <ShowAsHex>1</ShowAsHex>
+      <VariableType>String</VariableType>
+      <Length>13</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>SpaceEngine.exe+408BE4</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>87</ID>
+      <Description>"无描述"</Description>
+      <VariableType>String</VariableType>
+      <Length>19</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>SpaceEngine.exe+4095D4</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>88</ID>
+      <Description>"无描述"</Description>
+      <VariableType>String</VariableType>
+      <Length>11</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>SpaceEngine.exe+3E6C18</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>89</ID>
+      <Description>"无描述"</Description>
+      <ShowAsHex>1</ShowAsHex>
+      <VariableType>4 Bytes</VariableType>
+      <Address>SpaceEngine.exe+481328</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>91</ID>
+      <Description>"无描述"</Description>
+      <ShowAsHex>1</ShowAsHex>
+      <VariableType>String</VariableType>
+      <Length>12</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>SpaceEngine.exe+481328</Address>
+      <Offsets>
+        <Offset>200</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>90</ID>
+      <Description>"无描述"</Description>
+      <ShowAsHex>1</ShowAsHex>
+      <VariableType>4 Bytes</VariableType>
+      <Address>SpaceEngine.exe+482830</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>92</ID>
+      <Description>"无描述"</Description>
+      <VariableType>String</VariableType>
+      <Length>14</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>10EF0467</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>93</ID>
+      <Description>"无描述"</Description>
+      <VariableType>String</VariableType>
+      <Length>14</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>12874067</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>94</ID>
+      <Description>"无描述"</Description>
+      <VariableType>String</VariableType>
+      <Length>100</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>10EF04B0</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>95</ID>
+      <Description>"无描述"</Description>
+      <VariableType>String</VariableType>
+      <Length>7</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>SpaceEngine.exe+42B5D0</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>96</ID>
+      <Description>"无描述"</Description>
+      <VariableType>String</VariableType>
+      <Length>7</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>SpaceEngine.exe+42B680</Address>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>123</ID>
+      <Description>"无描述"</Description>
+      <ShowAsHex>1</ShowAsHex>
+      <VariableType>String</VariableType>
+      <Length>1000</Length>
+      <Unicode>0</Unicode>
+      <CodePage>0</CodePage>
+      <ZeroTerminate>1</ZeroTerminate>
+      <Address>SpaceEngine.exe+4FD194</Address>
+      <Offsets>
+        <Offset>0</Offset>
+      </Offsets>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>126</ID>
+      <Description>"自动汇编脚本"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-11
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+8B779)
+define(bytes,F3 0F 7F 07 F3 0F 7F 4F 10)
+
+[ENABLE]
+
+assert(address,bytes)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+
+code:
+ // movdqu [edi],xmm0
+  //movdqu [edi+10],xmm1
+  jmp return
+
+address:
+  jmp newmem
+  nop
+  nop
+  nop
+  nop
+
+return:
+
+SpaceEngine.exe+1DCADB:
+nop
+nop
+nop
+
+[DISABLE]
+
+address:
+  db bytes
+  // movdqu [edi],xmm0
+  // movdqu [edi+10],xmm1
+
+SpaceEngine.exe+1DCADB:
+mov byte ptr [eax],00 { 0 }
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+8B779
+
+"SpaceEngine.exe"+8B75B: 75 A3                 -  jne SpaceEngine.exe+8B700
+"SpaceEngine.exe"+8B75D: 85 C9                 -  test ecx,ecx
+"SpaceEngine.exe"+8B75F: 74 5F                 -  je SpaceEngine.exe+8B7C0
+"SpaceEngine.exe"+8B761: 8B D1                 -  mov edx,ecx
+"SpaceEngine.exe"+8B763: C1 EA 05              -  shr edx,05
+"SpaceEngine.exe"+8B766: 85 D2                 -  test edx,edx
+"SpaceEngine.exe"+8B768: 74 21                 -  je SpaceEngine.exe+8B78B
+"SpaceEngine.exe"+8B76A: 8D 9B 00 00 00 00     -  lea ebx,[ebx+00000000]
+"SpaceEngine.exe"+8B770: F3 0F 6F 06           -  movdqu xmm0,[esi]
+"SpaceEngine.exe"+8B774: F3 0F 6F 4E 10        -  movdqu xmm1,[esi+10]
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+8B779: F3 0F 7F 07           -  movdqu [edi],xmm0
+"SpaceEngine.exe"+8B77D: F3 0F 7F 4F 10        -  movdqu [edi+10],xmm1
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+8B782: 8D 76 20              -  lea esi,[esi+20]
+"SpaceEngine.exe"+8B785: 8D 7F 20              -  lea edi,[edi+20]
+"SpaceEngine.exe"+8B788: 4A                    -  dec edx
+"SpaceEngine.exe"+8B789: 75 E5                 -  jne SpaceEngine.exe+8B770
+"SpaceEngine.exe"+8B78B: 83 E1 1F              -  and ecx,1F
+"SpaceEngine.exe"+8B78E: 74 30                 -  je SpaceEngine.exe+8B7C0
+"SpaceEngine.exe"+8B790: 8B C1                 -  mov eax,ecx
+"SpaceEngine.exe"+8B792: C1 E9 02              -  shr ecx,02
+"SpaceEngine.exe"+8B795: 74 0F                 -  je SpaceEngine.exe+8B7A6
+"SpaceEngine.exe"+8B797: 8B 16                 -  mov edx,[esi]
+}
+</AssemblerScript>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>127</ID>
+      <Description>"自动汇编脚本"</Description>
+      <LastState/>
+      <VariableType>Auto Assembler Script</VariableType>
+      <AssemblerScript>{ Game   : SpaceEngine.exe
+  Version: 
+  Date   : 2018-05-11
+  Author : cdkey
+
+  This script does blah blah blah
+}
+
+define(address,"SpaceEngine.exe"+2179C8)
+define(bytes,E8 B3 21 4B 6D)
+
+[ENABLE]
+
+assert(address,bytes)
+alloc(newmem,$1000)
+
+label(code)
+label(return)
+
+newmem:
+
+code:
+
+  call zlib1.GetCode
+  mov eax,10001000
+  jmp return
+
+address:
+  jmp newmem
+return:
+
+[DISABLE]
+
+address:
+  db bytes
+  // call zlib1.GetCode
+
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: "SpaceEngine.exe"+2179C8
+
+"SpaceEngine.exe"+217993: F3 0F 10 BF C0 00 00 00  -  movss xmm7,[edi+000000C0]
+"SpaceEngine.exe"+21799B: F3 0F 58 3F              -  addss xmm7,[edi]
+"SpaceEngine.exe"+21799F: F3 0F 10 B7 BC 00 00 00  -  movss xmm6,[edi+000000BC]
+"SpaceEngine.exe"+2179A7: F3 0F 11 74 24 14        -  movss [esp+14],xmm6
+"SpaceEngine.exe"+2179AD: F3 0F 11 7C 24 10        -  movss [esp+10],xmm7
+"SpaceEngine.exe"+2179B3: F3 0F 11 BF C0 00 00 00  -  movss [edi+000000C0],xmm7
+"SpaceEngine.exe"+2179BB: E9 77 05 00 00           -  jmp SpaceEngine.exe+217F37
+"SpaceEngine.exe"+2179C0: 51                       -  push ecx
+"SpaceEngine.exe"+2179C1: FF B7 D0 00 00 00        -  push [edi+000000D0]
+"SpaceEngine.exe"+2179C7: 52                       -  push edx
+// ---------- INJECTING HERE ----------
+"SpaceEngine.exe"+2179C8: E8 B3 21 4B 6D           -  call zlib1.dll+39B80
+// ---------- DONE INJECTING  ----------
+"SpaceEngine.exe"+2179CD: 59                       -  pop ecx
+"SpaceEngine.exe"+2179CE: F3 0F 10 8F D4 00 00 00  -  movss xmm1,[edi+000000D4]
+"SpaceEngine.exe"+2179D6: F3 0F 59 4F 14           -  mulss xmm1,[edi+14]
+"SpaceEngine.exe"+2179DB: F3 0F 11 4C 24 24        -  movss [esp+24],xmm1
+"SpaceEngine.exe"+2179E1: 8B D0                    -  mov edx,eax
+"SpaceEngine.exe"+2179E3: EB 93                    -  jmp SpaceEngine.exe+217978
+"SpaceEngine.exe"+2179E5: 90                       -  nop 
+"SpaceEngine.exe"+2179E6: 90                       -  nop 
+"SpaceEngine.exe"+2179E7: 8B 47 24                 -  mov eax,[edi+24]
+"SpaceEngine.exe"+2179EA: F3 0F 59 6F 10           -  mulss xmm5,[edi+10]
+}
+</AssemblerScript>
+    </CheatEntry>
+  </CheatEntries>
+  <UserdefinedSymbols/>
+  <DisassemblerComments>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+34810</Address>
+      <Comment>std::string::insert
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+8A9FD</Address>
+      <Comment>strcpy(esi-&gt;edi,ecx)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+8B797</Address>
+      <Comment>intcpy(esi-&gt;edx,ecx)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+8B7AD</Address>
+      <Comment>strcpy(esi-&gt;edx,ecx)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+1907C5</Address>
+      <Comment>字符渲染函数(char const*,bool)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+1A3503</Address>
+      <Comment>链表
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+1AFC60</Address>
+      <Comment>初始化皮肤
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+1B03C1</Address>
+      <Comment>初始化字体纹理
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+1BAC10</Address>
+      <Comment>readlocale()
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+217580</Address>
+      <Comment>函数起始
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+217612</Address>
+      <Comment>取得参数
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+21CB30</Address>
+      <Comment>字符显示-预算
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+21CB3C</Address>
+      <Comment>取得参数
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+21EEC0</Address>
+      <Comment>显示2??
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+220A70</Address>
+      <Comment>strlen(ecx)
+</Comment>
+    </DisassemblerComment>
+    <DisassemblerComment>
+      <Address>"SpaceEngine.exe"+220A7D</Address>
+      <Comment>排除
+</Comment>
+    </DisassemblerComment>
+  </DisassemblerComments>
+</CheatTable>
