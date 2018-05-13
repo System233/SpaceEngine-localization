@@ -1,0 +1,12 @@
+
+//上面是UTF8编码
+"Look deep into nature, and then you will understand everything better._- Albert Einstein"	"看透事物的本质,你能更好地理解世事。_- 阿尔伯特·爱因斯坦"
+"The true sign of intelligence is not knowledge but imagination._- Albert Einstein"	"智慧真正的表现不是知识,而是想象力。_- 阿尔伯特·爱因斯坦"
+"The world stands before us as a great, eternal riddle._- Albert Einstein"	"我们所处的世界本身就是一个巨大且永恒的迷。_- 阿尔伯特·爱因斯坦"
+"We still do not know one thousandth of one percent of what nature has revealed to us._- Albert Einstein"	"我们现在对自然的理解依旧不足其十万分之一。_- 阿尔伯特·爱因斯坦"
+"Science is a way of thinking much more than it is a body of knowledge._- Carl Sagan"	"科学是一种思维方式,而不是一套知识体系。_- 卡尔·萨根"
+"Imagination will often carry us to worlds that never were. But without it we go nowhere._- Carl Sagan"	"想象力常常能将我们带入一个从未涉足的世界,倘若没有想象力,我们哪都去不了。_- 卡尔·萨根"
+"The total number of stars in the Universe is larger than all the grains of sand on all the beaches of the planet Earth._- Carl Sagan"	"天上星星的数量比地球上所有沙滩中的沙粒总和还要多。_- 卡尔·萨根"
+"Astronomy compels the soul to look upward, and leads us from this world to another._- Plato"	"天文学迫使灵魂朝上看,并且带领我们进入另一个世界。_- 柏拉图"
+"The purpose of life is the investigation of the Sun, the Moon, and the heavens._- Anaxagoras"	"生命的目的是为了研究太阳、月亮和天空。_- 阿那克萨哥拉"
+"Two possibilities exist: either we are alone in the Universe or we are not. Both are equally terrifying._- Arthur C. Clarke"	"存在两种可能：我们要么孤独地存在于宇宙中，要么不是。两种都同样可怕。_- 亚瑟·查理斯·克拉克"
