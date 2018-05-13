@@ -1,13 +1,25 @@
 #include <cstdint>
 #include <iostream>
+#include <string>
 extern "C" intptr_t BASE;
 intptr_t BASE;
 auto x ="ABCDEF";
+template<class _Ty>
+   std::string out(_Ty const&ty){
+        std::cout<<sizeof(ty)<<std::endl;
+        return std::string(ty,sizeof(ty)-1);
+    }
 main(){
-    BASE=((intptr_t)&printf);
-    
-    std::cout<<std::hex<<BASE<<std::endl;
+    //BASE=((intptr_t)&printf);
+    std::string str=out("\x0F\xB6\xCA\x66\x0F\x6E\xC1\x0F\x5B\xC0\x0F\xB6\xCE\x66\x0F\x6E"
+                "\xF9\xC1\xEA\x10\x0F\xBE\xCA\x66\x0F\x6E\xE1\x0F\x5B\xE4\x0F\xBE"
+                "\xC6\x66\x0F\x6E\xD8\x0F\x5B\xDB\xFF\xB7\xD0\x00\x00\x00\xE8\xBD"
+                "\x27\x4B\x6D\x66\x0F\x6E\xC8\xF3\x0F\x59\xE1\x8B\x15\x18\xCF\x26"
+                "\x01\xEB\x0B\x66\x0F\x1F\x84\x00\x00\x00\x00\x00\x66\x90");
+    std::cout<<str.size()<<std::endl;
+    out("\x56\xE8\x19\x09\x4B\x6D\x66\x85\xD2\x0F\x84\xF8\x08\x00\x00\xF3\x0F\x10\x0D\x44\x7E\x11\x01\xF3\x0F\x10\x1D\x08\x7F\x11\x01\xF3\x0F\x10\x25\x34\x8E\x11\x01\x66\x0F\x1F\x84\x00\x00\x00\x00\x00\x8B\xF0\x8B\xCE\x89\x74\x24\x24\x2B\x4D\x08");
+    //std::cout<<std::hex<<BASE<<std::endl;
     //std::cin.get();
-    __asm __volatile__ ("loc_6175C9:push _x;int3;call [_BASE+0xF];jz      short loc_6175C9;");
+    //__asm __volatile__ ("loc_6175C9:push _x;int3;call [_BASE+0xF];jz      short loc_6175C9;");
    
 }
