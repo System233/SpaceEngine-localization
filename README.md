@@ -1,12 +1,28 @@
 # SpaceEngine 字符扩展
 
-------
-
 由于Space Engine自身特性，可用字符总数被限制为255个，这极大的阻碍了其他非拉丁字母语言的本土化。
 
 本补丁程序通过**DLL劫持(替换)** 实现自动加载，并在**运行时修改**主程序在内存中的代码，从而使得游戏能够**显示超过255种字符** 。
 
-[前往下载页面](https://github.com/System233/SpaceEngine-localization/releases)
+### TODO
+- [ ] 开发
+    - [ ] UTF-8字符编辑
+    - [ ] UTF-8字符输入
+    - [ ] UTF-8字符大小写映射
+    - [ ] UTF-8字符显示(0.970\~0.980e)
+    - [x] UTF-8字符显示(0.981b9)
+    - [x] 无延时语言切换
+    - [x] 黄条背景长度修正
+    - [x] 显示超过255种字符
+    - [x] 0.970++支持
+- [ ] 其他
+    - [ ] 补丁安装器
+    - [ ] 字体纹理编辑器
+    - [ ] 配置文件编辑器
+    - [ ] 语言文件编辑器
+    - [ ] 其他语言文件
+    - [x] 中文语言文件
+    - [x] 本说明文件
 
 ### 特性
 支持版本: **0.970~0.980e、0.981b9(仅源码可用)**
@@ -70,7 +86,9 @@ SE默认的16×16字符也是不够用的，根据字体纹理在显存中的使
 |小字体(带阴影)|1|16×16|256×256|仅用于显示左上角的天体信息|
 |大字体|2|16×16|512×512|主菜单显示|
 
-其中带阴影小字体在显存中紧贴小字体的右侧，当网格扩展为32×32(512×512像素)时，右侧的带阴影字体将不复存在。
+其中带阴影小字体在显存中紧贴无阴影小字体的右侧，当网格扩展为32×32(512×512像素)时，右侧的带阴影字体将不复存在。
+
+没看懂也很正常，钩住字符串处理函数，在里面调用`glGetTexImage`来导出显存中的字体纹理，再看看导出的图像就彻底明白了，这也是补丁函数`Hook::Hack`的功能。
 
 ### 解决问题
 目前针对0.970~0.980e的补丁使用自定义编码来解决坐标问题，其原理还是通过编码值来确定坐标，但需要在(0,0xFF)区间内选出几个值来标记需要处理的字符，被标记的字符会在计算完坐标后再给XY分别加上一个偏移值。
@@ -121,6 +139,8 @@ void SetPos(char ch){//根据ch的值与容器mak内的数据设置全局变量X
 流程图
 
 ![旧流程](https://github.com/System233/SpaceEngine-localization/blob/mingw/Hook/flow-old.svg)
+
+
 由于修改了全局变量，函数变成了线程不安全，多个线程在此类函数内运行时将出现问题，但因为"显示字符"是UI相关操作，而UI最忌讳的就是多线程，所以我不大觉得这个函数会有多个线程同时在里面运行，也没有做过针对测试。
 
 **为避免上述隐患**，重写后的981B9补丁不再使用全局变量来传递数据，同时改自定义编码为UTF-8编码。
@@ -146,7 +166,7 @@ uint32_t Get(uint16_t ch){  //获取字符参数
 }
 游戏内部字符处理函数(char*str){
     while(*str){
-        char m=1;//981中还有字号要处理，这里假设字号一直是1，也就是无阴影小字体
+        char m=1;//981中还有字号要处理，这里假设字号一直是1，即带阴影小字体
         uint16_t ch=Decode(str) //char ch=*str;把全部1字节的char改为2字节的uint16_t，
                                 //在汇编中就是把低8位寄存器都改为更大的寄存器
         /*控制符处理*/
@@ -171,10 +191,12 @@ uint32_t Get(uint16_t ch){  //获取字符参数
 ## 开发
 ### 编译环境
 本补丁当前已改用 [CMake](https://github.com/Kitware/CMake)+[MSYS2](https://github.com/msys2/msys2) 构建。
+
 CMake 是一个跨平台编译工具，它可以根据 [CMakeLists.txt](https://github.com/System233/SpaceEngine-localization/blob/mingw/Hook/SpaceEngine.CT) 内的描述生成用户想要的工程文件。
+
 MSYS2 是一套仿Unix平台工具，它可以很方便地在Windows上编译在Linux上开发的软件，用这类软件的人估计都遇过在 [Visual Studio](https://www.visualstudio.com/) 中根本没法编译的项目。
 ### 代码
-当前补丁代码主要位于[Hook.cpp](https://github.com/System233/SpaceEngine-localization/blob/mingw/Hook/Hook.cpp)，修改内存进行Hook的过程位于Hook::initialize函数中。
+当前补丁代码主要位于[Hook.cpp](https://github.com/System233/SpaceEngine-localization/blob/mingw/Hook/Hook.cpp)，修改内存进行Hook的过程位于`Hook::initialize`  函数中。
 
 在以下示例Mod中,0x217641为偏移值，第二个字符串类型的参数为要写入的汇编码，之后的链式调用为代码重定位。
 ```C++
@@ -193,11 +215,12 @@ Mod::make_mod(0x217641,//相对基址偏移
 ### 通过CE获取偏移值和汇编码
 [Cheat Engine](https://github.com/cheat-engine/cheat-engine) 是个非常牛叉的内存修改器，数值搜索、游戏变速、调试器、代码注入等等功能一应俱全，名字中的"引擎"二字当之无愧！
 其中的内存定位功能(找出写入/访问该内存的代码)可用来定位游戏中的字符串处理函数，自动汇编功能可用来测试自己的汇编码是否可行。
-当然，这个从无到有的测试过程会很漫长。文件 [SpaceEngine.CT](https://github.com/System233/SpaceEngine-localization/blob/mingw/Hook/SpaceEngine.CT) 是981B9补丁制作过程中使用的CT作弊表，可供各位参考。
+
+当然，这个从无到有的测试过程会很漫长。文件 [SpaceEngine.CT](https://github.com/System233/SpaceEngine-localization/blob/mingw/Hook/SpaceEngine.CT) 是981B9补丁制作过程中所使用的CT表，可供各位参考。
 ### 补丁配置文件
 当前981B9版补丁的配置文件为 [system/language.json](https://github.com/System233/SpaceEngine-localization/blob/mingw/Hook/language.json)，文件编码为UTF-8，其"\_comment"注释字段已经描述了各参数的作用以及配置规则，某些参数可能需要配合代码才能理解。
 
-欲知JSON内的参数如何影响游戏内的显示，建议使用上述CT作弊表。
+欲知JSON内的参数如何影响游戏内的显示，建议使用上述CT表。
 
 修改配置文件后请务必确保语法格式无误，否则补丁不会运行。
 ### 字体纹理
@@ -217,6 +240,7 @@ Mod::make_mod(0x217641,//相对基址偏移
 
 为防止连带问题，不贴上度盘链接。
 
+神奇的效果图(图裂一半)
 ![效果(0.980)](http://imgsrc.baidu.com/forum/pic/item/b78638f082025aaff24aa914f3edab64024f1a0e.jpg)
 
 ------
